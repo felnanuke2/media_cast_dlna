@@ -99,6 +99,8 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
   String _platformVersion = 'Unknown';
   late final DlnaConnectionManager _connectionManager;
   final TextEditingController _customUrlController = TextEditingController();
+  Timer? _playbackPollingTimer;
+  Timer? _discoveryPollingTimer;
 
   @override
   void initState() {
@@ -106,12 +108,52 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
     _connectionManager = DlnaConnectionManager();
     _connectionManager.addListener(_onConnectionStateChanged);
     initPlatformState();
+    _startPlaybackPolling();
+    _startDiscoveryPolling();
+  }
+
+  void _startPlaybackPolling() {
+    _playbackPollingTimer?.cancel();
+    _playbackPollingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (_connectionManager.hasSelectedDevice) {
+        try {
+          await _connectionManager.updatePlaybackInfo();
+          await _connectionManager.updateVolumeInfo(); // Poll volume info as well
+        } catch (_) {}
+      }
+    });
+  }
+
+  void _stopPlaybackPolling() {
+    _playbackPollingTimer?.cancel();
+    _playbackPollingTimer = null;
+  }
+
+  void _startDiscoveryPolling() {
+    _discoveryPollingTimer?.cancel();
+    _discoveryPollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      try {
+        await _connectionManager.updateDiscoveredDevices();
+        setState(() {}); // Refresh UI with new devices
+      } catch (_) {}
+    });
+  }
+
+  void _stopDiscoveryPolling() {
+    _discoveryPollingTimer?.cancel();
+    _discoveryPollingTimer = null;
   }
 
   void _onConnectionStateChanged() {
     setState(() {
       // Trigger rebuild when connection state changes
     });
+    // Start/stop polling based on device selection
+    if (_connectionManager.hasSelectedDevice) {
+      _startPlaybackPolling();
+    } else {
+      _stopPlaybackPolling();
+    }
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -373,10 +415,24 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
     }
   }
 
+  // Add this method to the _DlnaHomePageState class
+  Future<void> _seekToPosition(int positionSeconds) async {
+    if (!_connectionManager.hasSelectedDevice || _connectionManager.currentPlaybackInfo == null) return;
+    try {
+      await _connectionManager.seek(positionSeconds);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Seek failed: $e')),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _connectionManager.removeListener(_onConnectionStateChanged);
     _customUrlController.dispose();
+    _stopPlaybackPolling();
+    _stopDiscoveryPolling();
     super.dispose();
   }
 
@@ -388,28 +444,28 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                color: Colors.grey[100],
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Platform: $_platformVersion'),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              color: Colors.grey[100],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Platform: $_platformVersion'),
+                  const SizedBox(height: 8),
+                  Text('Discovered devices: ${_connectionManager.discoveredDevices.length}'),
+                  if (_connectionManager.selectedRendererUdn != null) ...[
                     const SizedBox(height: 8),
-                    Text('Discovered devices: ${_connectionManager.discoveredDevices.length}'),
-                    if (_connectionManager.selectedRendererUdn != null) ...[
-                      const SizedBox(height: 8),
-                      Text('Selected renderer: ${_connectionManager.selectedDevice?.friendlyName ?? "Unknown"}'),
-                    ],
+                    Text('Selected renderer: ${_connectionManager.selectedDevice?.friendlyName ?? "Unknown"}'),
                   ],
-                ),
+                ],
               ),
-            
-            // Discovery controls
-            Container(
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Container(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
@@ -425,10 +481,10 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
                 ],
               ),
             ),
-
-            // Device list
-            Container(
-              height: 200, // Fixed height for device list
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 200,
               child: _connectionManager.discoveredDevices.isEmpty
                   ? const Center(child: Text('No devices discovered\nTap "Start Discovery" to find DLNA devices'))
                   : ListView.builder(
@@ -478,137 +534,126 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
                       },
                     ),
             ),
-
-            // Playback controls
-            if (_connectionManager.hasSelectedDevice) ...[
-              const Divider(),
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Playback status
-                    if (_connectionManager.currentPlaybackInfo != null) ...[
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          if (_connectionManager.hasSelectedDevice)
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  const Divider(),
+                  Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 4,
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Text('Playback State: ${_connectionManager.currentPlaybackInfo!.state.name}', 
-                                style: const TextStyle(fontWeight: FontWeight.bold)),
-                              Text('Position: ${_connectionManager.currentPlaybackInfo!.position}s / ${_connectionManager.currentPlaybackInfo!.duration}s'),
-                              if (_connectionManager.currentPlaybackInfo!.currentTrackUri != null)
-                                Text('Track: ${_connectionManager.currentPlaybackInfo!.currentTrackUri}'),
+                              Icon(Icons.music_note, color: Colors.deepPurple, size: 28),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Playback State: \\${_connectionManager.currentPlaybackInfo!.state.name}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.deepPurple),
+                              ),
                             ],
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    
-                    // Volume controls
-                    if (_connectionManager.currentVolumeInfo != null) ...[
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 8),
+                          Text(
+                            'Position: \\${_connectionManager.currentPlaybackInfo!.position}s / \\${_connectionManager.currentPlaybackInfo!.duration}s',
+                            style: const TextStyle(fontSize: 15, color: Colors.black87),
+                          ),
+                          if (_connectionManager.currentPlaybackInfo!.currentTrackUri != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                'Track: \\${_connectionManager.currentPlaybackInfo!.currentTrackUri}',
+                                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          // Seek bar
+                          if (_connectionManager.currentPlaybackInfo!.duration > 0)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Slider(
+                                value: _connectionManager.currentPlaybackInfo!.position.toDouble().clamp(0, _connectionManager.currentPlaybackInfo!.duration.toDouble()),
+                                min: 0,
+                                max: _connectionManager.currentPlaybackInfo!.duration.toDouble(),
+                                activeColor: Colors.deepPurple,
+                                inactiveColor: Colors.deepPurple.shade100,
+                                onChanged: (value) {
+                                  _seekToPosition(value.round());
+                                },
+                              ),
+                            ),
+                          // Next/Previous/Play/Pause/Stop controls
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Row(
+                              IconButton(
+                                icon: const Icon(Icons.skip_previous, size: 32, color: Colors.deepPurple),
+                                tooltip: 'Previous',
+                                onPressed: () => _controlPlayback('previous'),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.play_arrow, size: 36, color: Colors.green),
+                                tooltip: 'Play',
+                                onPressed: () => _controlPlayback('play'),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.pause, size: 36, color: Colors.orange),
+                                tooltip: 'Pause',
+                                onPressed: () => _controlPlayback('pause'),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.stop, size: 32, color: Colors.red),
+                                tooltip: 'Stop',
+                                onPressed: () => _controlPlayback('stop'),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.skip_next, size: 32, color: Colors.deepPurple),
+                                tooltip: 'Next',
+                                onPressed: () => _controlPlayback('next'),
+                              ),
+                            ],
+                          ),
+                          // Volume control row (restored)
+                          if (_connectionManager.currentVolumeInfo != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Row(
                                 children: [
-                                  const Text('Volume: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  Text('${_connectionManager.currentVolumeInfo!.volume}%'),
-                                  const Spacer(),
                                   IconButton(
                                     onPressed: _toggleMute,
-                                    icon: Icon(_connectionManager.currentVolumeInfo!.muted ? Icons.volume_off : Icons.volume_up),
+                                    icon: Icon(_connectionManager.currentVolumeInfo!.muted ? Icons.volume_off : Icons.volume_up, color: Colors.deepPurple),
+                                  ),
+                                  Expanded(
+                                    child: Slider(
+                                      value: _connectionManager.currentVolumeInfo!.volume.toDouble(),
+                                      min: 0,
+                                      max: 100,
+                                      divisions: 20,
+                                      activeColor: Colors.deepPurple,
+                                      onChanged: (value) => _setVolume(value.round()),
+                                    ),
                                   ),
                                 ],
                               ),
-                              Slider(
-                                value: _connectionManager.currentVolumeInfo!.volume.toDouble(),
-                                min: 0,
-                                max: 100,
-                                divisions: 20,
-                                onChanged: (value) => _setVolume(value.round()),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    
-                    // Test media options
-                    const Text('Test Media:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    ..._testMediaOptions.map((media) => Card(
-                      child: ListTile(
-                        title: Text(media['title']!),
-                        subtitle: Text(media['description']!),
-                        trailing: ElevatedButton(
-                          onPressed: () => _playSelectedMedia(media),
-                          child: const Text('Play'),
-                        ),
-                      ),
-                    )).toList(),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Custom URL input
-                    const Text('Custom Media URL:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _customUrlController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter media URL (http://...)',
-                              border: OutlineInputBorder(),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: _playCustomUrl,
-                          child: const Text('Play'),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Playback control buttons
-                    const Text('Playback Controls:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () => _controlPlayback('play'),
-                          icon: const Icon(Icons.play_arrow),
-                          label: const Text('Play'),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () => _controlPlayback('pause'),
-                          icon: const Icon(Icons.pause),
-                          label: const Text('Pause'),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () => _controlPlayback('stop'),
-                          icon: const Icon(Icons.stop),
-                          label: const Text('Stop'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

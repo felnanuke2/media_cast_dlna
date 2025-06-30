@@ -4,12 +4,14 @@ import 'dart:async';
 
 /// Global DLNA connection manager that can be shared across all tabs
 class DlnaConnectionManager extends ChangeNotifier {
-  static final DlnaConnectionManager _instance = DlnaConnectionManager._internal();
+  static final DlnaConnectionManager _instance =
+      DlnaConnectionManager._internal();
   factory DlnaConnectionManager() => _instance;
   DlnaConnectionManager._internal();
 
-  final MediaCastDlnaController _dlnaController = MediaCastDlnaController.instance;
-  
+  final MediaCastDlnaController _dlnaController =
+      MediaCastDlnaController.instance;
+
   List<DlnaDevice> _discoveredDevices = [];
   String? _selectedRendererUdn;
   DlnaDevice? _selectedDevice;
@@ -69,7 +71,9 @@ class DlnaConnectionManager extends ChangeNotifier {
       notifyListeners();
     });
 
-    _transportStateSub = _dlnaController.onTransportStateChanged.listen((event) {
+    _transportStateSub = _dlnaController.onTransportStateChanged.listen((
+      event,
+    ) {
       if (event.deviceUdn == _selectedRendererUdn) {
         updatePlaybackInfo();
       }
@@ -119,9 +123,9 @@ class DlnaConnectionManager extends ChangeNotifier {
     _selectedDevice = _discoveredDevices.findByUdn(rendererUdn);
     _currentPlaybackInfo = null;
     _currentVolumeInfo = null;
-    
+
     notifyListeners();
-    
+
     // Update playback and volume info
     updatePlaybackInfo();
     updateVolumeInfo();
@@ -141,7 +145,9 @@ class DlnaConnectionManager extends ChangeNotifier {
     if (_selectedRendererUdn == null) return;
 
     try {
-      final playbackInfo = await _dlnaController.getPlaybackInfo(_selectedRendererUdn!);
+      final playbackInfo = await _dlnaController.getPlaybackInfo(
+        _selectedRendererUdn!,
+      );
       _currentPlaybackInfo = playbackInfo;
       notifyListeners();
     } catch (e) {
@@ -155,7 +161,9 @@ class DlnaConnectionManager extends ChangeNotifier {
     if (_selectedRendererUdn == null) return;
 
     try {
-      final volumeInfo = await _dlnaController.getVolumeInfo(_selectedRendererUdn!);
+      final volumeInfo = await _dlnaController.getVolumeInfo(
+        _selectedRendererUdn!,
+      );
       _currentVolumeInfo = volumeInfo;
       notifyListeners();
     } catch (e) {
@@ -164,13 +172,32 @@ class DlnaConnectionManager extends ChangeNotifier {
     }
   }
 
+  /// Polls the controller for the latest discovered devices and updates the list.
+  Future<void> updateDiscoveredDevices() async {
+    try {
+      final devices = await _dlnaController.getDiscoveredDevices();
+      _discoveredDevices = List<DlnaDevice>.from(devices);
+      notifyListeners();
+    } catch (e) {
+      // Handle error silently for now
+      print('Error updating discovered devices: $e');
+    }
+  }
+
   /// Play media on the selected device
-  Future<void> playMedia(String mediaUrl, {required MediaMetadata metadata}) async {
+  Future<void> playMedia(
+    String mediaUrl, {
+    required MediaMetadata metadata,
+  }) async {
     if (_selectedRendererUdn == null) {
       throw Exception('No device selected');
     }
 
-    await _dlnaController.playMedia(_selectedRendererUdn!, mediaUrl, metadata: metadata);
+    await _dlnaController.playMedia(
+      _selectedRendererUdn!,
+      mediaUrl,
+      metadata: metadata,
+    );
     updatePlaybackInfo();
   }
 
@@ -190,10 +217,16 @@ class DlnaConnectionManager extends ChangeNotifier {
       case 'stop':
         await _dlnaController.stop(_selectedRendererUdn!);
         break;
+      case 'next':
+        _dlnaController.next(_selectedRendererUdn!);
+        break;
+      case 'previous':
+        _dlnaController.previous(_selectedRendererUdn!);
+        break;
       default:
         throw Exception('Unknown playback action: $action');
     }
-    
+
     updatePlaybackInfo();
   }
 
@@ -213,8 +246,41 @@ class DlnaConnectionManager extends ChangeNotifier {
       throw Exception('No device selected or volume info unavailable');
     }
 
-    await _dlnaController.setMute(_selectedRendererUdn!, !_currentVolumeInfo!.muted);
+    await _dlnaController.setMute(
+      _selectedRendererUdn!,
+      !_currentVolumeInfo!.muted,
+    );
     updateVolumeInfo();
+  }
+
+  /// Seek to a specific position (in seconds)
+  Future<void> seek(int positionSeconds) async {
+    if (_selectedRendererUdn == null) {
+      throw Exception('No device selected');
+    }
+    await _dlnaController.seek(
+      _selectedRendererUdn!,
+      Duration(seconds: positionSeconds),
+    );
+    updatePlaybackInfo();
+  }
+
+  /// Skip to the next track
+  Future<void> next() async {
+    if (_selectedRendererUdn == null) {
+      throw Exception('No device selected');
+    }
+    await _dlnaController.next(_selectedRendererUdn!);
+    updatePlaybackInfo();
+  }
+
+  /// Skip to the previous track
+  Future<void> previous() async {
+    if (_selectedRendererUdn == null) {
+      throw Exception('No device selected');
+    }
+    await _dlnaController.previous(_selectedRendererUdn!);
+    updatePlaybackInfo();
   }
 
   @override
