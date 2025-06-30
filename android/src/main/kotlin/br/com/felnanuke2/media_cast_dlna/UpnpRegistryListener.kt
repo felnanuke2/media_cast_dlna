@@ -1,7 +1,5 @@
 package br.com.felnanuke2.media_cast_dlna
 
-import DeviceDiscoveryApi
-import DlnaDevice
 import MediaCastDlnaApi
 import android.os.Handler
 import android.os.Looper
@@ -23,8 +21,6 @@ import java.lang.Exception
  * to avoid the "Methods marked with @UiThread must be executed on the main thread" error.
  */
 class UpnpRegistryListener(
-    private val mediaCastDlnaApi: MediaCastDlnaApi,
-    private val deviceDiscoveryApi: DeviceDiscoveryApi,
 ) : RegistryListener {
 
     private var remoteDevices: MutableList<RemoteDevice> = mutableListOf()
@@ -141,11 +137,7 @@ class UpnpRegistryListener(
         device?.let {
             // Only notify Flutter if this is a media device
             if (isMediaDevice(it)) {
-                runOnMainThread {
-                    deviceDiscoveryApi.onDeviceDiscovered(
-                        it.toDlnaDevice()
-                    ) {}
-                }
+
             }
         }
     }
@@ -153,11 +145,7 @@ class UpnpRegistryListener(
     override fun remoteDeviceDiscoveryFailed(
         registry: Registry?, device: RemoteDevice?, e: Exception?
     ) {
-        runOnMainThread {
-            deviceDiscoveryApi.onDiscoveryError(
-                "Remote device discovery failed: ${e?.message ?: "Unknown error"}"
-            ) {}
-        }
+
     }
 
     override fun remoteDeviceAdded(registry: Registry?, device: RemoteDevice?) {
@@ -169,9 +157,7 @@ class UpnpRegistryListener(
 
                 // Convert to DlnaDevice and notify Flutter
                 val dlnaDevice = it.toDlnaDevice()
-                runOnMainThread {
-                    deviceDiscoveryApi.onDeviceDiscovered(dlnaDevice) {}
-                }
+
             }
         }
     }
@@ -190,9 +176,7 @@ class UpnpRegistryListener(
 
                 // Convert to DlnaDevice and notify Flutter about the update
                 val dlnaDevice = it.toDlnaDevice()
-                runOnMainThread {
-                    deviceDiscoveryApi.onDeviceUpdated(dlnaDevice) {}
-                }
+
             }
         }
     }
@@ -207,9 +191,7 @@ class UpnpRegistryListener(
                         iterator.remove()
                         // Notify Flutter about the removed device
                         val dlnaDevice = it.toDlnaDevice()
-                        runOnMainThread {
-                            deviceDiscoveryApi.onDeviceRemoved(dlnaDevice) {}
-                        }
+
                         break;
                     }
                 }
@@ -226,9 +208,7 @@ class UpnpRegistryListener(
 
                 // Convert to DlnaDevice and notify Flutter
                 val dlnaDevice = it.toDlnaDevice()
-                runOnMainThread {
-                    deviceDiscoveryApi.onDeviceDiscovered(dlnaDevice) {}
-                }
+
             }
         }
     }
@@ -243,9 +223,7 @@ class UpnpRegistryListener(
                         iterator.remove()
                         // Notify Flutter about the removed local device
                         val dlnaDevice = it.toDlnaDevice()
-                        runOnMainThread {
-                            deviceDiscoveryApi.onDeviceRemoved(dlnaDevice) {}
-                        }
+
                         break;
                     }
                 }

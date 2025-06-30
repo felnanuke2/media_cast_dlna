@@ -5,9 +5,6 @@ import 'media_cast_dlna_pigeon.dart';
 class MediaCastDlnaController {
   static MediaCastDlnaController? _instance;
   late final MediaCastDlnaApi _api;
-  late final DeviceDiscoveryApi _deviceDiscoveryApi;
-  late final MediaRendererEventsApi _rendererEventsApi;
-  late final MediaServerEventsApi _serverEventsApi;
 
   // Stream controllers for events
   final _deviceDiscoveredController = StreamController<DlnaDevice>.broadcast();
@@ -36,7 +33,6 @@ class MediaCastDlnaController {
 
   MediaCastDlnaController._internal() {
     _api = MediaCastDlnaApi();
-    _setupCallbacks();
   }
 
   /// Get singleton instance of the controller
@@ -45,15 +41,6 @@ class MediaCastDlnaController {
     return _instance!;
   }
 
-  void _setupCallbacks() {
-    _deviceDiscoveryApi = _DeviceDiscoveryApiImpl(this);
-    _rendererEventsApi = _MediaRendererEventsApiImpl(this);
-    _serverEventsApi = _MediaServerEventsApiImpl(this);
-
-    DeviceDiscoveryApi.setUp(_deviceDiscoveryApi);
-    MediaRendererEventsApi.setUp(_rendererEventsApi);
-    MediaServerEventsApi.setUp(_serverEventsApi);
-  }
 
   // Getters for event streams
 
@@ -304,40 +291,7 @@ class MediaCastDlnaController {
     return await _api.getTransportState(rendererUdn);
   }
 
-  // Event subscription methods
 
-  /// Subscribe to device events
-  Future<void> subscribeToEvents(String deviceUdn, String serviceType) async {
-    await _api.subscribeToEvents(deviceUdn, serviceType);
-  }
-
-  /// Unsubscribe from device events
-  Future<void> unsubscribeFromEvents(
-    String deviceUdn,
-    String serviceType,
-  ) async {
-    await _api.unsubscribeFromEvents(deviceUdn, serviceType);
-  }
-
-  /// Subscribe to all common renderer events
-  Future<void> subscribeToRendererEvents(String rendererUdn) async {
-    await subscribeToEvents(
-      rendererUdn,
-      'urn:schemas-upnp-org:service:AVTransport:1',
-    );
-    await subscribeToEvents(
-      rendererUdn,
-      'urn:schemas-upnp-org:service:RenderingControl:1',
-    );
-  }
-
-  /// Subscribe to media server events
-  Future<void> subscribeToServerEvents(String serverUdn) async {
-    await subscribeToEvents(
-      serverUdn,
-      'urn:schemas-upnp-org:service:ContentDirectory:1',
-    );
-  }
 
   // Utility methods
 
@@ -374,107 +328,3 @@ class MediaCastDlnaController {
 }
 
 // Implementation classes for Flutter API callbacks
-
-class _DeviceDiscoveryApiImpl extends DeviceDiscoveryApi {
-  final MediaCastDlnaController _controller;
-
-  _DeviceDiscoveryApiImpl(this._controller);
-
-  @override
-  void onDeviceDiscovered(DlnaDevice device) {
-    _controller._deviceDiscoveredController.add(device);
-  }
-
-  @override
-  void onDeviceUpdated(DlnaDevice device) {
-    _controller._deviceUpdatedController.add(device);
-  }
-
-  @override
-  void onDiscoveryError(String error) {
-    _controller._discoveryErrorController.add(error);
-  }
-
-  @override
-  void onDiscoveryCompleted() {
-    _controller._discoveryCompletedController.add(null);
-  }
-
-  @override
-  void onDeviceRemoved(DlnaDevice deviceUdn) {
-    _controller._deviceRemovedController.add(deviceUdn);
-  }
-}
-
-class _MediaRendererEventsApiImpl extends MediaRendererEventsApi {
-  final MediaCastDlnaController _controller;
-
-  _MediaRendererEventsApiImpl(this._controller);
-
-  @override
-  void onTransportStateChanged(String deviceUdn, TransportState state) {
-    _controller._transportStateChangedController.add((
-      deviceUdn: deviceUdn,
-      state: state,
-    ));
-  }
-
-  @override
-  void onPositionChanged(String deviceUdn, int positionSeconds) {
-    _controller._positionChangedController.add((
-      deviceUdn: deviceUdn,
-      positionSeconds: positionSeconds,
-    ));
-  }
-
-  @override
-  void onVolumeChanged(String deviceUdn, VolumeInfo volumeInfo) {
-    _controller._volumeChangedController.add((
-      deviceUdn: deviceUdn,
-      volumeInfo: volumeInfo,
-    ));
-  }
-
-  @override
-  void onTrackChanged(
-    String deviceUdn,
-    String? trackUri,
-    String? trackMetadata,
-  ) {
-    _controller._trackChangedController.add((
-      deviceUdn: deviceUdn,
-      trackUri: trackUri,
-      trackMetadata: trackMetadata,
-    ));
-  }
-
-  @override
-  void onPlaybackError(String deviceUdn, String error) {
-    _controller._playbackErrorController.add((
-      deviceUdn: deviceUdn,
-      error: error,
-    ));
-  }
-}
-
-class _MediaServerEventsApiImpl extends MediaServerEventsApi {
-  final MediaCastDlnaController _controller;
-
-  _MediaServerEventsApiImpl(this._controller);
-
-  @override
-  void onContentDirectoryUpdated(String deviceUdn, String containerId) {
-    _controller._contentDirectoryUpdatedController.add((
-      deviceUdn: deviceUdn,
-      containerId: containerId,
-    ));
-  }
-
-  @override
-  void onContentDirectoryError(String deviceUdn, String error) {
-    _controller._contentDirectoryErrorController.add((
-      deviceUdn: deviceUdn,
-      error: error,
-    ));
-  }
-}

@@ -346,14 +346,6 @@ abstract class MediaCastDlnaApi {
   /// Get transport state
   TransportState getTransportState(String deviceUdn);
   
-  // ==== Subscription Management ====
-  
-  /// Subscribe to device events (transport state changes, volume changes, etc.)
-  void subscribeToEvents(String deviceUdn, String serviceType);
-  
-  /// Unsubscribe from device events
-  void unsubscribeFromEvents(String deviceUdn, String serviceType);
-  
   // ==== Utility Methods ====
   
   /// Get platform version
@@ -364,55 +356,4 @@ abstract class MediaCastDlnaApi {
   
   /// Get network interface information
   List<String> getNetworkInterfaces();
-}
-
-/// Flutter API for receiving callbacks from native platform
-@FlutterApi()
-abstract class DeviceDiscoveryApi {
-  
-  /// Called when a new device is discovered
-  void onDeviceDiscovered(DlnaDevice device);
-  
-  /// Called when a device is removed/lost
-  void onDeviceRemoved(DlnaDevice deviceUdn);
-  
-  /// Called when a device is updated
-  void onDeviceUpdated(DlnaDevice device);
-  
-  /// Called when discovery encounters an error
-  void onDiscoveryError(String error);
-  
-  /// Called when discovery is completed
-  void onDiscoveryCompleted();
-}
-
-/// Flutter API for receiving media renderer events
-@FlutterApi()
-abstract class MediaRendererEventsApi {
-  
-  /// Called when transport state changes
-  void onTransportStateChanged(String deviceUdn, TransportState state);
-  
-  /// Called when position changes during playback
-  void onPositionChanged(String deviceUdn, int positionSeconds);
-  
-  /// Called when volume changes
-  void onVolumeChanged(String deviceUdn, VolumeInfo volumeInfo);
-  
-  /// Called when current track changes
-  void onTrackChanged(String deviceUdn, String? trackUri, String? trackMetadata);
-  
-  /// Called when an error occurs during playback
-  void onPlaybackError(String deviceUdn, String error);
-}
-
-/// Flutter API for receiving media server events
-@FlutterApi()
-abstract class MediaServerEventsApi {
-  
-  /// Called when content directory is updated
-  void onContentDirectoryUpdated(String deviceUdn, String containerId);
-  
-  /// Called when a content directory operation encounters an error
-  void onContentDirectoryError(String deviceUdn, String error);
 }
