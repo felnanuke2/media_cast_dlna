@@ -15,6 +15,53 @@
 
 ---
 
+## 📦 Installation
+
+### Step 1: Add to pubspec.yaml
+
+```yaml
+dependencies:
+  media_cast_dlna: ^0.0.1
+```
+
+### Step 2: Install the package
+
+```bash
+flutter pub get
+```
+
+### Step 3: Android Configuration
+
+Add the following permissions to your `android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Required for DLNA/UPnP network discovery and communication -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    
+    <application
+        android:label="your_app_name"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        
+        <!-- Your existing activity configuration -->
+        
+        <!-- Required service for JUPnP Android UPnP functionality -->
+        <service android:name="org.jupnp.android.AndroidUpnpServiceImpl"/>
+    </application>
+</manifest>
+```
+
+### Step 4: Import and Initialize
+
+```dart
+import 'package:media_cast_dlna/media_cast_dlna.dart';
+```
+
 ## 🚀 What is Media Cast DLNA?
 
 Media Cast DLNA is a comprehensive Flutter plugin that transforms your app into a media casting powerhouse. Built with cutting-edge technology using the **Pigeon package** for seamless native interface generation, this plugin provides robust DLNA/UPnP functionality for discovering and controlling media devices on your local network.
@@ -84,7 +131,7 @@ This plugin leverages the power of **Pigeon** - Google's code generation tool th
 
 ### Native Libraries Used:
 - **Android**: jUPnP (Java UPnP library)
-- **iOS**: CocoaUPnP *(Coming Soon)*
+- **iOS**: UPnAtom *(Coming Soon)*
 
 ## 📱 Platform Support
 
@@ -94,53 +141,6 @@ This plugin leverages the power of **Pigeon** - Google's code generation tool th
 | 🍎 **iOS** | 🚧 **Coming Soon** | iOS 12.0+ |
 
 > **Note**: iOS support is currently in development and will be released in the next major update. Stay tuned!
-
-## 📦 Installation
-
-### Step 1: Add to pubspec.yaml
-
-```yaml
-dependencies:
-  media_cast_dlna: ^0.0.1
-```
-
-### Step 2: Install the package
-
-```bash
-flutter pub get
-```
-
-### Step 3: Android Configuration
-
-Add the following permissions to your `android/app/src/main/AndroidManifest.xml`:
-
-```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
-    <!-- Required for DLNA/UPnP network discovery and communication -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
-    
-    <application
-        android:label="your_app_name"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
-        
-        <!-- Your existing activity configuration -->
-        
-        <!-- Required service for JUPnP Android UPnP functionality -->
-        <service android:name="org.jupnp.android.AndroidUpnpServiceImpl"/>
-    </application>
-</manifest>
-```
-
-### Step 4: Import and Initialize
-
-```dart
-import 'package:media_cast_dlna/media_cast_dlna.dart';
-```
 
 ## 🎮 Quick Start Guide
 
@@ -826,4 +826,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 *Star ⭐ this repository if it helped you!*
 
 </div>
+
+<a href='https://ko-fi.com/Y8Y61HCG2P' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
