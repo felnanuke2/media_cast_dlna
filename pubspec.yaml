@@ -12,10 +12,10 @@ topics:
   - media-casting
   - media-renderer
   - media-server
-  - pigeon
 
 platforms:
   android:
+  ios:
 
 environment:
   sdk: ^3.8.1

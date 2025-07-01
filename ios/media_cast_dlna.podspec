@@ -4,17 +4,18 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'media_cast_dlna'
-  s.version          = '0.0.1'
-  s.summary          = 'A new Flutter plugin project.'
+  s.version          = '0.1.0'
+  s.summary          = 'A powerful Flutter plugin for discovering and controlling DLNA/UPnP media devices.'
   s.description      = <<-DESC
-A new Flutter plugin project.
+A powerful Flutter plugin for discovering and controlling DLNA/UPnP media devices. Cast your media to smart TVs, speakers, and other DLNA-enabled devices with ease! Built with Pigeon for type-safe native interfaces.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/felnanuke2/media_cast_dlna'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'felnanuke2' => 'felnanuke2@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
+  s.dependency 'UPnAtom', '~> 1.0'
   s.platform = :ios, '12.0'
 
   # Flutter.framework does not contain a i386 slice.
