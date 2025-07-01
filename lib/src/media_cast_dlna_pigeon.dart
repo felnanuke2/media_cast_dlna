@@ -157,6 +157,7 @@ class MediaItem {
     required this.mimeType,
     this.metadata,
     this.size,
+    this.subtitleTracks,
   });
 
   /// Content ID
@@ -177,6 +178,9 @@ class MediaItem {
   /// File size in bytes
   int? size;
 
+  /// Available subtitle tracks
+  List<SubtitleTrack>? subtitleTracks;
+
   Object encode() {
     return <Object?>[
       id,
@@ -185,6 +189,7 @@ class MediaItem {
       mimeType,
       metadata,
       size,
+      subtitleTracks,
     ];
   }
 
@@ -197,6 +202,60 @@ class MediaItem {
       mimeType: result[3]! as String,
       metadata: result[4] as MediaMetadata?,
       size: result[5] as int?,
+      subtitleTracks: (result[6] as List<Object?>?)?.cast<SubtitleTrack>(),
+    );
+  }
+}
+
+/// Represents a subtitle track
+class SubtitleTrack {
+  SubtitleTrack({
+    required this.id,
+    required this.uri,
+    required this.mimeType,
+    required this.language,
+    this.title,
+    this.isDefault,
+  });
+
+  /// Track ID
+  String id;
+
+  /// Subtitle file URI
+  String uri;
+
+  /// MIME type (text/srt, text/vtt, etc.)
+  String mimeType;
+
+  /// Language code (ISO 639-1)
+  String language;
+
+  /// Human-readable title
+  String? title;
+
+  /// Whether this is the default subtitle track
+  bool? isDefault;
+
+  Object encode() {
+    return <Object?>[
+      id,
+      uri,
+      mimeType,
+      language,
+      title,
+      isDefault,
+    ];
+  }
+
+  static SubtitleTrack decode(Object result) {
+    result as List<Object?>;
+    return SubtitleTrack(
+      id: result[0]! as String,
+      uri: result[1]! as String,
+      mimeType: result[2]! as String,
+      language: result[3]! as String,
+      title: result[4] as String?,
+      isDefault: result[5] as bool?,
     );
   }
 }
@@ -216,6 +275,7 @@ class AudioMetadata extends MediaMetadata {
     this.description,
     this.originalTrackNumber,
     this.upnpClass,
+    this.title,
   });
 
   String? artist;
@@ -234,6 +294,8 @@ class AudioMetadata extends MediaMetadata {
 
   String? upnpClass;
 
+  String? title;
+
   Object encode() {
     return <Object?>[
       artist,
@@ -244,6 +306,7 @@ class AudioMetadata extends MediaMetadata {
       description,
       originalTrackNumber,
       upnpClass,
+      title,
     ];
   }
 
@@ -258,6 +321,7 @@ class AudioMetadata extends MediaMetadata {
       description: result[5] as String?,
       originalTrackNumber: result[6] as int?,
       upnpClass: result[7] as String?,
+      title: result[8] as String?,
     );
   }
 }
@@ -272,6 +336,7 @@ class VideoMetadata extends MediaMetadata {
     this.genre,
     this.upnpClass,
     this.bitrate,
+    this.title,
   });
 
   String? resolution;
@@ -288,6 +353,8 @@ class VideoMetadata extends MediaMetadata {
 
   int? bitrate;
 
+  String? title;
+
   Object encode() {
     return <Object?>[
       resolution,
@@ -297,6 +364,7 @@ class VideoMetadata extends MediaMetadata {
       genre,
       upnpClass,
       bitrate,
+      title,
     ];
   }
 
@@ -310,6 +378,7 @@ class VideoMetadata extends MediaMetadata {
       genre: result[4] as String?,
       upnpClass: result[5] as String?,
       bitrate: result[6] as int?,
+      title: result[7] as String?,
     );
   }
 }
@@ -322,6 +391,7 @@ class ImageMetadata extends MediaMetadata {
     this.thumbnailUri,
     this.date,
     this.upnpClass,
+    this.title,
   });
 
   String? resolution;
@@ -334,6 +404,8 @@ class ImageMetadata extends MediaMetadata {
 
   String? upnpClass;
 
+  String? title;
+
   Object encode() {
     return <Object?>[
       resolution,
@@ -341,6 +413,7 @@ class ImageMetadata extends MediaMetadata {
       thumbnailUri,
       date,
       upnpClass,
+      title,
     ];
   }
 
@@ -352,6 +425,7 @@ class ImageMetadata extends MediaMetadata {
       thumbnailUri: result[2] as String?,
       date: result[3] as String?,
       upnpClass: result[4] as String?,
+      title: result[5] as String?,
     );
   }
 }
@@ -379,7 +453,7 @@ class PlaybackInfo {
   String? currentTrackUri;
 
   /// Current track metadata
-  String? currentTrackMetadata;
+  MediaMetadata? currentTrackMetadata;
 
   Object encode() {
     return <Object?>[
@@ -398,7 +472,7 @@ class PlaybackInfo {
       position: result[1]! as int,
       duration: result[2]! as int,
       currentTrackUri: result[3] as String?,
-      currentTrackMetadata: result[4] as String?,
+      currentTrackMetadata: result[4] as MediaMetadata?,
     );
   }
 }
@@ -481,23 +555,26 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is MediaItem) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioMetadata) {
+    }    else if (value is SubtitleTrack) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoMetadata) {
+    }    else if (value is AudioMetadata) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageMetadata) {
+    }    else if (value is VideoMetadata) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    }    else if (value is PlaybackInfo) {
+    }    else if (value is ImageMetadata) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    }    else if (value is VolumeInfo) {
+    }    else if (value is PlaybackInfo) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    }    else if (value is DiscoveryOptions) {
+    }    else if (value is VolumeInfo) {
       buffer.putUint8(138);
+      writeValue(buffer, value.encode());
+    }    else if (value is DiscoveryOptions) {
+      buffer.putUint8(139);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -517,16 +594,18 @@ class _PigeonCodec extends StandardMessageCodec {
       case 132: 
         return MediaItem.decode(readValue(buffer)!);
       case 133: 
-        return AudioMetadata.decode(readValue(buffer)!);
+        return SubtitleTrack.decode(readValue(buffer)!);
       case 134: 
-        return VideoMetadata.decode(readValue(buffer)!);
+        return AudioMetadata.decode(readValue(buffer)!);
       case 135: 
-        return ImageMetadata.decode(readValue(buffer)!);
+        return VideoMetadata.decode(readValue(buffer)!);
       case 136: 
-        return PlaybackInfo.decode(readValue(buffer)!);
+        return ImageMetadata.decode(readValue(buffer)!);
       case 137: 
-        return VolumeInfo.decode(readValue(buffer)!);
+        return PlaybackInfo.decode(readValue(buffer)!);
       case 138: 
+        return VolumeInfo.decode(readValue(buffer)!);
+      case 139: 
         return DiscoveryOptions.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -857,6 +936,131 @@ class MediaCastDlnaApi {
       );
     } else {
       return;
+    }
+  }
+
+  /// Set the media URI with subtitle support
+  Future<void> setMediaUriWithSubtitles(String deviceUdn, String uri, MediaMetadata metadata, List<SubtitleTrack> subtitleTracks) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMediaUriWithSubtitles$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[deviceUdn, uri, metadata, subtitleTracks]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Check if device supports subtitle track control
+  Future<bool> supportsSubtitleControl(String deviceUdn) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.supportsSubtitleControl$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+
+  /// Enable/disable subtitle track
+  Future<void> setSubtitleTrack(String deviceUdn, String? subtitleTrackId) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setSubtitleTrack$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[deviceUdn, subtitleTrackId]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Get available subtitle tracks for current media
+  Future<List<SubtitleTrack>> getAvailableSubtitleTracks(String deviceUdn) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getAvailableSubtitleTracks$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as List<Object?>?)!.cast<SubtitleTrack>();
+    }
+  }
+
+  /// Get currently active subtitle track
+  Future<SubtitleTrack?> getCurrentSubtitleTrack(String deviceUdn) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getCurrentSubtitleTrack$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return (pigeonVar_replyList[0] as SubtitleTrack?);
     }
   }
 

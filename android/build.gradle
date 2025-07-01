@@ -56,6 +56,11 @@ android {
         implementation("org.eclipse.jetty:jetty-http:9.4.54.v20240208")
         implementation("org.eclipse.jetty:jetty-io:9.4.54.v20240208")
         implementation("org.eclipse.jetty:jetty-util:9.4.54.v20240208")
+        
+        // Kotlin Coroutines
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+        
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }

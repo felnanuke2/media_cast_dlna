@@ -1,0 +1,32 @@
+# Files to exclude from pub.dev publication
+
+# Documentation files
+COROUTINES_REFACTORING.md
+IMPLEMENTATION_GUIDE.md
+MEDIA_STATUS_GUIDE.md
+SAMPLE_MUSIC_README.md
+SUBTITLE_SUPPORT_GUIDE.md
+SUBTITLE_TROUBLESHOOTING.md
+
+# Development scripts
+generate_pigeon.sh
+
+# Screenshots directory (until we have actual screenshots)
+screenshots/
+
+# Example app integration tests and additional demo files
+example/integration_test/
+example/lib/demo_playlist_viewer.dart
+example/lib/dlna_connection_manager.dart
+example/lib/music_player_example.dart
+example/test/
+
+# Build and temporary files
+**/build/
+**/.dart_tool/
+**/.packages
+**/.pub/
+**/pubspec.lock
+
+# Log files
+example/flutter_*.log

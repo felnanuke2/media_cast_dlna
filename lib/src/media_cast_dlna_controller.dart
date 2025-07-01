@@ -13,6 +13,11 @@ class MediaCastDlnaController {
   final _discoveryErrorController = StreamController<String>.broadcast();
   final _discoveryCompletedController = StreamController<void>.broadcast();
 
+  // Internal state for discovered devices
+  final List<DlnaDevice> _discoveredDevices = [];
+  final _discoveredDevicesController = StreamController<List<DlnaDevice>>.broadcast();
+  bool _isDiscoveryActive = false;
+
   final _transportStateChangedController =
       StreamController<({String deviceUdn, TransportState state})>.broadcast();
   final _positionChangedController =
@@ -47,6 +52,10 @@ class MediaCastDlnaController {
   /// Stream of discovered devices
   Stream<DlnaDevice> get onDeviceDiscovered =>
       _deviceDiscoveredController.stream;
+
+  /// Stream of all discovered devices as a list
+  Stream<List<DlnaDevice>> get discoveredDevicesStream =>
+      _discoveredDevicesController.stream;
 
   /// Stream of removed device UDNs
   Stream<DlnaDevice> get onDeviceRemoved => _deviceRemovedController.stream;
@@ -108,21 +117,39 @@ class MediaCastDlnaController {
     String? searchTarget,
     int timeoutSeconds = 5,
   }) async {
+    _isDiscoveryActive = true;
     final options = DiscoveryOptions(
       searchTarget: searchTarget,
       timeout: timeoutSeconds,
     );
     await _api.startDiscovery(options);
+    
+    // Initial population of discovered devices
+    await getDiscoveredDevices();
+    
+    // Set up periodic updates
+    Timer.periodic(const Duration(seconds: 2), (timer) async {
+      if (_isDiscoveryActive) {
+        await getDiscoveredDevices();
+      } else {
+        timer.cancel();
+      }
+    });
   }
 
   /// Stop device discovery
   Future<void> stopDiscovery() async {
+    _isDiscoveryActive = false;
     await _api.stopDiscovery();
   }
 
   /// Get list of currently discovered devices
   Future<List<DlnaDevice>> getDiscoveredDevices() async {
-    return await _api.getDiscoveredDevices();
+    final devices = await _api.getDiscoveredDevices();
+    _discoveredDevices.clear();
+    _discoveredDevices.addAll(devices);
+    _discoveredDevicesController.add(List.from(_discoveredDevices));
+    return devices;
   }
 
   /// Get media renderer devices (devices that can play media)
@@ -291,7 +318,32 @@ class MediaCastDlnaController {
     return await _api.getTransportState(rendererUdn);
   }
 
+  // Subtitle support methods
 
+  /// Set media URI with subtitle tracks
+  Future<void> setMediaUriWithSubtitles(
+    String rendererUdn,
+    String uri,
+    MediaMetadata metadata,
+    List<SubtitleTrack> subtitleTracks,
+  ) async {
+    await _api.setMediaUriWithSubtitles(rendererUdn, uri, metadata, subtitleTracks);
+  }
+
+  /// Enable/disable subtitle track
+  Future<void> setSubtitleTrack(String rendererUdn, String? subtitleTrackId) async {
+    await _api.setSubtitleTrack(rendererUdn, subtitleTrackId);
+  }
+
+  /// Get available subtitle tracks for current media
+  Future<List<SubtitleTrack>> getAvailableSubtitleTracks(String rendererUdn) async {
+    return await _api.getAvailableSubtitleTracks(rendererUdn);
+  }
+
+  /// Get currently active subtitle track
+  Future<SubtitleTrack?> getCurrentSubtitleTrack(String rendererUdn) async {
+    return await _api.getCurrentSubtitleTrack(rendererUdn);
+  }
 
   // Utility methods
 
@@ -312,6 +364,7 @@ class MediaCastDlnaController {
 
   /// Dispose resources
   void dispose() {
+    _isDiscoveryActive = false;
     _deviceDiscoveredController.close();
     _deviceRemovedController.close();
     _deviceUpdatedController.close();
@@ -324,6 +377,7 @@ class MediaCastDlnaController {
     _playbackErrorController.close();
     _contentDirectoryUpdatedController.close();
     _contentDirectoryErrorController.close();
+    _discoveredDevicesController.close();
   }
 }
 

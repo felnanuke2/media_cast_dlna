@@ -1,28 +1,70 @@
 package br.com.felnanuke2.media_cast_dlna.core
 
+import AudioMetadata
+import ImageMetadata
 import MediaMetadata
-import android.util.Log
-import org.jupnp.support.model.DIDLContent
-import org.jupnp.support.model.ProtocolInfo
-import org.jupnp.support.model.Res
-import org.jupnp.support.model.item.VideoItem
-import org.jupnp.support.contentdirectory.DIDLParser
-import java.net.URI
+import VideoMetadata
 
 class DefaultDidlMetadataConverter : DidlMetadataConverter {
     override fun toDidlLite(metadata: MediaMetadata, uri: String): String {
-        // TODO: Implement conversion from MediaMetadata to DIDL-Lite XML string
-        // For now, fallback to a default metadata
-        return try {
-            val didl = DIDLContent()
-            val resource = Res(ProtocolInfo("http-get:*:video/mp4:*"), null, uri)
-            val videoItem = VideoItem("1", "0", "Media", "Unknown")
-            videoItem.addResource(resource)
-            didl.addItem(videoItem)
-            DIDLParser().generate(didl)
-        } catch (e: Exception) {
-            Log.e("DidlMetadataConverter", "Error generating DIDL metadata", e)
-            ""
+        // Use the comprehensive metadata utils to generate DIDL-Lite XML
+        val title = when (metadata) {
+            is AudioMetadata -> metadata.title ?: "Unknown Audio"
+            is VideoMetadata -> metadata.title ?: "Unknown Video"
+            is ImageMetadata -> metadata.title ?: "Unknown Image"
+            else -> "Unknown Media"
+        }
+
+        // Detect MIME type from URI extension for better compatibility
+        val mimeType = when {
+            metadata is AudioMetadata -> detectMimeTypeFromUri(uri, "audio")
+            metadata is VideoMetadata -> detectMimeTypeFromUri(uri, "video")
+            metadata is ImageMetadata -> detectMimeTypeFromUri(uri, "image")
+            else -> detectMimeTypeFromUri(uri, "audio") // Default to audio
+        }
+
+        return createDefaultMetadata(
+            uri = uri,
+            title = title,
+            metadata = metadata,
+            mimeType = mimeType
+        )
+    }
+
+    private fun detectMimeTypeFromUri(uri: String, mediaType: String): String {
+        val extension = uri.substringAfterLast('.').lowercase()
+        return when (mediaType) {
+            "audio" -> when (extension) {
+                "mp3" -> "audio/mpeg"
+                "wav" -> "audio/wav"
+                "flac" -> "audio/flac"
+                "aac" -> "audio/aac"
+                "m4a" -> "audio/mp4"
+                "ogg" -> "audio/ogg"
+                "wma" -> "audio/x-ms-wma"
+                else -> "audio/mpeg" // Default to MP3
+            }
+            "video" -> when (extension) {
+                "mp4" -> "video/mp4"
+                "avi" -> "video/x-msvideo"
+                "mkv" -> "video/x-matroska"
+                "mov" -> "video/quicktime"
+                "wmv" -> "video/x-ms-wmv"
+                "flv" -> "video/x-flv"
+                "webm" -> "video/webm"
+                "m4v" -> "video/mp4"
+                else -> "video/mp4" // Default to MP4
+            }
+            "image" -> when (extension) {
+                "jpg", "jpeg" -> "image/jpeg"
+                "png" -> "image/png"
+                "gif" -> "image/gif"
+                "bmp" -> "image/bmp"
+                "webp" -> "image/webp"
+                "tiff", "tif" -> "image/tiff"
+                else -> "image/jpeg" // Default to JPEG
+            }
+            else -> "application/octet-stream"
         }
     }
 }

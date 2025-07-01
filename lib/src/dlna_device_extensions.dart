@@ -45,7 +45,7 @@ extension DlnaDeviceExtensions on DlnaDevice {
   }
 }
 
-/// Extension on List<DlnaDevice> to provide collection-specific operations
+/// Extension on `List<DlnaDevice>` to provide collection-specific operations
 extension DlnaDeviceListExtensions on List<DlnaDevice> {
   /// Finds a device by UDN in the list
   /// 

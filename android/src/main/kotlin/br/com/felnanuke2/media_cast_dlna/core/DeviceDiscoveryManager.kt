@@ -1,17 +1,15 @@
 package br.com.felnanuke2.media_cast_dlna.core
 
-import DiscoveryOptions
 import DlnaDevice
 import DlnaService
 import MediaItem
 import br.com.felnanuke2.media_cast_dlna.toDlnaDevice
 import org.jupnp.android.AndroidUpnpService
-import org.jupnp.model.meta.Device
 import org.jupnp.model.meta.LocalDevice
 import org.jupnp.model.meta.RemoteDevice
 
 class DeviceDiscoveryManager(private val upnpService: AndroidUpnpService?) {
-    fun startDiscovery(options: DiscoveryOptions) {
+    fun startDiscovery() {
         upnpService?.controlPoint?.search()
     }
 

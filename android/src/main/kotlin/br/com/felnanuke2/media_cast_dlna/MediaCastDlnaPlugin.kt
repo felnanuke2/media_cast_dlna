@@ -7,6 +7,7 @@ import MediaCastDlnaApi
 import MediaItem
 import MediaMetadata
 import PlaybackInfo
+import SubtitleTrack
 import TransportState
 import VolumeInfo
 import android.content.Context
@@ -16,80 +17,62 @@ import android.content.ComponentName
 import android.os.IBinder
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.runBlocking
 import org.jupnp.android.AndroidUpnpService
 import org.jupnp.android.AndroidUpnpServiceImpl
-import org.jupnp.model.message.UpnpResponse
-import org.jupnp.model.meta.Device
-import org.jupnp.model.meta.Service
-import org.jupnp.model.types.UDAServiceId
 import org.jupnp.model.types.UDN
-import org.jupnp.support.avtransport.callback.SetAVTransportURI
-import org.jupnp.support.avtransport.callback.Play
-import org.jupnp.support.avtransport.callback.GetTransportInfo
-import org.jupnp.support.avtransport.callback.GetPositionInfo
-import org.jupnp.model.action.ActionInvocation
-import org.jupnp.model.types.UnsignedIntegerFourBytes
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Semaphore
-import java.util.concurrent.TimeUnit
-import br.com.felnanuke2.media_cast_dlna.core.DeviceServiceManager
-import br.com.felnanuke2.media_cast_dlna.core.DefaultDeviceServiceManager
+import org.jupnp.model.types.UDAServiceId
 import br.com.felnanuke2.media_cast_dlna.core.DidlMetadataConverter
 import br.com.felnanuke2.media_cast_dlna.core.DefaultDidlMetadataConverter
 import br.com.felnanuke2.media_cast_dlna.core.MediaControlManager
 import br.com.felnanuke2.media_cast_dlna.core.DeviceDiscoveryManager
 import br.com.felnanuke2.media_cast_dlna.core.VolumeManager
-import br.com.felnanuke2.media_cast_dlna.core.createDefaultMetadata
 
-/** MediaCastDlnaPlugin (polling-only, no event/callback APIs) */
+/** MediaCastDlnaPlugin - Refactored to act as a simple Facade with coroutines support */
 class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
     private var context: Context? = null
     private var upnpService: AndroidUpnpService? = null
     private var isServiceBound = false
-    private var lastTransportState: MutableMap<String, TransportState> = ConcurrentHashMap()
-    private var lastPosition: MutableMap<String, Long> = ConcurrentHashMap()
     private var upnpRegistryListener: UpnpRegistryListener? = null
+
+    // Coroutine scope for managing async operations
+    private val pluginScope = CoroutineScope(SupervisorJob() + Dispatchers.IO) // Changed to IO dispatcher
+
+    // Service connection for UPnP service
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            Log.d("MediaCastDlna", "UPnP service connected: $className")
             upnpService = service as AndroidUpnpService
+            Log.d("MediaCastDlna", "Starting UPnP service...")
             upnpService?.get()?.startup()
             upnpRegistryListener = UpnpRegistryListener()
             upnpService?.registry?.addListener(upnpRegistryListener)
             isServiceBound = true
+            Log.d("MediaCastDlna", "UPnP service initialization completed")
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
+            Log.w("MediaCastDlna", "UPnP service disconnected: $className")
             upnpService = null
             isServiceBound = false
         }
     }
 
-    private val deviceServiceManager: DeviceServiceManager = DefaultDeviceServiceManager()
     private val didlMetadataConverter: DidlMetadataConverter = DefaultDidlMetadataConverter()
     private val mediaControlManager: MediaControlManager by lazy {
-        MediaControlManager(upnpService) { udn -> findDeviceByUdn(udn) }
+        MediaControlManager(upnpService)
     }
     private val deviceDiscoveryManager: DeviceDiscoveryManager by lazy {
         DeviceDiscoveryManager(upnpService)
     }
     private val volumeManager: VolumeManager by lazy {
-        VolumeManager(upnpService) { udn -> findDeviceByUdn(udn) }
-    }
-
-    // --- Utility helpers ---
-    private inline fun <T> requireUpnpService(block: (AndroidUpnpService) -> T): T {
-        val service = upnpService ?: throw IllegalStateException("UPnP service is not available")
-        return block(service)
-    }
-
-    private fun requireDevice(deviceUdn: String): Device<*, *, *> =
-        findDeviceByUdn(deviceUdn)
-            ?: throw IllegalArgumentException("Device with UDN $deviceUdn not found")
-
-    private fun <T> withService(device: Device<*, *, *>, serviceId: String, error: String, block: (Service<*, *>) -> T): T {
-        val service = device.findService(UDAServiceId(serviceId))
-            ?: throw IllegalStateException("$error on device ${device.identity.udn}")
-        return block(service)
+        VolumeManager(upnpService)
     }
 
     // --- Plugin lifecycle ---
@@ -108,10 +91,14 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
     }
 
     override fun initializeUpnpService() {
+        Log.d("MediaCastDlna", "initializeUpnpService called")
         context?.let {
+            Log.d("MediaCastDlna", "Context available, creating service intent")
             val intent = Intent(it, AndroidUpnpServiceImpl::class.java)
-            it.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        } ?: throw IllegalStateException("Context is not available. Ensure the plugin is attached to the engine.")
+            val bindResult = it.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+            Log.d("MediaCastDlna", "bindService result: $bindResult")
+        }
+            ?: throw IllegalStateException("Context is not available. Ensure the plugin is attached to the engine.")
     }
 
     override fun isUpnpServiceInitialized(): Boolean = upnpService != null && isServiceBound
@@ -131,24 +118,29 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
     // --- Discovery ---
     override fun startDiscovery(options: DiscoveryOptions) {
         if (!isServiceBound) throw IllegalStateException("UPnP service is not bound. Please ensure the service is started before calling startDiscovery.")
-        deviceDiscoveryManager.startDiscovery(options)
+        deviceDiscoveryManager.startDiscovery()
     }
 
     override fun stopDiscovery() {
         deviceDiscoveryManager.stopDiscovery()
     }
 
-    override fun getDiscoveredDevices(): List<DlnaDevice> = deviceDiscoveryManager.getDiscoveredDevices()
+    override fun getDiscoveredDevices(): List<DlnaDevice> =
+        deviceDiscoveryManager.getDiscoveredDevices()
 
-    override fun refreshDevice(deviceUdn: String): DlnaDevice? = deviceDiscoveryManager.refreshDevice(deviceUdn)
+    override fun refreshDevice(deviceUdn: String): DlnaDevice? =
+        deviceDiscoveryManager.refreshDevice(deviceUdn)
 
-    override fun getDeviceServices(deviceUdn: String): List<DlnaService> = deviceDiscoveryManager.getDeviceServices(deviceUdn)
+    override fun getDeviceServices(deviceUdn: String): List<DlnaService> =
+        deviceDiscoveryManager.getDeviceServices(deviceUdn)
 
-    override fun hasService(deviceUdn: String, serviceType: String): Boolean = deviceDiscoveryManager.hasService(deviceUdn, serviceType)
+    override fun hasService(deviceUdn: String, serviceType: String): Boolean =
+        deviceDiscoveryManager.hasService(deviceUdn, serviceType)
 
     override fun browseContentDirectory(
         deviceUdn: String, parentId: String, startIndex: Long, requestCount: Long
-    ): List<MediaItem> = deviceDiscoveryManager.browseContentDirectory(deviceUdn, parentId, startIndex, requestCount)
+    ): List<MediaItem> =
+        deviceDiscoveryManager.browseContentDirectory(deviceUdn, parentId, startIndex, requestCount)
 
     override fun searchContentDirectory(
         deviceUdn: String,
@@ -160,251 +152,501 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
         throw NotImplementedError()
     }
 
-    // --- Media Control ---
-    override fun setMediaUri(deviceUdn: String, uri: String, metadata: MediaMetadata) {
-        requireUpnpService { service ->
-            val device = requireDevice(deviceUdn)
-            val avTransportService = deviceServiceManager.findService(device, "AVTransport")
-                ?: throw IllegalStateException("AVTransport service not found on device $deviceUdn")
-            val finalMetadata = didlMetadataConverter.toDidlLite(metadata, uri)
-            mediaControlManager.setMediaUri(deviceUdn, uri, finalMetadata, avTransportService)
+    // --- Media Control (delegating to managers with coroutines) ---
+    override fun setMediaUri(deviceUdn: String, uri: String, metadata: MediaMetadata, callback: (Result<Unit>) -> Unit) {
+        Log.d("MediaCastDlna", "setMediaUri called - deviceUdn: $deviceUdn, uri: $uri")
+        Log.d("MediaCastDlna", "UPnP service bound: $isServiceBound, upnpService: $upnpService")
+        
+        if (!isServiceBound || upnpService == null) {
+            Log.e("MediaCastDlna", "UPnP service is not properly initialized. Cannot set media URI.")
+            callback(Result.failure(Exception("UPnP service not initialized")))
+            return
         }
-    }
-
-    override fun play(deviceUdn: String) {
-        requireUpnpService { service ->
-            val device = requireDevice(deviceUdn)
-            withService(device, "AVTransport", "AVTransport service not found") { avTransportService ->
-                mediaControlManager.play(deviceUdn, avTransportService)
+        
+        pluginScope.launch {
+            try {
+                Log.d("MediaCastDlna", "Converting metadata to DIDL-Lite...")
+                val finalMetadata = didlMetadataConverter.toDidlLite(metadata, uri)
+                Log.d("MediaCastDlna", "DIDL-Lite metadata: $finalMetadata")
+                
+                Log.d("MediaCastDlna", "Calling mediaControlManager.setMediaUri...")
+                // Add debug info before calling
+                debugDeviceConnection(deviceUdn)
+                
+                // Add timeout to the operation
+                withTimeout(30000L) { // 30 second timeout
+                    mediaControlManager.setMediaUri(deviceUdn, uri, finalMetadata)
+                }
+                Log.d("MediaCastDlna", "setMediaUri completed successfully")
+                callback(Result.success(Unit))
+            } catch (e: TimeoutCancellationException) {
+                Log.e("MediaCastDlna", "setMediaUri timed out after 30 seconds for device $deviceUdn")
+                callback(Result.failure(e))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to set media URI for device $deviceUdn", e)
+                Log.e("MediaCastDlna", "Exception stack trace:", e)
+                callback(Result.failure(e))
             }
         }
     }
 
-    override fun pause(deviceUdn: String) {
-        requireUpnpService { service ->
-            val device = requireDevice(deviceUdn)
-            withService(device, "AVTransport", "AVTransport service not found") { avTransportService ->
-                mediaControlManager.pause(deviceUdn, avTransportService)
+    override fun setMediaUriWithSubtitles(
+        deviceUdn: String,
+        uri: String,
+        metadata: MediaMetadata,
+        subtitleTracks: List<SubtitleTrack>,
+        callback: (Result<Unit>) -> Unit
+    ) {
+        Log.d("MediaCastDlna", "setMediaUriWithSubtitles called - deviceUdn: $deviceUdn, uri: $uri")
+        Log.d("MediaCastDlna", "Subtitle tracks: ${subtitleTracks.size}")
+        
+        if (!isServiceBound || upnpService == null) {
+            Log.e("MediaCastDlna", "UPnP service is not properly initialized. Cannot set media URI with subtitles.")
+            callback(Result.failure(Exception("UPnP service not initialized")))
+            return
+        }
+        
+        pluginScope.launch {
+            try {
+                val mediaControlManager = MediaControlManager(upnpService)
+                val metadataConverter = DefaultDidlMetadataConverter()
+                val finalMetadata = metadataConverter.toDidlLite(metadata, uri)
+                
+                Log.d("MediaCastDlna", "Generated DIDL-Lite metadata: $finalMetadata")
+                
+                withTimeout(30000) { // 30-second timeout
+                    mediaControlManager.setMediaUriWithSubtitlesEnhanced(deviceUdn, uri, finalMetadata, subtitleTracks)
+                }
+                
+                Log.d("MediaCastDlna", "setMediaUriWithSubtitles completed successfully")
+                callback(Result.success(Unit))
+            } catch (e: TimeoutCancellationException) {
+                Log.e("MediaCastDlna", "setMediaUriWithSubtitles timed out", e)
+                callback(Result.failure(Exception("Operation timed out: ${e.message}")))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "setMediaUriWithSubtitles failed", e)
+                callback(Result.failure(e))
             }
         }
     }
 
-    override fun stop(deviceUdn: String) {
-        requireUpnpService { service ->
-            val device = requireDevice(deviceUdn)
-            withService(device, "AVTransport", "AVTransport service not found") { avTransportService ->
-                mediaControlManager.stop(deviceUdn, avTransportService)
+    override fun supportsSubtitleControl(deviceUdn: String): Boolean {
+        return try {
+            runBlocking {
+                mediaControlManager.checkDeviceSubtitleSupport(deviceUdn)
+            }
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "Failed to check subtitle support for device $deviceUdn", e)
+            false
+        }
+    }
+
+    override fun setSubtitleTrack(
+        deviceUdn: String,
+        subtitleTrackId: String?,
+        callback: (Result<Unit>) -> Unit
+    ) {
+        Log.d("MediaCastDlna", "setSubtitleTrack called - deviceUdn: $deviceUdn, subtitleTrackId: $subtitleTrackId")
+        
+        if (!isServiceBound || upnpService == null) {
+            Log.e("MediaCastDlna", "UPnP service is not properly initialized. Cannot set subtitle track.")
+            callback(Result.failure(Exception("UPnP service not initialized")))
+            return
+        }
+        
+        pluginScope.launch {
+            try {
+                val mediaControlManager = MediaControlManager(upnpService)
+                
+                withTimeout(10000) { // 10-second timeout
+                    mediaControlManager.setSubtitleTrack(deviceUdn, subtitleTrackId)
+                }
+                
+                Log.d("MediaCastDlna", "setSubtitleTrack completed successfully")
+                callback(Result.success(Unit))
+            } catch (e: UnsupportedOperationException) {
+                Log.w("MediaCastDlna", "Device does not support subtitle track control: ${e.message}")
+                callback(Result.failure(e))
+            } catch (e: TimeoutCancellationException) {
+                Log.e("MediaCastDlna", "setSubtitleTrack timed out", e)
+                callback(Result.failure(Exception("Operation timed out: ${e.message}")))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "setSubtitleTrack failed", e)
+                callback(Result.failure(e))
             }
         }
     }
 
-    override fun seek(deviceUdn: String, positionSeconds: Long) {
-        if (upnpService == null) {
-            throw IllegalStateException("UPnP service is not available")
+    override fun getAvailableSubtitleTracks(deviceUdn: String): List<SubtitleTrack> {
+        Log.d("MediaCastDlna", "getAvailableSubtitleTracks called - deviceUdn: $deviceUdn")
+        
+        if (!isServiceBound || upnpService == null) {
+            Log.e("MediaCastDlna", "UPnP service is not properly initialized. Cannot get subtitle tracks.")
+            return emptyList()
         }
-        val device = findDeviceByUdn(deviceUdn)
-            ?: throw IllegalArgumentException("Device with UDN $deviceUdn not found")
-        val avTransportService = device.findService(UDAServiceId("AVTransport"))
-            ?: throw IllegalStateException("AVTransport service not found on device $deviceUdn")
-        val seekAction = avTransportService.getAction("Seek")
-            ?: throw IllegalStateException("Seek action not available on device $deviceUdn")
-        val actionInvocation = ActionInvocation(seekAction)
-        actionInvocation.setInput("InstanceID", UnsignedIntegerFourBytes(0))
-        actionInvocation.setInput("Unit", "REL_TIME")
-        // Format seconds to HH:MM:SS
-        val hours = positionSeconds / 3600
-        val minutes = (positionSeconds % 3600) / 60
-        val seconds = positionSeconds % 60
-        val timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-        actionInvocation.setInput("Target", timeString)
-        mediaControlManager.seek(deviceUdn, actionInvocation, timeString)
+        
+        return try {
+            val mediaControlManager = MediaControlManager(upnpService)
+            
+            // Use runBlocking since this is a synchronous method
+            runBlocking {
+                withTimeout(10000) { // 10-second timeout
+                    mediaControlManager.getAvailableSubtitleTracks(deviceUdn)
+                }
+            }
+        } catch (e: TimeoutCancellationException) {
+            Log.e("MediaCastDlna", "getAvailableSubtitleTracks timed out", e)
+            emptyList()
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "getAvailableSubtitleTracks failed", e)
+            emptyList()
+        }
     }
 
-    override fun next(deviceUdn: String) {
-        if (upnpService == null) {
-            throw IllegalStateException("UPnP service is not available")
+    override fun getCurrentSubtitleTrack(deviceUdn: String): SubtitleTrack? {
+        Log.d("MediaCastDlna", "getCurrentSubtitleTrack called - deviceUdn: $deviceUdn")
+        
+        if (!isServiceBound || upnpService == null) {
+            Log.e("MediaCastDlna", "UPnP service is not properly initialized. Cannot get current subtitle track.")
+            return null
         }
-        val device = findDeviceByUdn(deviceUdn)
-            ?: throw IllegalArgumentException("Device with UDN $deviceUdn not found")
-        val avTransportService = device.findService(UDAServiceId("AVTransport"))
-            ?: throw IllegalStateException("AVTransport service not found on device $deviceUdn")
-        mediaControlManager.next(deviceUdn, avTransportService)
+        
+        return try {
+            val mediaControlManager = MediaControlManager(upnpService)
+            
+            // Use runBlocking since this is a synchronous method
+            runBlocking {
+                withTimeout(10000) { // 10-second timeout
+                    mediaControlManager.getCurrentSubtitleTrack(deviceUdn)
+                }
+            }
+        } catch (e: TimeoutCancellationException) {
+            Log.e("MediaCastDlna", "getCurrentSubtitleTrack timed out", e)
+            null
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "getCurrentSubtitleTrack failed", e)
+            null
+        }
     }
 
-    override fun previous(deviceUdn: String) {
-        if (upnpService == null) {
-            throw IllegalStateException("UPnP service is not available")
+    override fun play(deviceUdn: String, callback: (Result<Unit>) -> Unit) {
+        Log.d("MediaCastDlna", "play called - deviceUdn: $deviceUdn")
+        Log.d("MediaCastDlna", "UPnP service bound: $isServiceBound, upnpService: $upnpService")
+        
+        if (!isServiceBound || upnpService == null) {
+            Log.e("MediaCastDlna", "UPnP service is not properly initialized. Cannot play.")
+            callback(Result.failure(Exception("UPnP service not initialized")))
+            return
         }
-        val device = findDeviceByUdn(deviceUdn)
-            ?: throw IllegalArgumentException("Device with UDN $deviceUdn not found")
-        val avTransportService = device.findService(UDAServiceId("AVTransport"))
-            ?: throw IllegalStateException("AVTransport service not found on device $deviceUdn")
-        mediaControlManager.previous(deviceUdn, avTransportService)
+        
+        pluginScope.launch {
+            try {
+                Log.d("MediaCastDlna", "Calling mediaControlManager.play...")
+                // Add debug info before calling
+                debugDeviceConnection(deviceUdn)
+                
+                // Add timeout to the operation
+                withTimeout(30000L) { // 30 second timeout
+                    mediaControlManager.play(deviceUdn)
+                }
+                Log.d("MediaCastDlna", "play completed successfully")
+                callback(Result.success(Unit))
+            } catch (e: TimeoutCancellationException) {
+                Log.e("MediaCastDlna", "play timed out after 30 seconds for device $deviceUdn")
+                callback(Result.failure(e))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to play for device $deviceUdn", e)
+                Log.e("MediaCastDlna", "Exception stack trace:", e)
+                callback(Result.failure(e))
+            }
+        }
     }
 
-    override fun setVolume(deviceUdn: String, volume: Long) {
-        volumeManager.setVolume(deviceUdn, volume)
+    override fun pause(deviceUdn: String, callback: (Result<Unit>) -> Unit) {
+        pluginScope.launch {
+            try {
+                mediaControlManager.pause(deviceUdn)
+                callback(Result.success(Unit))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to pause for device $deviceUdn", e)
+                callback(Result.failure(e))
+            }
+        }
+    }
+
+    override fun stop(deviceUdn: String, callback: (Result<Unit>) -> Unit) {
+        pluginScope.launch {
+            try {
+                mediaControlManager.stop(deviceUdn)
+                callback(Result.success(Unit))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to stop for device $deviceUdn", e)
+                callback(Result.failure(e))
+            }
+        }
+    }
+
+    override fun seek(deviceUdn: String, positionSeconds: Long, callback: (Result<Unit>) -> Unit) {
+        pluginScope.launch {
+            try {
+                mediaControlManager.seek(deviceUdn, positionSeconds)
+                callback(Result.success(Unit))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to seek for device $deviceUdn", e)
+                callback(Result.failure(e))
+            }
+        }
+    }
+
+    override fun next(deviceUdn: String, callback: (Result<Unit>) -> Unit) {
+        pluginScope.launch {
+            try {
+                mediaControlManager.next(deviceUdn)
+                callback(Result.success(Unit))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to go to next for device $deviceUdn", e)
+                callback(Result.failure(e))
+            }
+        }
+    }
+
+    override fun previous(deviceUdn: String, callback: (Result<Unit>) -> Unit) {
+        pluginScope.launch {
+            try {
+                mediaControlManager.previous(deviceUdn)
+                callback(Result.success(Unit))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to go to previous for device $deviceUdn", e)
+                callback(Result.failure(e))
+            }
+        }
+    }
+
+    override fun setVolume(deviceUdn: String, volume: Long, callback: (Result<Unit>) -> Unit) {
+        pluginScope.launch {
+            try {
+                volumeManager.setVolume(deviceUdn, volume)
+                callback(Result.success(Unit))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to set volume for device $deviceUdn", e)
+                callback(Result.failure(e))
+            }
+        }
     }
 
     override fun getVolumeInfo(deviceUdn: String): VolumeInfo {
-        return volumeManager.getVolumeInfo(deviceUdn)
+        // Note: This is synchronous in the Pigeon API, but we should consider making it async
+        return try {
+            // For now, we'll use runBlocking, but ideally the Pigeon API should support suspend functions
+            runBlocking {
+                volumeManager.getVolumeInfo(deviceUdn)
+            }
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "Failed to get volume info for device $deviceUdn", e)
+            VolumeInfo(0L, false)
+        }
     }
 
-    override fun setMute(deviceUdn: String, muted: Boolean) {
-        volumeManager.setMute(deviceUdn, muted)
+    override fun setMute(deviceUdn: String, muted: Boolean, callback: (Result<Unit>) -> Unit) {
+        pluginScope.launch {
+            try {
+                volumeManager.setMute(deviceUdn, muted)
+                callback(Result.success(Unit))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "Failed to set mute for device $deviceUdn", e)
+                callback(Result.failure(e))
+            }
+        }
     }
 
     override fun getPlaybackInfo(deviceUdn: String): PlaybackInfo {
-        if (upnpService == null) {
-            throw IllegalStateException("UPnP service is not available")
-        }
-        val device = findDeviceByUdn(deviceUdn)
-            ?: throw IllegalArgumentException("Device with UDN $deviceUdn not found")
-        val avTransportService = device.findService(UDAServiceId("AVTransport"))
-            ?: throw IllegalStateException("AVTransport service not found on device $deviceUdn")
-        // Get transport state
-        val state = getTransportState(deviceUdn)
-        // Get position info
-        var position = 0
-        var duration = 0
-        var currentTrackUri: String? = null
-        var currentTrackMetadata: String? = null
-        val semaphore = java.util.concurrent.Semaphore(0)
-        val getPositionInfoAction = object : GetPositionInfo(avTransportService) {
-            override fun received(
-                invocation: ActionInvocation<*>?,
-                positionInfo: org.jupnp.support.model.PositionInfo?
-            ) {
-                positionInfo?.let { info ->
-                    position = parseTimeToSeconds(info.relTime)
-                    duration = parseTimeToSeconds(info.trackDuration)
-                    currentTrackUri = info.trackURI
-                    currentTrackMetadata = info.trackMetaData
-                }
-                semaphore.release()
+        // Note: This is synchronous in the Pigeon API, but we should consider making it async
+        return try {
+            runBlocking {
+                mediaControlManager.getPlaybackInfo(deviceUdn)
             }
-
-            override fun failure(
-                invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?
-            ) {
-                Log.v("MediaCastDlna", "GetPositionInfo failed for device $deviceUdn: $defaultMsg")
-                semaphore.release()
-            }
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "Failed to get playback info for device $deviceUdn", e)
+            PlaybackInfo(
+                TransportState.STOPPED, 0L, 0L, null, null
+            )
         }
-        upnpService?.controlPoint?.execute(getPositionInfoAction)
-        try {
-            semaphore.tryAcquire(3, java.util.concurrent.TimeUnit.SECONDS)
-        } catch (e: InterruptedException) {
-            Log.w("MediaCastDlna", "GetPlaybackInfo interrupted for device $deviceUdn")
-        }
-        return PlaybackInfo(
-            state,
-            position.toLong(),
-            duration.toLong(),
-            currentTrackUri,
-            currentTrackMetadata
-        )
     }
 
     override fun getCurrentPosition(deviceUdn: String): Long {
-        if (upnpService == null) {
-            throw IllegalStateException("UPnP service is not available")
-        }
-        val device = findDeviceByUdn(deviceUdn)
-            ?: throw IllegalArgumentException("Device with UDN $deviceUdn not found")
-        val avTransportService = device.findService(UDAServiceId("AVTransport"))
-            ?: throw IllegalStateException("AVTransport service not found on device $deviceUdn")
-        var position: Long = -1L
-        val semaphore = Semaphore(0)
-        val getPositionInfoAction = object : GetPositionInfo(avTransportService) {
-            override fun received(
-                invocation: ActionInvocation<*>?,
-                positionInfo: org.jupnp.support.model.PositionInfo?
-            ) {
-                positionInfo?.let { info ->
-                    position = parseTimeToSeconds(info.relTime).toLong()
-                }
-                semaphore.release()
+        return try {
+            runBlocking {
+                mediaControlManager.getCurrentPosition(deviceUdn)
             }
-
-            override fun failure(
-                invocation: ActionInvocation<*>?,
-                operation: UpnpResponse?,
-                defaultMsg: String?
-            ) {
-                Log.e(
-                    "MediaCastDlna",
-                    "GetCurrentPosition failed for device $deviceUdn: $defaultMsg"
-                )
-                semaphore.release()
-            }
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "Failed to get current position for device $deviceUdn", e)
+            -1L
         }
-        upnpService?.controlPoint?.execute(getPositionInfoAction)
-        try {
-            // Wait for the asynchronous call to complete with a timeout
-            if (!semaphore.tryAcquire(5, TimeUnit.SECONDS)) {
-                Log.w(
-                    "MediaCastDlna",
-                    "Timeout waiting for GetCurrentPosition response for device $deviceUdn"
-                )
-            }
-        } catch (e: InterruptedException) {
-            Thread.currentThread().interrupt() // Restore the interrupted status
-            Log.w("MediaCastDlna", "GetCurrentPosition interrupted for device $deviceUdn", e)
-        }
-        return position
     }
 
     override fun getTransportState(deviceUdn: String): TransportState {
-        if (upnpService == null) {
-            throw IllegalStateException("UPnP service is not available")
-        }
-        val device = findDeviceByUdn(deviceUdn)
-        if (device == null) {
-            throw IllegalArgumentException("Device with UDN $deviceUdn not found")
-        }
-        val avTransportService = device.findService(UDAServiceId("AVTransport"))
-        if (avTransportService == null) {
-            throw IllegalStateException("AVTransport service not found on device $deviceUdn")
-        }
-        var currentState = TransportState.STOPPED
-        val semaphore = java.util.concurrent.Semaphore(0)
-        val getTransportInfoAction = object : GetTransportInfo(avTransportService) {
-            override fun received(
-                invocation: ActionInvocation<*>?,
-                transportInfo: org.jupnp.support.model.TransportInfo?
-            ) {
-                transportInfo?.let { info ->
-                    currentState = when (info.currentTransportState) {
-                        org.jupnp.support.model.TransportState.PLAYING -> TransportState.PLAYING
-                        org.jupnp.support.model.TransportState.PAUSED_PLAYBACK -> TransportState.PAUSED
-                        org.jupnp.support.model.TransportState.STOPPED -> TransportState.STOPPED
-                        org.jupnp.support.model.TransportState.TRANSITIONING -> TransportState.TRANSITIONING
-                        org.jupnp.support.model.TransportState.NO_MEDIA_PRESENT -> TransportState.NO_MEDIA_PRESENT
-                        else -> TransportState.STOPPED
-                    }
-                    lastTransportState[deviceUdn] = currentState
-                }
-                semaphore.release()
+        return try {
+            runBlocking {
+                mediaControlManager.getTransportState(deviceUdn)
             }
-
-            override fun failure(
-                invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?
-            ) {
-                Log.e("MediaCastDlna", "GetTransportInfo failed for device $deviceUdn: $defaultMsg")
-                semaphore.release()
-            }
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "Failed to get transport state for device $deviceUdn", e)
+            TransportState.STOPPED
         }
-        upnpService?.controlPoint?.execute(getTransportInfoAction)
-        try {
-            // Wait for response with timeout
-            semaphore.tryAcquire(5, java.util.concurrent.TimeUnit.SECONDS)
-        } catch (e: InterruptedException) {
-            Log.w("MediaCastDlna", "GetTransportState interrupted for device $deviceUdn")
-        }
-        return currentState
     }
 
+    // --- Debug methods ---
+    fun debugDeviceConnection(deviceUdn: String) {
+        Log.d("MediaCastDlna", "=== DEBUG: Testing device connection for $deviceUdn ===")
+        
+        try {
+            Log.d("MediaCastDlna", "1. Checking UPnP service state...")
+            Log.d("MediaCastDlna", "   isServiceBound: $isServiceBound")
+            Log.d("MediaCastDlna", "   upnpService: $upnpService")
+            
+            if (upnpService == null) {
+                Log.e("MediaCastDlna", "   ERROR: UPnP service is null")
+                return
+            }
+            
+            Log.d("MediaCastDlna", "2. Checking registry...")
+            val registry = upnpService?.registry
+            Log.d("MediaCastDlna", "   registry: $registry")
+            
+            if (registry == null) {
+                Log.e("MediaCastDlna", "   ERROR: Registry is null")
+                return
+            }
+            
+            Log.d("MediaCastDlna", "3. Looking for device...")
+            val udn = UDN.valueOf(deviceUdn)
+            val device = registry.getDevice(udn, false)
+            Log.d("MediaCastDlna", "   device: ${device?.details?.friendlyName ?: "null"}")
+            
+            if (device == null) {
+                Log.e("MediaCastDlna", "   ERROR: Device not found")
+                Log.d("MediaCastDlna", "   Available devices:")
+                registry.devices?.forEach { availableDevice ->
+                    Log.d("MediaCastDlna", "     - ${availableDevice.identity.udn} (${availableDevice.details.friendlyName})")
+                }
+                return
+            }
+            
+            Log.d("MediaCastDlna", "4. Checking AVTransport service...")
+            val avTransportService = device.findService(UDAServiceId("AVTransport"))
+            Log.d("MediaCastDlna", "   AVTransport service: ${avTransportService?.serviceId ?: "null"}")
+            
+            if (avTransportService == null) {
+                Log.e("MediaCastDlna", "   ERROR: AVTransport service not found")
+                Log.d("MediaCastDlna", "   Available services:")
+                device.services?.forEach { service ->
+                    Log.d("MediaCastDlna", "     - ${service.serviceId}")
+                }
+                return
+            }
+            
+            Log.d("MediaCastDlna", "5. Checking control point...")
+            val controlPoint = upnpService?.controlPoint
+            Log.d("MediaCastDlna", "   controlPoint: $controlPoint")
+            
+            if (controlPoint == null) {
+                Log.e("MediaCastDlna", "   ERROR: Control point is null")
+                return
+            }
+            
+            Log.d("MediaCastDlna", "=== DEBUG: All checks passed! Device should be ready for commands ===")
+            
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "=== DEBUG: Exception during device connection test ===", e)
+        }
+    }
+
+    // Test method to be called from Dart  
+    fun testDeviceConnection(deviceUdn: String): Boolean {
+        Log.d("MediaCastDlna", "testDeviceConnection called for device: $deviceUdn")
+        return try {
+            debugDeviceConnection(deviceUdn)
+            true
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "Device test failed", e)
+            false
+        }
+    }
+
+    // --- Debug methods to help troubleshoot subtitle issues ---
+    fun debugDeviceSubtitleSupport(deviceUdn: String, callback: (Result<Map<String, Any>>) -> Unit) {
+        Log.d("MediaCastDlna", "debugDeviceSubtitleSupport called for device: $deviceUdn")
+        
+        if (!isServiceBound || upnpService == null) {
+            callback(Result.failure(Exception("UPnP service not initialized")))
+            return
+        }
+        
+        pluginScope.launch {
+            try {
+                val mediaControlManager = MediaControlManager(upnpService)
+                val capabilities = mediaControlManager.debugDeviceCapabilities(deviceUdn)
+                val supportsSubtitles = mediaControlManager.checkDeviceSubtitleSupport(deviceUdn)
+                
+                val result = capabilities.toMutableMap()
+                result["supportsSubtitleControl"] = supportsSubtitles
+                
+                Log.d("MediaCastDlna", "Device subtitle support debug result: $result")
+                callback(Result.success(result))
+            } catch (e: Exception) {
+                Log.e("MediaCastDlna", "debugDeviceSubtitleSupport failed", e)
+                callback(Result.failure(e))
+            }
+        }
+    }
+    
+    fun debugSubtitleMetadata(originalMetadata: String, subtitleTracks: List<SubtitleTrack>): Map<String, String> {
+        Log.d("MediaCastDlna", "debugSubtitleMetadata called")
+        
+        return try {
+            val mediaControlManager = MediaControlManager(upnpService)
+            mediaControlManager.debugMetadata(originalMetadata, subtitleTracks)
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "debugSubtitleMetadata failed", e)
+            mapOf("error" to (e.message ?: "Unknown error"))
+        }
+    }
+
+    // --- Helper method to check if a device supports subtitle track control ---
+    // Exposed to Dart
+    fun checkSubtitleSupport(deviceUdn: String): Boolean {
+        Log.d("MediaCastDlna", "checkSubtitleSupport called for device: $deviceUdn")
+        
+        if (!isServiceBound || upnpService == null) {
+            Log.e("MediaCastDlna", "UPnP service is not properly initialized.")
+            return false
+        }
+        
+        return try {
+            val mediaControlManager = MediaControlManager(upnpService)
+            runBlocking {
+                // Use the private method through reflection or create a public version
+                // For now, let's check directly
+                val udn = org.jupnp.model.types.UDN.valueOf(deviceUdn)
+                val device = upnpService?.registry?.getDevice(udn, false)
+                if (device != null) {
+                    val avTransportService = device.findService(org.jupnp.model.types.UDAServiceId("AVTransport"))
+                    val setSubtitleAction = avTransportService?.getAction("SetCurrentSubtitle")
+                    val result = setSubtitleAction != null
+                    Log.d("MediaCastDlna", "Device $deviceUdn subtitle support: $result")
+                    result
+                } else {
+                    Log.w("MediaCastDlna", "Device $deviceUdn not found")
+                    false
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MediaCastDlna", "Error checking subtitle support for device $deviceUdn", e)
+            false
+        }
+    }
+
+    // --- Unimplemented methods (kept as-is for now) ---
     override fun getPlatformVersion(): String {
         throw NotImplementedError()
     }
@@ -417,91 +659,5 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
         throw NotImplementedError()
     }
 
-    // Helper method to find device by UDN
-    private fun findDeviceByUdn(deviceUdn: String): Device<*, *, *>? {
-        if (upnpService == null) return null
-        val udn = UDN.valueOf(deviceUdn)
-        return upnpService?.registry?.getDevice(udn, false)
-    }
-
-    // Enhanced castVideo method that combines setMediaUri and play (like the original Java code)
-    fun castVideo(deviceUdn: String, videoUrl: String, title: String) {
-        if (upnpService == null) {
-            Log.e("MediaCastDlna", "UPnP service is not available")
-            throw IllegalStateException("UPnP service is not available")
-        }
-        val device = findDeviceByUdn(deviceUdn)
-        if (device == null) {
-            Log.e("MediaCastDlna", "Device with UDN $deviceUdn not found")
-            throw IllegalArgumentException("Device with UDN $deviceUdn not found")
-        }
-        val avTransportService = device.findService(UDAServiceId("AVTransport"))
-        if (avTransportService == null) {
-            Log.e("MediaCastDlna", "AVTransport service not found on device $deviceUdn")
-            throw IllegalStateException("AVTransport service not found on device $deviceUdn")
-        }
-        // Create DIDL-Lite metadata
-        val metadata = createDefaultMetadata(videoUrl, title)
-        if (metadata.isEmpty()) {
-            Log.e("MediaCastDlna", "Failed to generate DIDL metadata")
-            throw RuntimeException("Failed to generate DIDL metadata")
-        }
-        // 1. Set the URI
-        val setAVTransportURIAction =
-            object : SetAVTransportURI(avTransportService, videoUrl, metadata) {
-                override fun success(invocation: ActionInvocation<*>?) {
-                    Log.d("MediaCastDlna", "SetAVTransportURI successful, now starting playback")
-                    // 2. Play the media (chained after successful URI setting)
-                    val playAction = object : Play(avTransportService) {
-                        override fun success(invocation: ActionInvocation<*>?) {
-                            Log.d(
-                                "MediaCastDlna",
-                                "Playback started successfully for '$title' on device $deviceUdn"
-                            )
-                        }
-
-                        override fun failure(
-                            invocation: ActionInvocation<*>?,
-                            operation: UpnpResponse?,
-                            defaultMsg: String?
-                        ) {
-                            Log.e(
-                                "MediaCastDlna",
-                                "Play action failed for device $deviceUdn: $defaultMsg"
-                            )
-                        }
-                    }
-                    upnpService?.controlPoint?.execute(playAction)
-                }
-
-                override fun failure(
-                    invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?
-                ) {
-                    Log.e(
-                        "MediaCastDlna",
-                        "SetAVTransportURI failed for device $deviceUdn: $defaultMsg"
-                    )
-                    throw RuntimeException("Failed to set media URI: $defaultMsg")
-                }
-            }
-        upnpService?.controlPoint?.execute(setAVTransportURIAction)
-    }
-
-    private fun parseTimeToSeconds(timeString: String?): Int {
-        if (timeString.isNullOrEmpty() || timeString == "NOT_IMPLEMENTED") return 0
-        try {
-            // Parse time format like "0:01:23" or "00:01:23.000"
-            val parts = timeString.split(":")
-            if (parts.size >= 3) {
-                val hours = parts[0].toInt()
-                val minutes = parts[1].toInt()
-                val seconds = parts[2].split(".")[0].toInt() // Remove milliseconds if present
-                return hours * 3600 + minutes * 60 + seconds
-            }
-        } catch (e: Exception) {
-            Log.w("MediaCastDlna", "Failed to parse time: $timeString", e)
-        }
-        return 0
-    }
 }
 
