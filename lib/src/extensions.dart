@@ -1,7 +1,7 @@
 /// Extensions and utilities for the media cast DLNA classes to add object calisthenics behavior
 /// while keeping the core classes Pigeon-compatible.
+library media_cast_dlna_extensions;
 
-import 'dart:math' as math;
 import '../src/media_cast_dlna_pigeon.dart';
 
 /// Static factory methods for VolumeLevel
