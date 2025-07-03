@@ -10,7 +10,7 @@ extension DlnaDeviceExtensions on DlnaDevice {
   /// 
   /// Returns true if both devices have the same UDN, false otherwise.
   bool hasSameUdn(DlnaDevice other) {
-    return udn == other.udn;
+    return udn.value == other.udn.value;
   }
 
   /// Checks if this device matches the given UDN string
@@ -20,7 +20,7 @@ extension DlnaDeviceExtensions on DlnaDevice {
   /// 
   /// Returns true if the device's UDN matches the provided UDN string.
   bool matchesUdn(String deviceUdn) {
-    return udn == deviceUdn;
+    return udn.value == deviceUdn;
   }
 
   /// Returns true if this device is a media renderer
@@ -71,7 +71,7 @@ extension DlnaDeviceListExtensions on List<DlnaDevice> {
   /// If no device with the UDN exists, it adds the new device.
   /// This prevents duplicates while allowing device updates.
   void addOrUpdate(DlnaDevice device) {
-    final existingIndex = indexOfUdn(device.udn);
+    final existingIndex = indexOfUdn(device.udn.value);
     if (existingIndex != -1) {
       // Update existing device
       this[existingIndex] = device;

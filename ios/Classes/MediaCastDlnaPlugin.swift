@@ -121,23 +121,15 @@ public class MediaCastDlnaPlugin: NSObject, FlutterPlugin, MediaCastDlnaApi {
         return deviceDiscoveryManager.hasService(deviceUdn: deviceUdn, serviceType: serviceType)
     }
     
-    public func browseContentDirectory(deviceUdn: String, parentId: String, startIndex: Int64, requestCount: Int64) throws -> [MediaItem] {
-        return deviceDiscoveryManager.browseContentDirectory(
-            deviceUdn: deviceUdn,
-            parentId: parentId,
-            startIndex: startIndex,
-            requestCount: requestCount
-        )
-    }
-    
-    public func searchContentDirectory(deviceUdn: String, containerId: String, searchCriteria: String, startIndex: Int64, requestCount: Int64) throws -> [MediaItem] {
-        return deviceDiscoveryManager.searchContentDirectory(
-            deviceUdn: deviceUdn,
-            containerId: containerId,
-            searchCriteria: searchCriteria,
-            startIndex: startIndex,
-            requestCount: requestCount
-        )
+    public func isDeviceOnline(deviceUdn: String) throws -> Bool {
+        os_log("Checking device connectivity for %@", log: logger, type: .info, deviceUdn)
+        
+        guard isServiceInitialized else {
+            os_log("UPnP service not initialized", log: logger, type: .error)
+            return false
+        }
+        
+        return deviceDiscoveryManager.isDeviceOnline(deviceUdn: deviceUdn)
     }
     
     // MARK: - Media Control
@@ -257,28 +249,6 @@ public class MediaCastDlnaPlugin: NSObject, FlutterPlugin, MediaCastDlnaApi {
         }
     }
     
-    public func next(deviceUdn: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        Task {
-            do {
-                try await mediaControlManager.next(deviceUdn: deviceUdn)
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    public func previous(deviceUdn: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        Task {
-            do {
-                try await mediaControlManager.previous(deviceUdn: deviceUdn)
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-    
     // MARK: - Volume Control
     public func setVolume(deviceUdn: String, volume: Int64, completion: @escaping (Result<Void, Error>) -> Void) {
         Task {
@@ -319,16 +289,8 @@ public class MediaCastDlnaPlugin: NSObject, FlutterPlugin, MediaCastDlnaApi {
         return mediaControlManager.getTransportState(deviceUdn: deviceUdn)
     }
     
-    // MARK: - Platform Info
-    public func getPlatformVersion() throws -> String {
-        return "iOS " + UIDevice.current.systemVersion
-    }
-    
-    public func isUpnpAvailable() throws -> Bool {
-        return true // UPnP is available on iOS
-    }
-    
-    public func getNetworkInterfaces() throws -> [String] {
+    // MARK: - Network Utilities
+    private func getNetworkInterfaces() -> [String] {
         var interfaces: [String] = []
         
         var ifaddr: UnsafeMutablePointer<ifaddrs>?

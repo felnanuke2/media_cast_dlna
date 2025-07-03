@@ -20,57 +20,57 @@ suspend fun <T : ActionCallback> ControlPoint.executeSuspending(
     callback: T,
     timeoutMs: Long = 15000 // Increased timeout to 15 seconds
 ): T = withTimeout(timeoutMs) {
-    android.util.Log.d("JupnpExtensions", "executeSuspending called with timeout: ${timeoutMs}ms")
-    android.util.Log.d("JupnpExtensions", "Callback type: ${callback.javaClass.simpleName}")
-    android.util.Log.d("JupnpExtensions", "Action: ${callback.actionInvocation?.action?.name}")
+    
+    
+    
     
     suspendCancellableCoroutine { continuation ->
-        android.util.Log.d("JupnpExtensions", "Creating wrapper callback...")
+        
         
         val startTime = System.currentTimeMillis()
         
         val originalCallback = object : ActionCallback(callback.actionInvocation) {
             override fun success(invocation: ActionInvocation<*>?) {
                 val duration = System.currentTimeMillis() - startTime
-                android.util.Log.d("JupnpExtensions", "Action successful after ${duration}ms, calling original callback success...")
+                
                 try {
                     // Call the original callback's success method if it has custom logic
                     callback.success(invocation)
-                    android.util.Log.d("JupnpExtensions", "Original callback success completed, resuming coroutine...")
+                    
                     continuation.resume(callback)
                 } catch (e: Exception) {
-                    android.util.Log.e("JupnpExtensions", "Exception in success callback", e)
+                    
                     continuation.resumeWithException(e)
                 }
             }
 
             override fun failure(invocation: ActionInvocation<*>?, response: UpnpResponse?, defaultMsg: String?) {
                 val duration = System.currentTimeMillis() - startTime
-                android.util.Log.e("JupnpExtensions", "Action failed after ${duration}ms: $defaultMsg")
+                
                 response?.let { resp ->
-                    android.util.Log.e("JupnpExtensions", "Response details: ${resp.responseDetails}")
-                    android.util.Log.e("JupnpExtensions", "Response message: ${resp.statusMessage}")
+                    
+                    
                 }
                 
                 try {
                     // Call the original callback's failure method if it has custom logic
                     callback.failure(invocation, response, defaultMsg)
-                    android.util.Log.d("JupnpExtensions", "Original callback failure completed, resuming with exception...")
+                    
                     val exception = RuntimeException(defaultMsg ?: "UPnP action failed")
                     continuation.resumeWithException(exception)
                 } catch (e: Exception) {
-                    android.util.Log.e("JupnpExtensions", "Exception in failure callback", e)
+                    
                     continuation.resumeWithException(e)
                 }
             }
         }
 
-        android.util.Log.d("JupnpExtensions", "Executing action with control point...")
+        
         try {
             execute(originalCallback)
-            android.util.Log.d("JupnpExtensions", "Action submitted to control point successfully")
+            
         } catch (e: Exception) {
-            android.util.Log.e("JupnpExtensions", "Failed to execute action", e)
+            
             continuation.resumeWithException(e)
             return@suspendCancellableCoroutine
         }
@@ -79,7 +79,7 @@ suspend fun <T : ActionCallback> ControlPoint.executeSuspending(
         continuation.invokeOnCancellation {
             // jupnp doesn't have direct cancellation, but we can log it
             val duration = System.currentTimeMillis() - startTime
-            android.util.Log.d("JupnpExtensions", "Coroutine was cancelled after ${duration}ms")
+            
         }
     }
 }
@@ -116,7 +116,7 @@ suspend fun ControlPoint.getPositionInfoSuspending(
         execute(callback)
 
         continuation.invokeOnCancellation {
-            android.util.Log.d("JupnpExtensions", "GetPositionInfo was cancelled")
+            
         }
     }
 }
@@ -153,7 +153,7 @@ suspend fun ControlPoint.getTransportInfoSuspending(
         execute(callback)
 
         continuation.invokeOnCancellation {
-            android.util.Log.d("JupnpExtensions", "GetTransportInfo was cancelled")
+            
         }
     }
 }
@@ -187,7 +187,7 @@ suspend fun ControlPoint.getVolumeSuspending(
         execute(callback)
 
         continuation.invokeOnCancellation {
-            android.util.Log.d("JupnpExtensions", "GetVolume was cancelled")
+            
         }
     }
 }
@@ -221,7 +221,7 @@ suspend fun ControlPoint.getMuteSuspending(
         execute(callback)
 
         continuation.invokeOnCancellation {
-            android.util.Log.d("JupnpExtensions", "GetMute was cancelled")
+            
         }
     }
 }

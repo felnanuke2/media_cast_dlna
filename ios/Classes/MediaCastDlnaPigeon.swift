@@ -73,44 +73,328 @@ enum TransportState: Int {
   case noMediaPresent = 4
 }
 
+/// Represents a Unique Device Name (UDN) following object calisthenics
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct DeviceUdn {
+  var value: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> DeviceUdn? {
+    let value = pigeonVar_list[0] as! String
+
+    return DeviceUdn(
+      value: value
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      value
+    ]
+  }
+}
+
+/// Volume level representation following object calisthenics
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct VolumeLevel {
+  var percentage: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> VolumeLevel? {
+    let percentage = pigeonVar_list[0] as! Int64
+
+    return VolumeLevel(
+      percentage: percentage
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      percentage
+    ]
+  }
+}
+
+/// Mute state representation
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct MuteState {
+  var isMuted: Bool
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> MuteState? {
+    let isMuted = pigeonVar_list[0] as! Bool
+
+    return MuteState(
+      isMuted: isMuted
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      isMuted
+    ]
+  }
+}
+
+/// Volume information combining level and mute state
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct VolumeInfo {
+  var level: VolumeLevel
+  var muteState: MuteState
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> VolumeInfo? {
+    let level = pigeonVar_list[0] as! VolumeLevel
+    let muteState = pigeonVar_list[1] as! MuteState
+
+    return VolumeInfo(
+      level: level,
+      muteState: muteState
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      level,
+      muteState,
+    ]
+  }
+}
+
+/// Represents a mute operation
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct MuteOperation {
+  var shouldMute: Bool
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> MuteOperation? {
+    let shouldMute = pigeonVar_list[0] as! Bool
+
+    return MuteOperation(
+      shouldMute: shouldMute
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      shouldMute
+    ]
+  }
+}
+
+/// Represents a position in time (seconds)
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct TimePosition {
+  var seconds: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> TimePosition? {
+    let seconds = pigeonVar_list[0] as! Int64
+
+    return TimePosition(
+      seconds: seconds
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      seconds
+    ]
+  }
+}
+
+/// Represents a duration in time (seconds)
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct TimeDuration {
+  var seconds: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> TimeDuration? {
+    let seconds = pigeonVar_list[0] as! Int64
+
+    return TimeDuration(
+      seconds: seconds
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      seconds
+    ]
+  }
+}
+
+/// Represents a URL following object calisthenics
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct Url {
+  var value: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> Url? {
+    let value = pigeonVar_list[0] as! String
+
+    return Url(
+      value: value
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      value
+    ]
+  }
+}
+
+/// Represents an IP address following object calisthenics
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct IpAddress {
+  var value: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> IpAddress? {
+    let value = pigeonVar_list[0] as! String
+
+    return IpAddress(
+      value: value
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      value
+    ]
+  }
+}
+
+/// Represents a network port following object calisthenics
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct NetworkPort {
+  var value: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> NetworkPort? {
+    let value = pigeonVar_list[0] as! Int64
+
+    return NetworkPort(
+      value: value
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      value
+    ]
+  }
+}
+
+/// Represents a discovery timeout following object calisthenics
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct DiscoveryTimeout {
+  var seconds: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> DiscoveryTimeout? {
+    let seconds = pigeonVar_list[0] as! Int64
+
+    return DiscoveryTimeout(
+      seconds: seconds
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      seconds
+    ]
+  }
+}
+
+/// Represents a search target for discovery
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct SearchTarget {
+  var target: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SearchTarget? {
+    let target = pigeonVar_list[0] as! String
+
+    return SearchTarget(
+      target: target
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      target
+    ]
+  }
+}
+
+/// Discovery options with descriptive classes
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct DiscoveryOptions {
+  var searchTarget: SearchTarget? = nil
+  var timeout: DiscoveryTimeout
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> DiscoveryOptions? {
+    let searchTarget: SearchTarget? = nilOrValue(pigeonVar_list[0])
+    let timeout = pigeonVar_list[1] as! DiscoveryTimeout
+
+    return DiscoveryOptions(
+      searchTarget: searchTarget,
+      timeout: timeout
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      searchTarget,
+      timeout,
+    ]
+  }
+}
+
 /// Represents a UPnP/DLNA device discovered on the network
 ///
 /// Generated class from Pigeon that represents data sent in messages.
 struct DlnaDevice {
-  /// Unique Device Name
-  var udn: String
-  /// Human-readable device name
+  var udn: DeviceUdn
   var friendlyName: String
-  /// Device type (e.g., MediaRenderer, MediaServer)
   var deviceType: String
-  /// Manufacturer name
   var manufacturerName: String
-  /// Model name
   var modelName: String
-  /// Device IP address
-  var ipAddress: String
-  /// Device port
-  var port: Int64
-  /// Optional model description
+  var ipAddress: IpAddress
+  var port: NetworkPort
   var modelDescription: String? = nil
-  /// Optional presentation URL
-  var presentationUrl: String? = nil
-  /// Optional icon URL
-  var iconUrl: String? = nil
+  var presentationUrl: Url? = nil
+  var iconUrl: Url? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> DlnaDevice? {
-    let udn = pigeonVar_list[0] as! String
+    let udn = pigeonVar_list[0] as! DeviceUdn
     let friendlyName = pigeonVar_list[1] as! String
     let deviceType = pigeonVar_list[2] as! String
     let manufacturerName = pigeonVar_list[3] as! String
     let modelName = pigeonVar_list[4] as! String
-    let ipAddress = pigeonVar_list[5] as! String
-    let port = pigeonVar_list[6] as! Int64
+    let ipAddress = pigeonVar_list[5] as! IpAddress
+    let port = pigeonVar_list[6] as! NetworkPort
     let modelDescription: String? = nilOrValue(pigeonVar_list[7])
-    let presentationUrl: String? = nilOrValue(pigeonVar_list[8])
-    let iconUrl: String? = nilOrValue(pigeonVar_list[9])
+    let presentationUrl: Url? = nilOrValue(pigeonVar_list[8])
+    let iconUrl: Url? = nilOrValue(pigeonVar_list[9])
 
     return DlnaDevice(
       udn: udn,
@@ -145,25 +429,20 @@ struct DlnaDevice {
 ///
 /// Generated class from Pigeon that represents data sent in messages.
 struct DlnaService {
-  /// Service type (e.g., AVTransport, RenderingControl, ContentDirectory)
   var serviceType: String
-  /// Service ID
   var serviceId: String
-  /// Service Control Protocol Description URL
-  var scpdUrl: String
-  /// Control URL for actions
-  var controlUrl: String
-  /// Event subscription URL
-  var eventSubUrl: String
+  var scpdUrl: Url
+  var controlUrl: Url
+  var eventSubUrl: Url
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> DlnaService? {
     let serviceType = pigeonVar_list[0] as! String
     let serviceId = pigeonVar_list[1] as! String
-    let scpdUrl = pigeonVar_list[2] as! String
-    let controlUrl = pigeonVar_list[3] as! String
-    let eventSubUrl = pigeonVar_list[4] as! String
+    let scpdUrl = pigeonVar_list[2] as! Url
+    let controlUrl = pigeonVar_list[3] as! Url
+    let eventSubUrl = pigeonVar_list[4] as! Url
 
     return DlnaService(
       serviceType: serviceType,
@@ -184,81 +463,22 @@ struct DlnaService {
   }
 }
 
-/// Represents media content that can be played
-///
-/// Generated class from Pigeon that represents data sent in messages.
-struct MediaItem {
-  /// Content ID
-  var id: String
-  /// Content title
-  var title: String
-  /// Content URI
-  var uri: String
-  /// MIME type
-  var mimeType: String
-  /// Structured metadata (audio, video, image)
-  var metadata: MediaMetadata? = nil
-  /// File size in bytes
-  var size: Int64? = nil
-  /// Available subtitle tracks
-  var subtitleTracks: [SubtitleTrack]? = nil
-
-
-  // swift-format-ignore: AlwaysUseLowerCamelCase
-  static func fromList(_ pigeonVar_list: [Any?]) -> MediaItem? {
-    let id = pigeonVar_list[0] as! String
-    let title = pigeonVar_list[1] as! String
-    let uri = pigeonVar_list[2] as! String
-    let mimeType = pigeonVar_list[3] as! String
-    let metadata: MediaMetadata? = nilOrValue(pigeonVar_list[4])
-    let size: Int64? = nilOrValue(pigeonVar_list[5])
-    let subtitleTracks: [SubtitleTrack]? = nilOrValue(pigeonVar_list[6])
-
-    return MediaItem(
-      id: id,
-      title: title,
-      uri: uri,
-      mimeType: mimeType,
-      metadata: metadata,
-      size: size,
-      subtitleTracks: subtitleTracks
-    )
-  }
-  func toList() -> [Any?] {
-    return [
-      id,
-      title,
-      uri,
-      mimeType,
-      metadata,
-      size,
-      subtitleTracks,
-    ]
-  }
-}
-
 /// Represents a subtitle track
 ///
 /// Generated class from Pigeon that represents data sent in messages.
 struct SubtitleTrack {
-  /// Track ID
   var id: String
-  /// Subtitle file URI
-  var uri: String
-  /// MIME type (text/srt, text/vtt, etc.)
+  var uri: Url
   var mimeType: String
-  /// Language code (ISO 639-1)
   var language: String
-  /// Human-readable title
   var title: String? = nil
-  /// Whether this is the default subtitle track
   var isDefault: Bool? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> SubtitleTrack? {
     let id = pigeonVar_list[0] as! String
-    let uri = pigeonVar_list[1] as! String
+    let uri = pigeonVar_list[1] as! Url
     let mimeType = pigeonVar_list[2] as! String
     let language = pigeonVar_list[3] as! String
     let title: String? = nilOrValue(pigeonVar_list[4])
@@ -300,8 +520,8 @@ struct AudioMetadata: MediaMetadata {
   var artist: String? = nil
   var album: String? = nil
   var genre: String? = nil
-  var duration: Int64? = nil
-  var albumArtUri: String? = nil
+  var duration: TimeDuration? = nil
+  var albumArtUri: Url? = nil
   var description: String? = nil
   var originalTrackNumber: Int64? = nil
   var upnpClass: String? = nil
@@ -313,8 +533,8 @@ struct AudioMetadata: MediaMetadata {
     let artist: String? = nilOrValue(pigeonVar_list[0])
     let album: String? = nilOrValue(pigeonVar_list[1])
     let genre: String? = nilOrValue(pigeonVar_list[2])
-    let duration: Int64? = nilOrValue(pigeonVar_list[3])
-    let albumArtUri: String? = nilOrValue(pigeonVar_list[4])
+    let duration: TimeDuration? = nilOrValue(pigeonVar_list[3])
+    let albumArtUri: Url? = nilOrValue(pigeonVar_list[4])
     let description: String? = nilOrValue(pigeonVar_list[5])
     let originalTrackNumber: Int64? = nilOrValue(pigeonVar_list[6])
     let upnpClass: String? = nilOrValue(pigeonVar_list[7])
@@ -352,9 +572,9 @@ struct AudioMetadata: MediaMetadata {
 /// Generated class from Pigeon that represents data sent in messages.
 struct VideoMetadata: MediaMetadata {
   var resolution: String? = nil
-  var duration: Int64? = nil
+  var duration: TimeDuration? = nil
   var description: String? = nil
-  var thumbnailUri: String? = nil
+  var thumbnailUri: Url? = nil
   var genre: String? = nil
   var upnpClass: String? = nil
   var bitrate: Int64? = nil
@@ -364,9 +584,9 @@ struct VideoMetadata: MediaMetadata {
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> VideoMetadata? {
     let resolution: String? = nilOrValue(pigeonVar_list[0])
-    let duration: Int64? = nilOrValue(pigeonVar_list[1])
+    let duration: TimeDuration? = nilOrValue(pigeonVar_list[1])
     let description: String? = nilOrValue(pigeonVar_list[2])
-    let thumbnailUri: String? = nilOrValue(pigeonVar_list[3])
+    let thumbnailUri: Url? = nilOrValue(pigeonVar_list[3])
     let genre: String? = nilOrValue(pigeonVar_list[4])
     let upnpClass: String? = nilOrValue(pigeonVar_list[5])
     let bitrate: Int64? = nilOrValue(pigeonVar_list[6])
@@ -403,7 +623,7 @@ struct VideoMetadata: MediaMetadata {
 struct ImageMetadata: MediaMetadata {
   var resolution: String? = nil
   var description: String? = nil
-  var thumbnailUri: String? = nil
+  var thumbnailUri: Url? = nil
   var date: String? = nil
   var upnpClass: String? = nil
   var title: String? = nil
@@ -413,7 +633,7 @@ struct ImageMetadata: MediaMetadata {
   static func fromList(_ pigeonVar_list: [Any?]) -> ImageMetadata? {
     let resolution: String? = nilOrValue(pigeonVar_list[0])
     let description: String? = nilOrValue(pigeonVar_list[1])
-    let thumbnailUri: String? = nilOrValue(pigeonVar_list[2])
+    let thumbnailUri: Url? = nilOrValue(pigeonVar_list[2])
     let date: String? = nilOrValue(pigeonVar_list[3])
     let upnpClass: String? = nilOrValue(pigeonVar_list[4])
     let title: String? = nilOrValue(pigeonVar_list[5])
@@ -439,27 +659,68 @@ struct ImageMetadata: MediaMetadata {
   }
 }
 
-/// Represents playback information
+/// Represents media content that can be played
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct MediaItem {
+  var id: String
+  var title: String
+  var uri: Url
+  var mimeType: String
+  var metadata: MediaMetadata? = nil
+  var size: Int64? = nil
+  var subtitleTracks: [SubtitleTrack]? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> MediaItem? {
+    let id = pigeonVar_list[0] as! String
+    let title = pigeonVar_list[1] as! String
+    let uri = pigeonVar_list[2] as! Url
+    let mimeType = pigeonVar_list[3] as! String
+    let metadata: MediaMetadata? = nilOrValue(pigeonVar_list[4])
+    let size: Int64? = nilOrValue(pigeonVar_list[5])
+    let subtitleTracks: [SubtitleTrack]? = nilOrValue(pigeonVar_list[6])
+
+    return MediaItem(
+      id: id,
+      title: title,
+      uri: uri,
+      mimeType: mimeType,
+      metadata: metadata,
+      size: size,
+      subtitleTracks: subtitleTracks
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      id,
+      title,
+      uri,
+      mimeType,
+      metadata,
+      size,
+      subtitleTracks,
+    ]
+  }
+}
+
+/// Represents playback information with descriptive time classes
 ///
 /// Generated class from Pigeon that represents data sent in messages.
 struct PlaybackInfo {
-  /// Current transport state
   var state: TransportState
-  /// Current position in seconds
-  var position: Int64
-  /// Total duration in seconds
-  var duration: Int64
-  /// Current track URI
+  var position: TimePosition
+  var duration: TimeDuration
   var currentTrackUri: String? = nil
-  /// Current track metadata
   var currentTrackMetadata: MediaMetadata? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
   static func fromList(_ pigeonVar_list: [Any?]) -> PlaybackInfo? {
     let state = pigeonVar_list[0] as! TransportState
-    let position = pigeonVar_list[1] as! Int64
-    let duration = pigeonVar_list[2] as! Int64
+    let position = pigeonVar_list[1] as! TimePosition
+    let duration = pigeonVar_list[2] as! TimeDuration
     let currentTrackUri: String? = nilOrValue(pigeonVar_list[3])
     let currentTrackMetadata: MediaMetadata? = nilOrValue(pigeonVar_list[4])
 
@@ -482,62 +743,6 @@ struct PlaybackInfo {
   }
 }
 
-/// Volume information
-///
-/// Generated class from Pigeon that represents data sent in messages.
-struct VolumeInfo {
-  /// Volume level (0-100)
-  var volume: Int64
-  /// Whether audio is muted
-  var muted: Bool
-
-
-  // swift-format-ignore: AlwaysUseLowerCamelCase
-  static func fromList(_ pigeonVar_list: [Any?]) -> VolumeInfo? {
-    let volume = pigeonVar_list[0] as! Int64
-    let muted = pigeonVar_list[1] as! Bool
-
-    return VolumeInfo(
-      volume: volume,
-      muted: muted
-    )
-  }
-  func toList() -> [Any?] {
-    return [
-      volume,
-      muted,
-    ]
-  }
-}
-
-/// Discovery options
-///
-/// Generated class from Pigeon that represents data sent in messages.
-struct DiscoveryOptions {
-  /// Search target (ST header) - can be "upnp:rootdevice", "ssdp:all", or specific device type
-  var searchTarget: String? = nil
-  /// Discovery timeout in seconds
-  var timeout: Int64
-
-
-  // swift-format-ignore: AlwaysUseLowerCamelCase
-  static func fromList(_ pigeonVar_list: [Any?]) -> DiscoveryOptions? {
-    let searchTarget: String? = nilOrValue(pigeonVar_list[0])
-    let timeout = pigeonVar_list[1] as! Int64
-
-    return DiscoveryOptions(
-      searchTarget: searchTarget,
-      timeout: timeout
-    )
-  }
-  func toList() -> [Any?] {
-    return [
-      searchTarget,
-      timeout,
-    ]
-  }
-}
-
 private class MediaCastDlnaPigeonPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
@@ -548,25 +753,47 @@ private class MediaCastDlnaPigeonPigeonCodecReader: FlutterStandardReader {
       }
       return nil
     case 130:
-      return DlnaDevice.fromList(self.readValue() as! [Any?])
+      return DeviceUdn.fromList(self.readValue() as! [Any?])
     case 131:
-      return DlnaService.fromList(self.readValue() as! [Any?])
+      return VolumeLevel.fromList(self.readValue() as! [Any?])
     case 132:
-      return MediaItem.fromList(self.readValue() as! [Any?])
+      return MuteState.fromList(self.readValue() as! [Any?])
     case 133:
-      return SubtitleTrack.fromList(self.readValue() as! [Any?])
-    case 134:
-      return AudioMetadata.fromList(self.readValue() as! [Any?])
-    case 135:
-      return VideoMetadata.fromList(self.readValue() as! [Any?])
-    case 136:
-      return ImageMetadata.fromList(self.readValue() as! [Any?])
-    case 137:
-      return PlaybackInfo.fromList(self.readValue() as! [Any?])
-    case 138:
       return VolumeInfo.fromList(self.readValue() as! [Any?])
+    case 134:
+      return MuteOperation.fromList(self.readValue() as! [Any?])
+    case 135:
+      return TimePosition.fromList(self.readValue() as! [Any?])
+    case 136:
+      return TimeDuration.fromList(self.readValue() as! [Any?])
+    case 137:
+      return Url.fromList(self.readValue() as! [Any?])
+    case 138:
+      return IpAddress.fromList(self.readValue() as! [Any?])
     case 139:
+      return NetworkPort.fromList(self.readValue() as! [Any?])
+    case 140:
+      return DiscoveryTimeout.fromList(self.readValue() as! [Any?])
+    case 141:
+      return SearchTarget.fromList(self.readValue() as! [Any?])
+    case 142:
       return DiscoveryOptions.fromList(self.readValue() as! [Any?])
+    case 143:
+      return DlnaDevice.fromList(self.readValue() as! [Any?])
+    case 144:
+      return DlnaService.fromList(self.readValue() as! [Any?])
+    case 145:
+      return SubtitleTrack.fromList(self.readValue() as! [Any?])
+    case 146:
+      return AudioMetadata.fromList(self.readValue() as! [Any?])
+    case 147:
+      return VideoMetadata.fromList(self.readValue() as! [Any?])
+    case 148:
+      return ImageMetadata.fromList(self.readValue() as! [Any?])
+    case 149:
+      return MediaItem.fromList(self.readValue() as! [Any?])
+    case 150:
+      return PlaybackInfo.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
     }
@@ -578,35 +805,68 @@ private class MediaCastDlnaPigeonPigeonCodecWriter: FlutterStandardWriter {
     if let value = value as? TransportState {
       super.writeByte(129)
       super.writeValue(value.rawValue)
-    } else if let value = value as? DlnaDevice {
+    } else if let value = value as? DeviceUdn {
       super.writeByte(130)
       super.writeValue(value.toList())
-    } else if let value = value as? DlnaService {
+    } else if let value = value as? VolumeLevel {
       super.writeByte(131)
       super.writeValue(value.toList())
-    } else if let value = value as? MediaItem {
+    } else if let value = value as? MuteState {
       super.writeByte(132)
       super.writeValue(value.toList())
-    } else if let value = value as? SubtitleTrack {
+    } else if let value = value as? VolumeInfo {
       super.writeByte(133)
       super.writeValue(value.toList())
-    } else if let value = value as? AudioMetadata {
+    } else if let value = value as? MuteOperation {
       super.writeByte(134)
       super.writeValue(value.toList())
-    } else if let value = value as? VideoMetadata {
+    } else if let value = value as? TimePosition {
       super.writeByte(135)
       super.writeValue(value.toList())
-    } else if let value = value as? ImageMetadata {
+    } else if let value = value as? TimeDuration {
       super.writeByte(136)
       super.writeValue(value.toList())
-    } else if let value = value as? PlaybackInfo {
+    } else if let value = value as? Url {
       super.writeByte(137)
       super.writeValue(value.toList())
-    } else if let value = value as? VolumeInfo {
+    } else if let value = value as? IpAddress {
       super.writeByte(138)
       super.writeValue(value.toList())
-    } else if let value = value as? DiscoveryOptions {
+    } else if let value = value as? NetworkPort {
       super.writeByte(139)
+      super.writeValue(value.toList())
+    } else if let value = value as? DiscoveryTimeout {
+      super.writeByte(140)
+      super.writeValue(value.toList())
+    } else if let value = value as? SearchTarget {
+      super.writeByte(141)
+      super.writeValue(value.toList())
+    } else if let value = value as? DiscoveryOptions {
+      super.writeByte(142)
+      super.writeValue(value.toList())
+    } else if let value = value as? DlnaDevice {
+      super.writeByte(143)
+      super.writeValue(value.toList())
+    } else if let value = value as? DlnaService {
+      super.writeByte(144)
+      super.writeValue(value.toList())
+    } else if let value = value as? SubtitleTrack {
+      super.writeByte(145)
+      super.writeValue(value.toList())
+    } else if let value = value as? AudioMetadata {
+      super.writeByte(146)
+      super.writeValue(value.toList())
+    } else if let value = value as? VideoMetadata {
+      super.writeByte(147)
+      super.writeValue(value.toList())
+    } else if let value = value as? ImageMetadata {
+      super.writeByte(148)
+      super.writeValue(value.toList())
+    } else if let value = value as? MediaItem {
+      super.writeByte(149)
+      super.writeValue(value.toList())
+    } else if let value = value as? PlaybackInfo {
+      super.writeByte(150)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)
@@ -633,76 +893,32 @@ class MediaCastDlnaPigeonPigeonCodec: FlutterStandardMessageCodec, @unchecked Se
 ///
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol MediaCastDlnaApi {
-  /// Initialize the UPnP service and prepare for device discovery/control
-  /// This must be called before any other operations
-  func initializeUpnpService() throws
-  /// Check if UPnP service is initialized and ready
-  func isUpnpServiceInitialized() throws -> Bool
-  /// Shutdown and cleanup UPnP service
-  func shutdownUpnpService() throws
-  /// Start UPnP/DLNA device discovery
-  /// Returns immediately, devices are reported via the DeviceDiscoveryApi callback
-  /// Note: initializeUpnpService() must be called first
-  func startDiscovery(options: DiscoveryOptions) throws
-  /// Stop device discovery
-  func stopDiscovery() throws
-  /// Get list of currently discovered devices
-  func getDiscoveredDevices() throws -> [DlnaDevice]
-  /// Refresh device information
-  func refreshDevice(deviceUdn: String) throws -> DlnaDevice?
-  /// Get services available on a device
-  func getDeviceServices(deviceUdn: String) throws -> [DlnaService]
-  /// Check if device supports a specific service type
-  func hasService(deviceUdn: String, serviceType: String) throws -> Bool
-  /// Browse content directory of a media server
-  /// parentId: ID of the container to browse (use "0" for root)
-  /// startIndex: Starting index for pagination
-  /// requestCount: Number of items to request
-  func browseContentDirectory(deviceUdn: String, parentId: String, startIndex: Int64, requestCount: Int64) throws -> [MediaItem]
-  /// Search content directory
-  func searchContentDirectory(deviceUdn: String, containerId: String, searchCriteria: String, startIndex: Int64, requestCount: Int64) throws -> [MediaItem]
-  /// Set the media URI to play on a renderer
-  func setMediaUri(deviceUdn: String, uri: String, metadata: MediaMetadata, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Set the media URI with subtitle support
-  func setMediaUriWithSubtitles(deviceUdn: String, uri: String, metadata: MediaMetadata, subtitleTracks: [SubtitleTrack], completion: @escaping (Result<Void, Error>) -> Void)
-  /// Check if device supports subtitle track control
-  func supportsSubtitleControl(deviceUdn: String) throws -> Bool
-  /// Enable/disable subtitle track
-  func setSubtitleTrack(deviceUdn: String, subtitleTrackId: String?, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Get available subtitle tracks for current media
-  func getAvailableSubtitleTracks(deviceUdn: String) throws -> [SubtitleTrack]
-  /// Get currently active subtitle track
-  func getCurrentSubtitleTrack(deviceUdn: String) throws -> SubtitleTrack?
-  /// Start playback
-  func play(deviceUdn: String, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Pause playback
-  func pause(deviceUdn: String, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Stop playback
-  func stop(deviceUdn: String, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Seek to specific position (in seconds)
-  func seek(deviceUdn: String, positionSeconds: Int64, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Skip to next track
-  func next(deviceUdn: String, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Skip to previous track
-  func previous(deviceUdn: String, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Set volume (0-100)
-  func setVolume(deviceUdn: String, volume: Int64, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Get current volume info
-  func getVolumeInfo(deviceUdn: String) throws -> VolumeInfo
-  /// Mute/unmute audio
-  func setMute(deviceUdn: String, muted: Bool, completion: @escaping (Result<Void, Error>) -> Void)
-  /// Get current playback information
-  func getPlaybackInfo(deviceUdn: String) throws -> PlaybackInfo
-  /// Get current position info
-  func getCurrentPosition(deviceUdn: String) throws -> Int64
-  /// Get transport state
-  func getTransportState(deviceUdn: String) throws -> TransportState
-  /// Get platform version
-  func getPlatformVersion() throws -> String
-  /// Check if UPnP is available on the platform
-  func isUpnpAvailable() throws -> Bool
-  /// Get network interface information
-  func getNetworkInterfaces() throws -> [String]
+  func initializeUpnpService(completion: @escaping (Result<Void, Error>) -> Void)
+  func isUpnpServiceInitialized(completion: @escaping (Result<Bool, Error>) -> Void)
+  func shutdownUpnpService(completion: @escaping (Result<Void, Error>) -> Void)
+  func startDiscovery(options: DiscoveryOptions, completion: @escaping (Result<Void, Error>) -> Void)
+  func stopDiscovery(completion: @escaping (Result<Void, Error>) -> Void)
+  func getDiscoveredDevices(completion: @escaping (Result<[DlnaDevice], Error>) -> Void)
+  func refreshDevice(deviceUdn: DeviceUdn, completion: @escaping (Result<DlnaDevice?, Error>) -> Void)
+  func getDeviceServices(deviceUdn: DeviceUdn, completion: @escaping (Result<[DlnaService], Error>) -> Void)
+  func hasService(deviceUdn: DeviceUdn, serviceType: String, completion: @escaping (Result<Bool, Error>) -> Void)
+  func isDeviceOnline(deviceUdn: DeviceUdn, completion: @escaping (Result<Bool, Error>) -> Void)
+  func setMediaUri(deviceUdn: DeviceUdn, uri: Url, metadata: MediaMetadata, completion: @escaping (Result<Void, Error>) -> Void)
+  func setMediaUriWithSubtitles(deviceUdn: DeviceUdn, uri: Url, metadata: MediaMetadata, subtitleTracks: [SubtitleTrack], completion: @escaping (Result<Void, Error>) -> Void)
+  func supportsSubtitleControl(deviceUdn: DeviceUdn, completion: @escaping (Result<Bool, Error>) -> Void)
+  func setSubtitleTrack(deviceUdn: DeviceUdn, subtitleTrackId: String?, completion: @escaping (Result<Void, Error>) -> Void)
+  func getAvailableSubtitleTracks(deviceUdn: DeviceUdn, completion: @escaping (Result<[SubtitleTrack], Error>) -> Void)
+  func getCurrentSubtitleTrack(deviceUdn: DeviceUdn, completion: @escaping (Result<SubtitleTrack?, Error>) -> Void)
+  func play(deviceUdn: DeviceUdn, completion: @escaping (Result<Void, Error>) -> Void)
+  func pause(deviceUdn: DeviceUdn, completion: @escaping (Result<Void, Error>) -> Void)
+  func stop(deviceUdn: DeviceUdn, completion: @escaping (Result<Void, Error>) -> Void)
+  func seek(deviceUdn: DeviceUdn, position: TimePosition, completion: @escaping (Result<Void, Error>) -> Void)
+  func setVolume(deviceUdn: DeviceUdn, volumeLevel: VolumeLevel, completion: @escaping (Result<Void, Error>) -> Void)
+  func getVolumeInfo(deviceUdn: DeviceUdn, completion: @escaping (Result<VolumeInfo, Error>) -> Void)
+  func setMute(deviceUdn: DeviceUdn, muteOperation: MuteOperation, completion: @escaping (Result<Void, Error>) -> Void)
+  func getPlaybackInfo(deviceUdn: DeviceUdn, completion: @escaping (Result<PlaybackInfo, Error>) -> Void)
+  func getCurrentPosition(deviceUdn: DeviceUdn, completion: @escaping (Result<TimePosition, Error>) -> Void)
+  func getTransportState(deviceUdn: DeviceUdn, completion: @escaping (Result<TransportState, Error>) -> Void)
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -711,193 +927,173 @@ class MediaCastDlnaApiSetup {
   /// Sets up an instance of `MediaCastDlnaApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: MediaCastDlnaApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
-    /// Initialize the UPnP service and prepare for device discovery/control
-    /// This must be called before any other operations
     let initializeUpnpServiceChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.initializeUpnpService\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       initializeUpnpServiceChannel.setMessageHandler { _, reply in
-        do {
-          try api.initializeUpnpService()
-          reply(wrapResult(nil))
-        } catch {
-          reply(wrapError(error))
+        api.initializeUpnpService { result in
+          switch result {
+          case .success:
+            reply(wrapResult(nil))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       initializeUpnpServiceChannel.setMessageHandler(nil)
     }
-    /// Check if UPnP service is initialized and ready
     let isUpnpServiceInitializedChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isUpnpServiceInitialized\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       isUpnpServiceInitializedChannel.setMessageHandler { _, reply in
-        do {
-          let result = try api.isUpnpServiceInitialized()
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        api.isUpnpServiceInitialized { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       isUpnpServiceInitializedChannel.setMessageHandler(nil)
     }
-    /// Shutdown and cleanup UPnP service
     let shutdownUpnpServiceChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.shutdownUpnpService\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       shutdownUpnpServiceChannel.setMessageHandler { _, reply in
-        do {
-          try api.shutdownUpnpService()
-          reply(wrapResult(nil))
-        } catch {
-          reply(wrapError(error))
+        api.shutdownUpnpService { result in
+          switch result {
+          case .success:
+            reply(wrapResult(nil))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       shutdownUpnpServiceChannel.setMessageHandler(nil)
     }
-    /// Start UPnP/DLNA device discovery
-    /// Returns immediately, devices are reported via the DeviceDiscoveryApi callback
-    /// Note: initializeUpnpService() must be called first
     let startDiscoveryChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.startDiscovery\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       startDiscoveryChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
         let optionsArg = args[0] as! DiscoveryOptions
-        do {
-          try api.startDiscovery(options: optionsArg)
-          reply(wrapResult(nil))
-        } catch {
-          reply(wrapError(error))
+        api.startDiscovery(options: optionsArg) { result in
+          switch result {
+          case .success:
+            reply(wrapResult(nil))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       startDiscoveryChannel.setMessageHandler(nil)
     }
-    /// Stop device discovery
     let stopDiscoveryChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.stopDiscovery\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       stopDiscoveryChannel.setMessageHandler { _, reply in
-        do {
-          try api.stopDiscovery()
-          reply(wrapResult(nil))
-        } catch {
-          reply(wrapError(error))
+        api.stopDiscovery { result in
+          switch result {
+          case .success:
+            reply(wrapResult(nil))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       stopDiscoveryChannel.setMessageHandler(nil)
     }
-    /// Get list of currently discovered devices
     let getDiscoveredDevicesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDiscoveredDevices\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getDiscoveredDevicesChannel.setMessageHandler { _, reply in
-        do {
-          let result = try api.getDiscoveredDevices()
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        api.getDiscoveredDevices { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       getDiscoveredDevicesChannel.setMessageHandler(nil)
     }
-    /// Refresh device information
     let refreshDeviceChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.refreshDevice\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       refreshDeviceChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.refreshDevice(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.refreshDevice(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       refreshDeviceChannel.setMessageHandler(nil)
     }
-    /// Get services available on a device
     let getDeviceServicesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDeviceServices\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getDeviceServicesChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.getDeviceServices(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.getDeviceServices(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       getDeviceServicesChannel.setMessageHandler(nil)
     }
-    /// Check if device supports a specific service type
     let hasServiceChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.hasService\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       hasServiceChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
+        let deviceUdnArg = args[0] as! DeviceUdn
         let serviceTypeArg = args[1] as! String
-        do {
-          let result = try api.hasService(deviceUdn: deviceUdnArg, serviceType: serviceTypeArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        api.hasService(deviceUdn: deviceUdnArg, serviceType: serviceTypeArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       hasServiceChannel.setMessageHandler(nil)
     }
-    /// Browse content directory of a media server
-    /// parentId: ID of the container to browse (use "0" for root)
-    /// startIndex: Starting index for pagination
-    /// requestCount: Number of items to request
-    let browseContentDirectoryChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.browseContentDirectory\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    let isDeviceOnlineChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isDeviceOnline\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
-      browseContentDirectoryChannel.setMessageHandler { message, reply in
+      isDeviceOnlineChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        let parentIdArg = args[1] as! String
-        let startIndexArg = args[2] as! Int64
-        let requestCountArg = args[3] as! Int64
-        do {
-          let result = try api.browseContentDirectory(deviceUdn: deviceUdnArg, parentId: parentIdArg, startIndex: startIndexArg, requestCount: requestCountArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.isDeviceOnline(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
-      browseContentDirectoryChannel.setMessageHandler(nil)
+      isDeviceOnlineChannel.setMessageHandler(nil)
     }
-    /// Search content directory
-    let searchContentDirectoryChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.searchContentDirectory\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      searchContentDirectoryChannel.setMessageHandler { message, reply in
-        let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        let containerIdArg = args[1] as! String
-        let searchCriteriaArg = args[2] as! String
-        let startIndexArg = args[3] as! Int64
-        let requestCountArg = args[4] as! Int64
-        do {
-          let result = try api.searchContentDirectory(deviceUdn: deviceUdnArg, containerId: containerIdArg, searchCriteria: searchCriteriaArg, startIndex: startIndexArg, requestCount: requestCountArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
-        }
-      }
-    } else {
-      searchContentDirectoryChannel.setMessageHandler(nil)
-    }
-    /// Set the media URI to play on a renderer
     let setMediaUriChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMediaUri\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setMediaUriChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        let uriArg = args[1] as! String
+        let deviceUdnArg = args[0] as! DeviceUdn
+        let uriArg = args[1] as! Url
         let metadataArg = args[2] as! MediaMetadata
         api.setMediaUri(deviceUdn: deviceUdnArg, uri: uriArg, metadata: metadataArg) { result in
           switch result {
@@ -911,13 +1107,12 @@ class MediaCastDlnaApiSetup {
     } else {
       setMediaUriChannel.setMessageHandler(nil)
     }
-    /// Set the media URI with subtitle support
     let setMediaUriWithSubtitlesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMediaUriWithSubtitles\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setMediaUriWithSubtitlesChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        let uriArg = args[1] as! String
+        let deviceUdnArg = args[0] as! DeviceUdn
+        let uriArg = args[1] as! Url
         let metadataArg = args[2] as! MediaMetadata
         let subtitleTracksArg = args[3] as! [SubtitleTrack]
         api.setMediaUriWithSubtitles(deviceUdn: deviceUdnArg, uri: uriArg, metadata: metadataArg, subtitleTracks: subtitleTracksArg) { result in
@@ -932,28 +1127,28 @@ class MediaCastDlnaApiSetup {
     } else {
       setMediaUriWithSubtitlesChannel.setMessageHandler(nil)
     }
-    /// Check if device supports subtitle track control
     let supportsSubtitleControlChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.supportsSubtitleControl\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       supportsSubtitleControlChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.supportsSubtitleControl(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.supportsSubtitleControl(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       supportsSubtitleControlChannel.setMessageHandler(nil)
     }
-    /// Enable/disable subtitle track
     let setSubtitleTrackChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setSubtitleTrack\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setSubtitleTrackChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
+        let deviceUdnArg = args[0] as! DeviceUdn
         let subtitleTrackIdArg: String? = nilOrValue(args[1])
         api.setSubtitleTrack(deviceUdn: deviceUdnArg, subtitleTrackId: subtitleTrackIdArg) { result in
           switch result {
@@ -967,44 +1162,45 @@ class MediaCastDlnaApiSetup {
     } else {
       setSubtitleTrackChannel.setMessageHandler(nil)
     }
-    /// Get available subtitle tracks for current media
     let getAvailableSubtitleTracksChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getAvailableSubtitleTracks\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getAvailableSubtitleTracksChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.getAvailableSubtitleTracks(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.getAvailableSubtitleTracks(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       getAvailableSubtitleTracksChannel.setMessageHandler(nil)
     }
-    /// Get currently active subtitle track
     let getCurrentSubtitleTrackChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getCurrentSubtitleTrack\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getCurrentSubtitleTrackChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.getCurrentSubtitleTrack(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.getCurrentSubtitleTrack(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       getCurrentSubtitleTrackChannel.setMessageHandler(nil)
     }
-    /// Start playback
     let playChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.play\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       playChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
+        let deviceUdnArg = args[0] as! DeviceUdn
         api.play(deviceUdn: deviceUdnArg) { result in
           switch result {
           case .success:
@@ -1017,12 +1213,11 @@ class MediaCastDlnaApiSetup {
     } else {
       playChannel.setMessageHandler(nil)
     }
-    /// Pause playback
     let pauseChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.pause\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       pauseChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
+        let deviceUdnArg = args[0] as! DeviceUdn
         api.pause(deviceUdn: deviceUdnArg) { result in
           switch result {
           case .success:
@@ -1035,12 +1230,11 @@ class MediaCastDlnaApiSetup {
     } else {
       pauseChannel.setMessageHandler(nil)
     }
-    /// Stop playback
     let stopChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.stop\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       stopChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
+        let deviceUdnArg = args[0] as! DeviceUdn
         api.stop(deviceUdn: deviceUdnArg) { result in
           switch result {
           case .success:
@@ -1053,14 +1247,13 @@ class MediaCastDlnaApiSetup {
     } else {
       stopChannel.setMessageHandler(nil)
     }
-    /// Seek to specific position (in seconds)
     let seekChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.seek\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       seekChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        let positionSecondsArg = args[1] as! Int64
-        api.seek(deviceUdn: deviceUdnArg, positionSeconds: positionSecondsArg) { result in
+        let deviceUdnArg = args[0] as! DeviceUdn
+        let positionArg = args[1] as! TimePosition
+        api.seek(deviceUdn: deviceUdnArg, position: positionArg) { result in
           switch result {
           case .success:
             reply(wrapResult(nil))
@@ -1072,50 +1265,13 @@ class MediaCastDlnaApiSetup {
     } else {
       seekChannel.setMessageHandler(nil)
     }
-    /// Skip to next track
-    let nextChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.next\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      nextChannel.setMessageHandler { message, reply in
-        let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        api.next(deviceUdn: deviceUdnArg) { result in
-          switch result {
-          case .success:
-            reply(wrapResult(nil))
-          case .failure(let error):
-            reply(wrapError(error))
-          }
-        }
-      }
-    } else {
-      nextChannel.setMessageHandler(nil)
-    }
-    /// Skip to previous track
-    let previousChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.previous\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      previousChannel.setMessageHandler { message, reply in
-        let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        api.previous(deviceUdn: deviceUdnArg) { result in
-          switch result {
-          case .success:
-            reply(wrapResult(nil))
-          case .failure(let error):
-            reply(wrapError(error))
-          }
-        }
-      }
-    } else {
-      previousChannel.setMessageHandler(nil)
-    }
-    /// Set volume (0-100)
     let setVolumeChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setVolume\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setVolumeChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        let volumeArg = args[1] as! Int64
-        api.setVolume(deviceUdn: deviceUdnArg, volume: volumeArg) { result in
+        let deviceUdnArg = args[0] as! DeviceUdn
+        let volumeLevelArg = args[1] as! VolumeLevel
+        api.setVolume(deviceUdn: deviceUdnArg, volumeLevel: volumeLevelArg) { result in
           switch result {
           case .success:
             reply(wrapResult(nil))
@@ -1127,30 +1283,30 @@ class MediaCastDlnaApiSetup {
     } else {
       setVolumeChannel.setMessageHandler(nil)
     }
-    /// Get current volume info
     let getVolumeInfoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getVolumeInfo\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getVolumeInfoChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.getVolumeInfo(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.getVolumeInfo(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       getVolumeInfoChannel.setMessageHandler(nil)
     }
-    /// Mute/unmute audio
     let setMuteChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMute\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setMuteChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        let mutedArg = args[1] as! Bool
-        api.setMute(deviceUdn: deviceUdnArg, muted: mutedArg) { result in
+        let deviceUdnArg = args[0] as! DeviceUdn
+        let muteOperationArg = args[1] as! MuteOperation
+        api.setMute(deviceUdn: deviceUdnArg, muteOperation: muteOperationArg) { result in
           switch result {
           case .success:
             reply(wrapResult(nil))
@@ -1162,95 +1318,56 @@ class MediaCastDlnaApiSetup {
     } else {
       setMuteChannel.setMessageHandler(nil)
     }
-    /// Get current playback information
     let getPlaybackInfoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getPlaybackInfo\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getPlaybackInfoChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.getPlaybackInfo(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.getPlaybackInfo(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       getPlaybackInfoChannel.setMessageHandler(nil)
     }
-    /// Get current position info
     let getCurrentPositionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getCurrentPosition\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getCurrentPositionChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.getCurrentPosition(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.getCurrentPosition(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       getCurrentPositionChannel.setMessageHandler(nil)
     }
-    /// Get transport state
     let getTransportStateChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getTransportState\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getTransportStateChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
-        let deviceUdnArg = args[0] as! String
-        do {
-          let result = try api.getTransportState(deviceUdn: deviceUdnArg)
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.getTransportState(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
         }
       }
     } else {
       getTransportStateChannel.setMessageHandler(nil)
-    }
-    /// Get platform version
-    let getPlatformVersionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getPlatformVersion\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      getPlatformVersionChannel.setMessageHandler { _, reply in
-        do {
-          let result = try api.getPlatformVersion()
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
-        }
-      }
-    } else {
-      getPlatformVersionChannel.setMessageHandler(nil)
-    }
-    /// Check if UPnP is available on the platform
-    let isUpnpAvailableChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isUpnpAvailable\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      isUpnpAvailableChannel.setMessageHandler { _, reply in
-        do {
-          let result = try api.isUpnpAvailable()
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
-        }
-      }
-    } else {
-      isUpnpAvailableChannel.setMessageHandler(nil)
-    }
-    /// Get network interface information
-    let getNetworkInterfacesChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getNetworkInterfaces\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      getNetworkInterfacesChannel.setMessageHandler { _, reply in
-        do {
-          let result = try api.getNetworkInterfaces()
-          reply(wrapResult(result))
-        } catch {
-          reply(wrapError(error))
-        }
-      }
-    } else {
-      getNetworkInterfacesChannel.setMessageHandler(nil)
     }
   }
 }

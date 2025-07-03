@@ -1,6 +1,9 @@
 package br.com.felnanuke2.media_cast_dlna.core
 
+import DeviceUdn
 import VolumeInfo
+import VolumeLevel
+import MuteState
 import android.util.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -31,10 +34,10 @@ class VolumeManager(upnpService: AndroidUpnpService?) : BaseManager(upnpService)
         
         val setVolumeCallback = object : ActionCallback(actionInvocation) {
             override fun success(invocation: ActionInvocation<*>?) {
-                Log.d("VolumeManager", "SetVolume successful for device $deviceUdn to $volume")
+                
             }
             override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                Log.e("VolumeManager", "SetVolume failed for device $deviceUdn: $defaultMsg")
+                
             }
         }
         
@@ -44,8 +47,8 @@ class VolumeManager(upnpService: AndroidUpnpService?) : BaseManager(upnpService)
     /**
      * Gets volume info using coroutines (runs volume and mute queries concurrently)
      */
-    suspend fun getVolumeInfo(deviceUdn: String): VolumeInfo = coroutineScope {
-        val (_, renderingControlService) = requireDeviceAndService(deviceUdn, "RenderingControl")
+    suspend fun getVolumeInfo(deviceUdn: DeviceUdn): VolumeInfo = coroutineScope {
+        val (_, renderingControlService) = requireDeviceAndService(deviceUdn.value, "RenderingControl")
         val controlPoint = requireUpnpService().controlPoint
         
         try {
@@ -60,10 +63,10 @@ class VolumeManager(upnpService: AndroidUpnpService?) : BaseManager(upnpService)
             val volume = volumeDeferred.await()
             val muted = muteDeferred.await()
             
-            VolumeInfo(volume.toLong(), muted)
+            VolumeInfo(VolumeLevel(volume.toLong()), MuteState(muted))
         } catch (e: Exception) {
-            Log.e("VolumeManager", "Failed to get volume info for device $deviceUdn", e)
-            VolumeInfo(0L, false)
+            
+            VolumeInfo(VolumeLevel(0), MuteState(false))
         }
     }
 
@@ -85,10 +88,10 @@ class VolumeManager(upnpService: AndroidUpnpService?) : BaseManager(upnpService)
         
         val setMuteCallback = object : ActionCallback(actionInvocation) {
             override fun success(invocation: ActionInvocation<*>?) {
-                Log.d("VolumeManager", "SetMute successful for device $deviceUdn to $muted")
+                
             }
             override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                Log.e("VolumeManager", "SetMute failed for device $deviceUdn: $defaultMsg")
+                
             }
         }
         

@@ -60,6 +60,14 @@ Add the following permissions to your `android/app/src/main/AndroidManifest.xml`
 
 ```dart
 import 'package:media_cast_dlna/media_cast_dlna.dart';
+
+// The main import gives you access to all classes:
+// - MediaCastDlnaApi (main API class)
+// - DlnaDevice, DeviceUdn, etc. (device classes)
+// - VolumeLevel, TimePosition, etc. (typed wrappers)
+// - VideoMetadata, AudioMetadata, etc. (metadata classes)
+// - TransportState, PlaybackInfo, etc. (state classes)
+// - DiscoveryOptions, SubtitleTrack, etc. (configuration classes)
 ```
 
 ## 🚀 What is Media Cast DLNA?
@@ -70,9 +78,8 @@ Media Cast DLNA is a comprehensive Flutter plugin that transforms your app into 
 
 - **🔍 Smart Device Discovery**: Automatically find DLNA/UPnP devices (TVs, speakers, media players)
 - **📱 Media Renderer Control**: Full playback control with play, pause, stop, seek, volume management
-- **📂 Media Server Integration**: Browse and search content from DLNA media servers
 - **🎬 Advanced Subtitle Support**: Handle subtitle tracks for enhanced viewing experience
-- **⚡ Real-time Events**: Get instant updates on playback state, position, and volume changes
+- **⚡ Real-time Status Monitoring**: Get instant updates on playback state, position, and volume changes
 - **🔧 Native Performance**: Powered by Pigeon-generated native interfaces for optimal performance
 
 ## 🏠 Unlocking Your Home Network: A Look at DLNA-Enabled TVs, Speakers, and Media Devices
@@ -120,6 +127,23 @@ Beyond the end-point devices like TVs and speakers, a crucial part of the DLNA e
 
 The prevalence of DLNA certification across a wide range of manufacturers ensures that consumers can build a connected home entertainment system with a high degree of confidence in device interoperability. By looking for the DLNA logo, users can unlock the full potential of their home network and enjoy their digital media library on their terms.
 
+
+## 📸 Screenshots
+
+Below are some screenshots of the plugin in action:
+
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="screenshots/Screenshot_20250703_180504.jpg" alt="Screenshot 1" width="180" /></td>
+      <td><img src="screenshots/Screenshot_20250703_180510.jpg" alt="Screenshot 2" width="180" /></td>
+      <td><img src="screenshots/Screenshot_20250703_180515.jpg" alt="Screenshot 3" width="180" /></td>
+      <td><img src="screenshots/Screenshot_20250703_180532.jpg" alt="Screenshot 4" width="180" /></td>
+    </tr>
+  </table>
+</div>
+
 ## 🏗️ Architecture & Technology
 
 This plugin leverages the power of **Pigeon** - Google's code generation tool that creates type-safe communication between Dart and native platforms. This ensures:
@@ -155,7 +179,7 @@ class MediaCastApp extends StatefulWidget {
 }
 
 class _MediaCastAppState extends State<MediaCastApp> {
-  final _mediaCast = MediaCastDlna();
+  final _api = MediaCastDlnaApi();
   List<DlnaDevice> _discoveredDevices = [];
   DlnaDevice? _selectedRenderer;
   
@@ -168,10 +192,10 @@ class _MediaCastAppState extends State<MediaCastApp> {
   Future<void> _initializeMediaCast() async {
     try {
       // Initialize the UPnP service
-      await _mediaCast.initializeUpnpService();
+      await _api.initializeUpnpService();
       
       // Check if service is ready
-      bool isReady = await _mediaCast.isUpnpServiceInitialized();
+      bool isReady = await _api.isUpnpServiceInitialized();
       print('UPnP Service Ready: $isReady');
       
     } catch (e) {
@@ -186,14 +210,17 @@ class _MediaCastAppState extends State<MediaCastApp> {
 ```dart
 Future<void> _startDeviceDiscovery() async {
   try {
-    // Start discovery with timeout
-    await _mediaCast.startDiscovery(
-      DiscoveryOptions(timeoutSeconds: 10)
+    // Start discovery with timeout using the new wrapper classes
+    await _api.startDiscovery(
+      DiscoveryOptions(
+        timeout: DiscoveryTimeout(seconds: 10),
+        searchTarget: SearchTarget(target: 'upnp:rootdevice'),
+      ),
     );
     
     // Periodically check for discovered devices
     Timer.periodic(Duration(seconds: 2), (timer) async {
-      final devices = await _mediaCast.getDiscoveredDevices();
+      final devices = await _api.getDiscoveredDevices();
       setState(() {
         _discoveredDevices = devices;
       });
@@ -201,7 +228,7 @@ Future<void> _startDeviceDiscovery() async {
       // Stop timer after 30 seconds
       if (timer.tick >= 15) {
         timer.cancel();
-        await _mediaCast.stopDiscovery();
+        await _api.stopDiscovery();
       }
     });
     
@@ -230,23 +257,24 @@ List<DlnaDevice> getMediaServers() {
 ```dart
 Future<void> _castMedia(DlnaDevice renderer, String mediaUrl) async {
   try {
-    // Create media metadata
-    final metadata = MediaMetadata(
+    // Create video metadata using the new typed classes
+    final metadata = VideoMetadata(
       title: 'My Awesome Video',
-      artist: 'Content Creator',
-      duration: 7200, // 2 hours in seconds
-      mimeType: 'video/mp4',
+      duration: TimeDuration(seconds: 7200), // 2 hours
+      resolution: '1920x1080',
+      genre: 'Entertainment',
+      upnpClass: 'object.item.videoItem.movie',
     );
     
     // Set the media URI on the renderer
-    await _mediaCast.setMediaUri(
+    await _api.setMediaUri(
       renderer.udn,
-      mediaUrl,
+      Url(value: mediaUrl),
       metadata,
     );
     
     // Start playback
-    await _mediaCast.play(renderer.udn);
+    await _api.play(renderer.udn);
     
     print('✅ Media cast successfully!');
     
@@ -260,34 +288,35 @@ Future<void> _castMedia(DlnaDevice renderer, String mediaUrl) async {
 
 ```dart
 class PlaybackController {
-  final MediaCastDlna _mediaCast;
-  final String _deviceUdn;
+  final MediaCastDlnaApi _api;
+  final DeviceUdn _deviceUdn;
   
-  PlaybackController(this._mediaCast, this._deviceUdn);
+  PlaybackController(this._api, this._deviceUdn);
   
   // Basic controls
-  Future<void> play() => _mediaCast.play(_deviceUdn);
-  Future<void> pause() => _mediaCast.pause(_deviceUdn);
-  Future<void> stop() => _mediaCast.stop(_deviceUdn);
+  Future<void> play() => _api.play(_deviceUdn);
+  Future<void> pause() => _api.pause(_deviceUdn);
+  Future<void> stop() => _api.stop(_deviceUdn);
   
-  // Navigation
-  Future<void> skipNext() => _mediaCast.next(_deviceUdn);
-  Future<void> skipPrevious() => _mediaCast.previous(_deviceUdn);
+  // Seek to specific position using TimePosition wrapper
+  Future<void> seekTo(int seconds) => 
+      _api.seek(_deviceUdn, TimePosition(seconds: seconds));
   
-  // Seek to specific position (in seconds)
-  Future<void> seekTo(int seconds) => _mediaCast.seek(_deviceUdn, seconds);
+  // Volume control using VolumeLevel wrapper
+  Future<void> setVolume(int volume) => 
+      _api.setVolume(_deviceUdn, VolumeLevel(percentage: volume));
   
-  // Volume control
-  Future<void> setVolume(int volume) => _mediaCast.setVolume(_deviceUdn, volume);
   Future<void> toggleMute() async {
-    final volumeInfo = await _mediaCast.getVolumeInfo(_deviceUdn);
-    await _mediaCast.setMute(_deviceUdn, !volumeInfo.muted);
+    final volumeInfo = await _api.getVolumeInfo(_deviceUdn);
+    await _api.setMute(_deviceUdn, MuteOperation(
+      shouldMute: !volumeInfo.muteState.isMuted,
+    ));
   }
   
   // Get current status
-  Future<PlaybackInfo> getStatus() => _mediaCast.getPlaybackInfo(_deviceUdn);
-  Future<int> getCurrentPosition() => _mediaCast.getCurrentPosition(_deviceUdn);
-  Future<TransportState> getTransportState() => _mediaCast.getTransportState(_deviceUdn);
+  Future<PlaybackInfo> getStatus() => _api.getPlaybackInfo(_deviceUdn);
+  Future<TimePosition> getCurrentPosition() => _api.getCurrentPosition(_deviceUdn);
+  Future<TransportState> getTransportState() => _api.getTransportState(_deviceUdn);
 }
 ```
 
@@ -296,55 +325,58 @@ class PlaybackController {
 ### Subtitle Support
 
 ```dart
-// Cast media with subtitle tracks
+// Cast media with subtitle tracks using the new typed classes
 Future<void> _castWithSubtitles(DlnaDevice renderer, String mediaUrl) async {
   final subtitleTracks = [
     SubtitleTrack(
       id: 'sub1',
       language: 'en',
-      label: 'English',
-      uri: 'https://example.com/subtitles/english.srt',
+      title: 'English',
+      uri: Url(value: 'https://example.com/subtitles/english.srt'),
       mimeType: 'text/srt',
+      isDefault: true,
     ),
     SubtitleTrack(
       id: 'sub2', 
       language: 'es',
-      label: 'Español',
-      uri: 'https://example.com/subtitles/spanish.srt',
+      title: 'Español',
+      uri: Url(value: 'https://example.com/subtitles/spanish.srt'),
       mimeType: 'text/srt',
     ),
   ];
   
-  final metadata = MediaMetadata(
+  final metadata = VideoMetadata(
     title: 'Movie with Subtitles',
-    mimeType: 'video/mp4',
+    duration: TimeDuration(seconds: 6300), // 1h 45m
+    resolution: '1920x1080',
+    upnpClass: 'object.item.videoItem.movie',
   );
   
-  await _mediaCast.setMediaUriWithSubtitles(
+  await _api.setMediaUriWithSubtitles(
     renderer.udn,
-    mediaUrl,
+    Url(value: mediaUrl),
     metadata,
     subtitleTracks,
   );
 }
 
 // Control subtitle tracks
-Future<void> _manageSubtitles(String deviceUdn) async {
+Future<void> _manageSubtitles(DeviceUdn deviceUdn) async {
   // Check if device supports subtitle control
-  bool supportsSubtitles = await _mediaCast.supportsSubtitleControl(deviceUdn);
+  bool supportsSubtitles = await _api.supportsSubtitleControl(deviceUdn);
   
   if (supportsSubtitles) {
     // Get available subtitle tracks
-    List<SubtitleTrack> tracks = await _mediaCast.getAvailableSubtitleTracks(deviceUdn);
+    List<SubtitleTrack> tracks = await _api.getAvailableSubtitleTracks(deviceUdn);
     
     // Get current subtitle track
-    SubtitleTrack? current = await _mediaCast.getCurrentSubtitleTrack(deviceUdn);
+    SubtitleTrack? current = await _api.getCurrentSubtitleTrack(deviceUdn);
     
     // Set a specific subtitle track
-    await _mediaCast.setSubtitleTrack(deviceUdn, 'sub1');
+    await _api.setSubtitleTrack(deviceUdn, 'sub1');
     
     // Disable subtitles
-    await _mediaCast.setSubtitleTrack(deviceUdn, null);
+    await _api.setSubtitleTrack(deviceUdn, null);
   }
 }
 ```
@@ -354,31 +386,32 @@ Future<void> _manageSubtitles(String deviceUdn) async {
 ```dart
 Future<void> _browseMediaServer(DlnaDevice server) async {
   try {
-    // Browse root directory
-    List<MediaItem> rootItems = await _mediaCast.browseContentDirectory(
-      server.udn,
-      '0', // Root container ID
-      0,   // Start index
-      50,  // Count
+    // Get device services first
+    List<DlnaService> services = await _api.getDeviceServices(server.udn);
+    
+    // Check if device has ContentDirectory service
+    bool hasContentDirectory = await _api.hasService(
+      server.udn, 
+      'urn:schemas-upnp-org:service:ContentDirectory:1'
     );
     
-    // Filter by content type
-    final videoItems = rootItems.where((item) => 
-        item.mimeType?.startsWith('video/') ?? false).toList();
-    
-    final audioItems = rootItems.where((item) => 
-        item.mimeType?.startsWith('audio/') ?? false).toList();
-    
-    print('Found ${videoItems.length} videos and ${audioItems.length} audio files');
-    
-    // Search for specific content
-    List<MediaItem> searchResults = await _mediaCast.searchContentDirectory(
-      server.udn,
-      '0',
-      'dc:title contains "movie"',
-      0,
-      20,
-    );
+    if (hasContentDirectory) {
+      print('Media server has ContentDirectory service');
+      
+      // Note: Content browsing methods would be implemented here
+      // The current API focuses on media renderer control
+      // Media server browsing is planned for future versions
+      
+      // Check if device is online
+      bool isOnline = await _api.isDeviceOnline(server.udn);
+      print('Media server online: $isOnline');
+      
+      // You can also refresh device information
+      DlnaDevice? refreshedDevice = await _api.refreshDevice(server.udn);
+      if (refreshedDevice != null) {
+        print('Refreshed device: ${refreshedDevice.friendlyName}');
+      }
+    }
     
   } catch (e) {
     print('Failed to browse content: $e');
@@ -393,13 +426,13 @@ Future<void> _browseMediaServer(DlnaDevice server) async {
 #### 1. UPnP Service Not Initialized
 ```dart
 Future<bool> _ensureServiceReady() async {
-  if (!await _mediaCast.isUpnpServiceInitialized()) {
-    await _mediaCast.initializeUpnpService();
+  if (!await _api.isUpnpServiceInitialized()) {
+    await _api.initializeUpnpService();
     
     // Wait a bit for service to be ready
     await Future.delayed(Duration(seconds: 2));
     
-    return await _mediaCast.isUpnpServiceInitialized();
+    return await _api.isUpnpServiceInitialized();
   }
   return true;
 }
@@ -415,7 +448,8 @@ Future<void> _troubleshootDiscovery() async {
   
   // Try refreshing a specific device
   try {
-    final refreshedDevice = await _mediaCast.refreshDevice('known-device-udn');
+    final deviceUdn = DeviceUdn(value: 'known-device-udn');
+    final refreshedDevice = await _api.refreshDevice(deviceUdn);
     print('Device refreshed: ${refreshedDevice?.friendlyName}');
   } catch (e) {
     print('Failed to refresh device: $e');
@@ -425,18 +459,25 @@ Future<void> _troubleshootDiscovery() async {
 
 #### 3. Playback Issues
 ```dart
-Future<void> _diagnosePlayback(String deviceUdn) async {
+Future<void> _diagnosePlayback(DeviceUdn deviceUdn) async {
   try {
     // Check device services
-    final services = await _mediaCast.getDeviceServices(deviceUdn);
+    final services = await _api.getDeviceServices(deviceUdn);
     print('Available services: ${services.map((s) => s.serviceType).join(', ')}');
     
     // Verify AVTransport service
-    bool hasAVTransport = await _mediaCast.hasService(deviceUdn, 'AVTransport');
+    bool hasAVTransport = await _api.hasService(
+      deviceUdn, 
+      'urn:schemas-upnp-org:service:AVTransport:1'
+    );
     print('Has AVTransport: $hasAVTransport');
     
+    // Check if device is online
+    bool isOnline = await _api.isDeviceOnline(deviceUdn);
+    print('Device online: $isOnline');
+    
     // Check current state
-    final state = await _mediaCast.getTransportState(deviceUdn);
+    final state = await _api.getTransportState(deviceUdn);
     print('Current transport state: $state');
     
   } catch (e) {
@@ -459,7 +500,7 @@ class DlnaMediaCastDemo extends StatefulWidget {
 }
 
 class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
-  final _mediaCast = MediaCastDlna();
+  final _api = MediaCastDlnaApi();
   List<DlnaDevice> _devices = [];
   DlnaDevice? _selectedRenderer;
   bool _isDiscovering = false;
@@ -475,7 +516,7 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
   
   Future<void> _initializePlugin() async {
     try {
-      await _mediaCast.initializeUpnpService();
+      await _api.initializeUpnpService();
       print('✅ Media Cast DLNA initialized successfully');
     } catch (e) {
       print('❌ Initialization failed: $e');
@@ -486,16 +527,21 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
     setState(() => _isDiscovering = true);
     
     try {
-      await _mediaCast.startDiscovery(DiscoveryOptions(timeoutSeconds: 15));
+      await _api.startDiscovery(
+        DiscoveryOptions(
+          timeout: DiscoveryTimeout(seconds: 15),
+          searchTarget: SearchTarget(target: 'upnp:rootdevice'),
+        ),
+      );
       
       // Poll for devices
       Timer.periodic(Duration(seconds: 2), (timer) async {
-        final devices = await _mediaCast.getDiscoveredDevices();
+        final devices = await _api.getDiscoveredDevices();
         setState(() => _devices = devices);
         
         if (timer.tick >= 10) {
           timer.cancel();
-          await _mediaCast.stopDiscovery();
+          await _api.stopDiscovery();
           setState(() => _isDiscovering = false);
         }
       });
@@ -514,15 +560,20 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
     const sampleUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
     
     try {
-      final metadata = MediaMetadata(
+      final metadata = VideoMetadata(
         title: 'Big Buck Bunny',
-        artist: 'Blender Foundation',
-        duration: 596,
-        mimeType: 'video/mp4',
+        duration: TimeDuration(seconds: 596),
+        resolution: '1920x1080',
+        genre: 'Animation',
+        upnpClass: 'object.item.videoItem.movie',
       );
       
-      await _mediaCast.setMediaUri(_selectedRenderer!.udn, sampleUrl, metadata);
-      await _mediaCast.play(_selectedRenderer!.udn);
+      await _api.setMediaUri(
+        _selectedRenderer!.udn,
+        Url(value: sampleUrl),
+        metadata,
+      );
+      await _api.play(_selectedRenderer!.udn);
       
       _showSuccess('Video cast successfully!');
       _startStatusPolling();
@@ -540,14 +591,14 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
       }
       
       try {
-        final state = await _mediaCast.getTransportState(_selectedRenderer!.udn);
-        final position = await _mediaCast.getCurrentPosition(_selectedRenderer!.udn);
-        final playbackInfo = await _mediaCast.getPlaybackInfo(_selectedRenderer!.udn);
+        final state = await _api.getTransportState(_selectedRenderer!.udn);
+        final position = await _api.getCurrentPosition(_selectedRenderer!.udn);
+        final playbackInfo = await _api.getPlaybackInfo(_selectedRenderer!.udn);
         
         setState(() {
           _currentState = state;
-          _currentPosition = position;
-          _duration = playbackInfo.duration ?? 0;
+          _currentPosition = position.seconds;
+          _duration = playbackInfo.duration.seconds;
         });
         
         // Stop polling if not playing
@@ -650,23 +701,19 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           IconButton(
-                            onPressed: () => _mediaCast.previous(_selectedRenderer!.udn),
-                            icon: Icon(Icons.skip_previous),
-                          ),
-                          IconButton(
-                            onPressed: () => _mediaCast.play(_selectedRenderer!.udn),
+                            onPressed: () => _api.play(_selectedRenderer!.udn),
                             icon: Icon(Icons.play_arrow, color: Colors.green),
                           ),
                           IconButton(
-                            onPressed: () => _mediaCast.pause(_selectedRenderer!.udn),
+                            onPressed: () => _api.pause(_selectedRenderer!.udn),
                             icon: Icon(Icons.pause, color: Colors.orange),
                           ),
                           IconButton(
-                            onPressed: () => _mediaCast.stop(_selectedRenderer!.udn),
+                            onPressed: () => _api.stop(_selectedRenderer!.udn),
                             icon: Icon(Icons.stop, color: Colors.red),
                           ),
                           IconButton(
-                            onPressed: () => _mediaCast.next(_selectedRenderer!.udn),
+                            onPressed: () => _api.next(_selectedRenderer!.udn),
                             icon: Icon(Icons.skip_next),
                           ),
                         ],
@@ -708,6 +755,129 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
   }
 }
 ```
+
+## 🔧 API Design & Typed Wrappers
+
+This plugin follows **Object Calisthenics** principles, using typed wrapper classes instead of primitive types for better type safety and code clarity.
+
+### Key Design Principles
+
+#### 1. **Typed Wrapper Classes**
+Instead of using primitive types, we use descriptive wrapper classes:
+
+```dart
+// ❌ Old approach with primitives
+await api.setVolume(deviceId, 75);
+await api.seek(deviceId, 120);
+await api.startDiscovery(10);
+
+// ✅ New approach with typed wrappers
+await api.setVolume(deviceUdn, VolumeLevel(percentage: 75));
+await api.seek(deviceUdn, TimePosition(seconds: 120));
+await api.startDiscovery(DiscoveryOptions(
+  timeout: DiscoveryTimeout(seconds: 10),
+));
+```
+
+#### 2. **Sealed Classes for Metadata**
+Media metadata uses sealed classes for type safety:
+
+```dart
+// For video content
+final videoMetadata = VideoMetadata(
+  title: 'My Movie',
+  duration: TimeDuration(seconds: 7200),
+  resolution: '1920x1080',
+  genre: 'Action',
+);
+
+// For audio content  
+final audioMetadata = AudioMetadata(
+  title: 'My Song',
+  artist: 'Artist Name',
+  album: 'Album Name',
+  duration: TimeDuration(seconds: 240),
+);
+
+// For images
+final imageMetadata = ImageMetadata(
+  title: 'My Photo',
+  resolution: '4032x3024',
+  date: '2025-07-03',
+);
+```
+
+#### 3. **Value Objects for Network Concepts**
+Network-related values use descriptive classes:
+
+```dart
+// Device identification
+final deviceUdn = DeviceUdn(value: 'uuid:12345678-1234-1234-1234-123456789012');
+
+// Network locations
+final mediaUrl = Url(value: 'https://example.com/video.mp4');
+final deviceIp = IpAddress(value: '192.168.1.100');
+final devicePort = NetworkPort(value: 8080);
+```
+
+### Common Patterns
+
+#### Discovery Pattern
+```dart
+// Start discovery with typed options
+await _api.startDiscovery(
+  DiscoveryOptions(
+    timeout: DiscoveryTimeout(seconds: 15),
+    searchTarget: SearchTarget(target: 'upnp:rootdevice'),
+  ),
+);
+
+// Get discovered devices
+final devices = await _api.getDiscoveredDevices();
+
+// Stop discovery
+await _api.stopDiscovery();
+```
+
+#### Playback Control Pattern
+```dart
+// Set media with typed metadata
+await _api.setMediaUri(
+  deviceUdn,
+  Url(value: mediaUrl),
+  VideoMetadata(title: 'Movie Title'),
+);
+
+// Control playback
+await _api.play(deviceUdn);
+await _api.pause(deviceUdn);
+await _api.stop(deviceUdn);
+
+// Seek to position
+await _api.seek(deviceUdn, TimePosition(seconds: 300));
+```
+
+#### Volume Control Pattern
+```dart
+// Set volume level
+await _api.setVolume(deviceUdn, VolumeLevel(percentage: 75));
+
+// Get current volume info
+final volumeInfo = await _api.getVolumeInfo(deviceUdn);
+print('Current volume: ${volumeInfo.level.percentage}%');
+print('Is muted: ${volumeInfo.muteState.isMuted}');
+
+// Toggle mute
+await _api.setMute(deviceUdn, MuteOperation(shouldMute: true));
+```
+
+### Benefits of This Approach
+
+1. **Type Safety**: Prevents runtime errors from incorrect parameter types
+2. **Code Clarity**: Method signatures are self-documenting
+3. **IDE Support**: Better autocomplete and refactoring support
+4. **Maintainability**: Easier to modify and extend APIs
+5. **Consistency**: Uniform patterns across the entire API
 
 ## 📚 API Reference
 

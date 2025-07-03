@@ -43,6 +43,21 @@ class DeviceDiscoveryManager {
         return services.contains { $0.serviceType.contains(serviceType) }
     }
     
+    func isDeviceOnline(deviceUdn: String) -> Bool {
+        // Check if device is still in our discovered devices registry
+        guard let device = discoveredDevices[deviceUdn] else {
+            os_log("Device not found in registry: %@", log: logger, type: .debug, deviceUdn)
+            return false
+        }
+        
+        // For iOS, we'll use a simple approach: check if device is in our registry
+        // The UPnP library should automatically remove expired devices
+        // Additional check could be added here if needed (e.g., timestamp-based expiration)
+        
+        os_log("Device %@ is online", log: logger, type: .debug, deviceUdn)
+        return true
+    }
+    
     private func fetchDeviceServices(for device: DlnaDevice) {
         // Construct device description URL
         let baseUrl = "http://\(device.ipAddress):\(device.port)"

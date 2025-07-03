@@ -61,45 +61,327 @@ enum class TransportState(val raw: Int) {
 }
 
 /**
+ * Represents a Unique Device Name (UDN) following object calisthenics
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class DeviceUdn (
+  val value: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): DeviceUdn {
+      val value = pigeonVar_list[0] as String
+      return DeviceUdn(value)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      value,
+    )
+  }
+}
+
+/**
+ * Volume level representation following object calisthenics
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class VolumeLevel (
+  val percentage: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VolumeLevel {
+      val percentage = pigeonVar_list[0] as Long
+      return VolumeLevel(percentage)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      percentage,
+    )
+  }
+}
+
+/**
+ * Mute state representation
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class MuteState (
+  val isMuted: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MuteState {
+      val isMuted = pigeonVar_list[0] as Boolean
+      return MuteState(isMuted)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      isMuted,
+    )
+  }
+}
+
+/**
+ * Volume information combining level and mute state
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class VolumeInfo (
+  val level: VolumeLevel,
+  val muteState: MuteState
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VolumeInfo {
+      val level = pigeonVar_list[0] as VolumeLevel
+      val muteState = pigeonVar_list[1] as MuteState
+      return VolumeInfo(level, muteState)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      level,
+      muteState,
+    )
+  }
+}
+
+/**
+ * Represents a mute operation
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class MuteOperation (
+  val shouldMute: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MuteOperation {
+      val shouldMute = pigeonVar_list[0] as Boolean
+      return MuteOperation(shouldMute)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      shouldMute,
+    )
+  }
+}
+
+/**
+ * Represents a position in time (seconds)
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TimePosition (
+  val seconds: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TimePosition {
+      val seconds = pigeonVar_list[0] as Long
+      return TimePosition(seconds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      seconds,
+    )
+  }
+}
+
+/**
+ * Represents a duration in time (seconds)
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TimeDuration (
+  val seconds: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TimeDuration {
+      val seconds = pigeonVar_list[0] as Long
+      return TimeDuration(seconds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      seconds,
+    )
+  }
+}
+
+/**
+ * Represents a URL following object calisthenics
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class Url (
+  val value: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): Url {
+      val value = pigeonVar_list[0] as String
+      return Url(value)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      value,
+    )
+  }
+}
+
+/**
+ * Represents an IP address following object calisthenics
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class IpAddress (
+  val value: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): IpAddress {
+      val value = pigeonVar_list[0] as String
+      return IpAddress(value)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      value,
+    )
+  }
+}
+
+/**
+ * Represents a network port following object calisthenics
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class NetworkPort (
+  val value: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NetworkPort {
+      val value = pigeonVar_list[0] as Long
+      return NetworkPort(value)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      value,
+    )
+  }
+}
+
+/**
+ * Represents a discovery timeout following object calisthenics
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class DiscoveryTimeout (
+  val seconds: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): DiscoveryTimeout {
+      val seconds = pigeonVar_list[0] as Long
+      return DiscoveryTimeout(seconds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      seconds,
+    )
+  }
+}
+
+/**
+ * Represents a search target for discovery
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class SearchTarget (
+  val target: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SearchTarget {
+      val target = pigeonVar_list[0] as String
+      return SearchTarget(target)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      target,
+    )
+  }
+}
+
+/**
+ * Discovery options with descriptive classes
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class DiscoveryOptions (
+  val searchTarget: SearchTarget? = null,
+  val timeout: DiscoveryTimeout
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): DiscoveryOptions {
+      val searchTarget = pigeonVar_list[0] as SearchTarget?
+      val timeout = pigeonVar_list[1] as DiscoveryTimeout
+      return DiscoveryOptions(searchTarget, timeout)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      searchTarget,
+      timeout,
+    )
+  }
+}
+
+/**
  * Represents a UPnP/DLNA device discovered on the network
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
 data class DlnaDevice (
-  /** Unique Device Name */
-  val udn: String,
-  /** Human-readable device name */
+  val udn: DeviceUdn,
   val friendlyName: String,
-  /** Device type (e.g., MediaRenderer, MediaServer) */
   val deviceType: String,
-  /** Manufacturer name */
   val manufacturerName: String,
-  /** Model name */
   val modelName: String,
-  /** Device IP address */
-  val ipAddress: String,
-  /** Device port */
-  val port: Long,
-  /** Optional model description */
+  val ipAddress: IpAddress,
+  val port: NetworkPort,
   val modelDescription: String? = null,
-  /** Optional presentation URL */
-  val presentationUrl: String? = null,
-  /** Optional icon URL */
-  val iconUrl: String? = null
+  val presentationUrl: Url? = null,
+  val iconUrl: Url? = null
 )
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): DlnaDevice {
-      val udn = pigeonVar_list[0] as String
+      val udn = pigeonVar_list[0] as DeviceUdn
       val friendlyName = pigeonVar_list[1] as String
       val deviceType = pigeonVar_list[2] as String
       val manufacturerName = pigeonVar_list[3] as String
       val modelName = pigeonVar_list[4] as String
-      val ipAddress = pigeonVar_list[5] as String
-      val port = pigeonVar_list[6] as Long
+      val ipAddress = pigeonVar_list[5] as IpAddress
+      val port = pigeonVar_list[6] as NetworkPort
       val modelDescription = pigeonVar_list[7] as String?
-      val presentationUrl = pigeonVar_list[8] as String?
-      val iconUrl = pigeonVar_list[9] as String?
+      val presentationUrl = pigeonVar_list[8] as Url?
+      val iconUrl = pigeonVar_list[9] as Url?
       return DlnaDevice(udn, friendlyName, deviceType, manufacturerName, modelName, ipAddress, port, modelDescription, presentationUrl, iconUrl)
     }
   }
@@ -125,25 +407,20 @@ data class DlnaDevice (
  * Generated class from Pigeon that represents data sent in messages.
  */
 data class DlnaService (
-  /** Service type (e.g., AVTransport, RenderingControl, ContentDirectory) */
   val serviceType: String,
-  /** Service ID */
   val serviceId: String,
-  /** Service Control Protocol Description URL */
-  val scpdUrl: String,
-  /** Control URL for actions */
-  val controlUrl: String,
-  /** Event subscription URL */
-  val eventSubUrl: String
+  val scpdUrl: Url,
+  val controlUrl: Url,
+  val eventSubUrl: Url
 )
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): DlnaService {
       val serviceType = pigeonVar_list[0] as String
       val serviceId = pigeonVar_list[1] as String
-      val scpdUrl = pigeonVar_list[2] as String
-      val controlUrl = pigeonVar_list[3] as String
-      val eventSubUrl = pigeonVar_list[4] as String
+      val scpdUrl = pigeonVar_list[2] as Url
+      val controlUrl = pigeonVar_list[3] as Url
+      val eventSubUrl = pigeonVar_list[4] as Url
       return DlnaService(serviceType, serviceId, scpdUrl, controlUrl, eventSubUrl)
     }
   }
@@ -159,76 +436,23 @@ data class DlnaService (
 }
 
 /**
- * Represents media content that can be played
- *
- * Generated class from Pigeon that represents data sent in messages.
- */
-data class MediaItem (
-  /** Content ID */
-  val id: String,
-  /** Content title */
-  val title: String,
-  /** Content URI */
-  val uri: String,
-  /** MIME type */
-  val mimeType: String,
-  /** Structured metadata (audio, video, image) */
-  val metadata: MediaMetadata? = null,
-  /** File size in bytes */
-  val size: Long? = null,
-  /** Available subtitle tracks */
-  val subtitleTracks: List<SubtitleTrack>? = null
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): MediaItem {
-      val id = pigeonVar_list[0] as String
-      val title = pigeonVar_list[1] as String
-      val uri = pigeonVar_list[2] as String
-      val mimeType = pigeonVar_list[3] as String
-      val metadata = pigeonVar_list[4] as MediaMetadata?
-      val size = pigeonVar_list[5] as Long?
-      val subtitleTracks = pigeonVar_list[6] as List<SubtitleTrack>?
-      return MediaItem(id, title, uri, mimeType, metadata, size, subtitleTracks)
-    }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      id,
-      title,
-      uri,
-      mimeType,
-      metadata,
-      size,
-      subtitleTracks,
-    )
-  }
-}
-
-/**
  * Represents a subtitle track
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
 data class SubtitleTrack (
-  /** Track ID */
   val id: String,
-  /** Subtitle file URI */
-  val uri: String,
-  /** MIME type (text/srt, text/vtt, etc.) */
+  val uri: Url,
   val mimeType: String,
-  /** Language code (ISO 639-1) */
   val language: String,
-  /** Human-readable title */
   val title: String? = null,
-  /** Whether this is the default subtitle track */
   val isDefault: Boolean? = null
 )
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): SubtitleTrack {
       val id = pigeonVar_list[0] as String
-      val uri = pigeonVar_list[1] as String
+      val uri = pigeonVar_list[1] as Url
       val mimeType = pigeonVar_list[2] as String
       val language = pigeonVar_list[3] as String
       val title = pigeonVar_list[4] as String?
@@ -264,8 +488,8 @@ data class AudioMetadata (
   val artist: String? = null,
   val album: String? = null,
   val genre: String? = null,
-  val duration: Long? = null,
-  val albumArtUri: String? = null,
+  val duration: TimeDuration? = null,
+  val albumArtUri: Url? = null,
   val description: String? = null,
   val originalTrackNumber: Long? = null,
   val upnpClass: String? = null,
@@ -277,8 +501,8 @@ data class AudioMetadata (
       val artist = pigeonVar_list[0] as String?
       val album = pigeonVar_list[1] as String?
       val genre = pigeonVar_list[2] as String?
-      val duration = pigeonVar_list[3] as Long?
-      val albumArtUri = pigeonVar_list[4] as String?
+      val duration = pigeonVar_list[3] as TimeDuration?
+      val albumArtUri = pigeonVar_list[4] as Url?
       val description = pigeonVar_list[5] as String?
       val originalTrackNumber = pigeonVar_list[6] as Long?
       val upnpClass = pigeonVar_list[7] as String?
@@ -308,9 +532,9 @@ data class AudioMetadata (
  */
 data class VideoMetadata (
   val resolution: String? = null,
-  val duration: Long? = null,
+  val duration: TimeDuration? = null,
   val description: String? = null,
-  val thumbnailUri: String? = null,
+  val thumbnailUri: Url? = null,
   val genre: String? = null,
   val upnpClass: String? = null,
   val bitrate: Long? = null,
@@ -320,9 +544,9 @@ data class VideoMetadata (
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): VideoMetadata {
       val resolution = pigeonVar_list[0] as String?
-      val duration = pigeonVar_list[1] as Long?
+      val duration = pigeonVar_list[1] as TimeDuration?
       val description = pigeonVar_list[2] as String?
-      val thumbnailUri = pigeonVar_list[3] as String?
+      val thumbnailUri = pigeonVar_list[3] as Url?
       val genre = pigeonVar_list[4] as String?
       val upnpClass = pigeonVar_list[5] as String?
       val bitrate = pigeonVar_list[6] as Long?
@@ -352,7 +576,7 @@ data class VideoMetadata (
 data class ImageMetadata (
   val resolution: String? = null,
   val description: String? = null,
-  val thumbnailUri: String? = null,
+  val thumbnailUri: Url? = null,
   val date: String? = null,
   val upnpClass: String? = null,
   val title: String? = null
@@ -362,7 +586,7 @@ data class ImageMetadata (
     fun fromList(pigeonVar_list: List<Any?>): ImageMetadata {
       val resolution = pigeonVar_list[0] as String?
       val description = pigeonVar_list[1] as String?
-      val thumbnailUri = pigeonVar_list[2] as String?
+      val thumbnailUri = pigeonVar_list[2] as Url?
       val date = pigeonVar_list[3] as String?
       val upnpClass = pigeonVar_list[4] as String?
       val title = pigeonVar_list[5] as String?
@@ -382,28 +606,63 @@ data class ImageMetadata (
 }
 
 /**
- * Represents playback information
+ * Represents media content that can be played
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class MediaItem (
+  val id: String,
+  val title: String,
+  val uri: Url,
+  val mimeType: String,
+  val metadata: MediaMetadata? = null,
+  val size: Long? = null,
+  val subtitleTracks: List<SubtitleTrack>? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MediaItem {
+      val id = pigeonVar_list[0] as String
+      val title = pigeonVar_list[1] as String
+      val uri = pigeonVar_list[2] as Url
+      val mimeType = pigeonVar_list[3] as String
+      val metadata = pigeonVar_list[4] as MediaMetadata?
+      val size = pigeonVar_list[5] as Long?
+      val subtitleTracks = pigeonVar_list[6] as List<SubtitleTrack>?
+      return MediaItem(id, title, uri, mimeType, metadata, size, subtitleTracks)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      title,
+      uri,
+      mimeType,
+      metadata,
+      size,
+      subtitleTracks,
+    )
+  }
+}
+
+/**
+ * Represents playback information with descriptive time classes
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
 data class PlaybackInfo (
-  /** Current transport state */
   val state: TransportState,
-  /** Current position in seconds */
-  val position: Long,
-  /** Total duration in seconds */
-  val duration: Long,
-  /** Current track URI */
+  val position: TimePosition,
+  val duration: TimeDuration,
   val currentTrackUri: String? = null,
-  /** Current track metadata */
   val currentTrackMetadata: MediaMetadata? = null
 )
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): PlaybackInfo {
       val state = pigeonVar_list[0] as TransportState
-      val position = pigeonVar_list[1] as Long
-      val duration = pigeonVar_list[2] as Long
+      val position = pigeonVar_list[1] as TimePosition
+      val duration = pigeonVar_list[2] as TimeDuration
       val currentTrackUri = pigeonVar_list[3] as String?
       val currentTrackMetadata = pigeonVar_list[4] as MediaMetadata?
       return PlaybackInfo(state, position, duration, currentTrackUri, currentTrackMetadata)
@@ -419,60 +678,6 @@ data class PlaybackInfo (
     )
   }
 }
-
-/**
- * Volume information
- *
- * Generated class from Pigeon that represents data sent in messages.
- */
-data class VolumeInfo (
-  /** Volume level (0-100) */
-  val volume: Long,
-  /** Whether audio is muted */
-  val muted: Boolean
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): VolumeInfo {
-      val volume = pigeonVar_list[0] as Long
-      val muted = pigeonVar_list[1] as Boolean
-      return VolumeInfo(volume, muted)
-    }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      volume,
-      muted,
-    )
-  }
-}
-
-/**
- * Discovery options
- *
- * Generated class from Pigeon that represents data sent in messages.
- */
-data class DiscoveryOptions (
-  /** Search target (ST header) - can be "upnp:rootdevice", "ssdp:all", or specific device type */
-  val searchTarget: String? = null,
-  /** Discovery timeout in seconds */
-  val timeout: Long
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): DiscoveryOptions {
-      val searchTarget = pigeonVar_list[0] as String?
-      val timeout = pigeonVar_list[1] as Long
-      return DiscoveryOptions(searchTarget, timeout)
-    }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      searchTarget,
-      timeout,
-    )
-  }
-}
 private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -483,52 +688,107 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
       }
       130.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DlnaDevice.fromList(it)
+          DeviceUdn.fromList(it)
         }
       }
       131.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DlnaService.fromList(it)
+          VolumeLevel.fromList(it)
         }
       }
       132.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          MediaItem.fromList(it)
+          MuteState.fromList(it)
         }
       }
       133.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SubtitleTrack.fromList(it)
+          VolumeInfo.fromList(it)
         }
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AudioMetadata.fromList(it)
+          MuteOperation.fromList(it)
         }
       }
       135.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VideoMetadata.fromList(it)
+          TimePosition.fromList(it)
         }
       }
       136.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageMetadata.fromList(it)
+          TimeDuration.fromList(it)
         }
       }
       137.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PlaybackInfo.fromList(it)
+          Url.fromList(it)
         }
       }
       138.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VolumeInfo.fromList(it)
+          IpAddress.fromList(it)
         }
       }
       139.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
+          NetworkPort.fromList(it)
+        }
+      }
+      140.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          DiscoveryTimeout.fromList(it)
+        }
+      }
+      141.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SearchTarget.fromList(it)
+        }
+      }
+      142.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
           DiscoveryOptions.fromList(it)
+        }
+      }
+      143.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          DlnaDevice.fromList(it)
+        }
+      }
+      144.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          DlnaService.fromList(it)
+        }
+      }
+      145.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SubtitleTrack.fromList(it)
+        }
+      }
+      146.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AudioMetadata.fromList(it)
+        }
+      }
+      147.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VideoMetadata.fromList(it)
+        }
+      }
+      148.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ImageMetadata.fromList(it)
+        }
+      }
+      149.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          MediaItem.fromList(it)
+        }
+      }
+      150.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PlaybackInfo.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -540,44 +800,88 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
         stream.write(129)
         writeValue(stream, value.raw)
       }
-      is DlnaDevice -> {
+      is DeviceUdn -> {
         stream.write(130)
         writeValue(stream, value.toList())
       }
-      is DlnaService -> {
+      is VolumeLevel -> {
         stream.write(131)
         writeValue(stream, value.toList())
       }
-      is MediaItem -> {
+      is MuteState -> {
         stream.write(132)
         writeValue(stream, value.toList())
       }
-      is SubtitleTrack -> {
+      is VolumeInfo -> {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is AudioMetadata -> {
+      is MuteOperation -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is VideoMetadata -> {
+      is TimePosition -> {
         stream.write(135)
         writeValue(stream, value.toList())
       }
-      is ImageMetadata -> {
+      is TimeDuration -> {
         stream.write(136)
         writeValue(stream, value.toList())
       }
-      is PlaybackInfo -> {
+      is Url -> {
         stream.write(137)
         writeValue(stream, value.toList())
       }
-      is VolumeInfo -> {
+      is IpAddress -> {
         stream.write(138)
         writeValue(stream, value.toList())
       }
-      is DiscoveryOptions -> {
+      is NetworkPort -> {
         stream.write(139)
+        writeValue(stream, value.toList())
+      }
+      is DiscoveryTimeout -> {
+        stream.write(140)
+        writeValue(stream, value.toList())
+      }
+      is SearchTarget -> {
+        stream.write(141)
+        writeValue(stream, value.toList())
+      }
+      is DiscoveryOptions -> {
+        stream.write(142)
+        writeValue(stream, value.toList())
+      }
+      is DlnaDevice -> {
+        stream.write(143)
+        writeValue(stream, value.toList())
+      }
+      is DlnaService -> {
+        stream.write(144)
+        writeValue(stream, value.toList())
+      }
+      is SubtitleTrack -> {
+        stream.write(145)
+        writeValue(stream, value.toList())
+      }
+      is AudioMetadata -> {
+        stream.write(146)
+        writeValue(stream, value.toList())
+      }
+      is VideoMetadata -> {
+        stream.write(147)
+        writeValue(stream, value.toList())
+      }
+      is ImageMetadata -> {
+        stream.write(148)
+        writeValue(stream, value.toList())
+      }
+      is MediaItem -> {
+        stream.write(149)
+        writeValue(stream, value.toList())
+      }
+      is PlaybackInfo -> {
+        stream.write(150)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -592,82 +896,32 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
  * Generated interface from Pigeon that represents a handler of messages from Flutter.
  */
 interface MediaCastDlnaApi {
-  /**
-   * Initialize the UPnP service and prepare for device discovery/control
-   * This must be called before any other operations
-   */
-  fun initializeUpnpService()
-  /** Check if UPnP service is initialized and ready */
-  fun isUpnpServiceInitialized(): Boolean
-  /** Shutdown and cleanup UPnP service */
-  fun shutdownUpnpService()
-  /**
-   * Start UPnP/DLNA device discovery
-   * Returns immediately, devices are reported via the DeviceDiscoveryApi callback
-   * Note: initializeUpnpService() must be called first
-   */
-  fun startDiscovery(options: DiscoveryOptions)
-  /** Stop device discovery */
-  fun stopDiscovery()
-  /** Get list of currently discovered devices */
-  fun getDiscoveredDevices(): List<DlnaDevice>
-  /** Refresh device information */
-  fun refreshDevice(deviceUdn: String): DlnaDevice?
-  /** Get services available on a device */
-  fun getDeviceServices(deviceUdn: String): List<DlnaService>
-  /** Check if device supports a specific service type */
-  fun hasService(deviceUdn: String, serviceType: String): Boolean
-  /**
-   * Browse content directory of a media server
-   * parentId: ID of the container to browse (use "0" for root)
-   * startIndex: Starting index for pagination
-   * requestCount: Number of items to request
-   */
-  fun browseContentDirectory(deviceUdn: String, parentId: String, startIndex: Long, requestCount: Long): List<MediaItem>
-  /** Search content directory */
-  fun searchContentDirectory(deviceUdn: String, containerId: String, searchCriteria: String, startIndex: Long, requestCount: Long): List<MediaItem>
-  /** Set the media URI to play on a renderer */
-  fun setMediaUri(deviceUdn: String, uri: String, metadata: MediaMetadata, callback: (Result<Unit>) -> Unit)
-  /** Set the media URI with subtitle support */
-  fun setMediaUriWithSubtitles(deviceUdn: String, uri: String, metadata: MediaMetadata, subtitleTracks: List<SubtitleTrack>, callback: (Result<Unit>) -> Unit)
-  /** Check if device supports subtitle track control */
-  fun supportsSubtitleControl(deviceUdn: String): Boolean
-  /** Enable/disable subtitle track */
-  fun setSubtitleTrack(deviceUdn: String, subtitleTrackId: String?, callback: (Result<Unit>) -> Unit)
-  /** Get available subtitle tracks for current media */
-  fun getAvailableSubtitleTracks(deviceUdn: String): List<SubtitleTrack>
-  /** Get currently active subtitle track */
-  fun getCurrentSubtitleTrack(deviceUdn: String): SubtitleTrack?
-  /** Start playback */
-  fun play(deviceUdn: String, callback: (Result<Unit>) -> Unit)
-  /** Pause playback */
-  fun pause(deviceUdn: String, callback: (Result<Unit>) -> Unit)
-  /** Stop playback */
-  fun stop(deviceUdn: String, callback: (Result<Unit>) -> Unit)
-  /** Seek to specific position (in seconds) */
-  fun seek(deviceUdn: String, positionSeconds: Long, callback: (Result<Unit>) -> Unit)
-  /** Skip to next track */
-  fun next(deviceUdn: String, callback: (Result<Unit>) -> Unit)
-  /** Skip to previous track */
-  fun previous(deviceUdn: String, callback: (Result<Unit>) -> Unit)
-  /** Set volume (0-100) */
-  fun setVolume(deviceUdn: String, volume: Long, callback: (Result<Unit>) -> Unit)
-  /** Get current volume info */
-  fun getVolumeInfo(deviceUdn: String): VolumeInfo
-  /** Mute/unmute audio */
-  fun setMute(deviceUdn: String, muted: Boolean, callback: (Result<Unit>) -> Unit)
-  /** Get current playback information */
-  fun getPlaybackInfo(deviceUdn: String): PlaybackInfo
-  /** Get current position info */
-  fun getCurrentPosition(deviceUdn: String): Long
-  /** Get transport state */
-  fun getTransportState(deviceUdn: String): TransportState
-  /** Get platform version */
-  fun getPlatformVersion(): String
-  /** Check if UPnP is available on the platform */
-  fun isUpnpAvailable(): Boolean
-  /** Get network interface information */
-  fun getNetworkInterfaces(): List<String>
+  fun initializeUpnpService(callback: (Result<Unit>) -> Unit)
+  fun isUpnpServiceInitialized(callback: (Result<Boolean>) -> Unit)
+  fun shutdownUpnpService(callback: (Result<Unit>) -> Unit)
+  fun startDiscovery(options: DiscoveryOptions, callback: (Result<Unit>) -> Unit)
+  fun stopDiscovery(callback: (Result<Unit>) -> Unit)
+  fun getDiscoveredDevices(callback: (Result<List<DlnaDevice>>) -> Unit)
+  fun refreshDevice(deviceUdn: DeviceUdn, callback: (Result<DlnaDevice?>) -> Unit)
+  fun getDeviceServices(deviceUdn: DeviceUdn, callback: (Result<List<DlnaService>>) -> Unit)
+  fun hasService(deviceUdn: DeviceUdn, serviceType: String, callback: (Result<Boolean>) -> Unit)
+  fun isDeviceOnline(deviceUdn: DeviceUdn, callback: (Result<Boolean>) -> Unit)
+  fun setMediaUri(deviceUdn: DeviceUdn, uri: Url, metadata: MediaMetadata, callback: (Result<Unit>) -> Unit)
+  fun setMediaUriWithSubtitles(deviceUdn: DeviceUdn, uri: Url, metadata: MediaMetadata, subtitleTracks: List<SubtitleTrack>, callback: (Result<Unit>) -> Unit)
+  fun supportsSubtitleControl(deviceUdn: DeviceUdn, callback: (Result<Boolean>) -> Unit)
+  fun setSubtitleTrack(deviceUdn: DeviceUdn, subtitleTrackId: String?, callback: (Result<Unit>) -> Unit)
+  fun getAvailableSubtitleTracks(deviceUdn: DeviceUdn, callback: (Result<List<SubtitleTrack>>) -> Unit)
+  fun getCurrentSubtitleTrack(deviceUdn: DeviceUdn, callback: (Result<SubtitleTrack?>) -> Unit)
+  fun play(deviceUdn: DeviceUdn, callback: (Result<Unit>) -> Unit)
+  fun pause(deviceUdn: DeviceUdn, callback: (Result<Unit>) -> Unit)
+  fun stop(deviceUdn: DeviceUdn, callback: (Result<Unit>) -> Unit)
+  fun seek(deviceUdn: DeviceUdn, position: TimePosition, callback: (Result<Unit>) -> Unit)
+  fun setVolume(deviceUdn: DeviceUdn, volumeLevel: VolumeLevel, callback: (Result<Unit>) -> Unit)
+  fun getVolumeInfo(deviceUdn: DeviceUdn, callback: (Result<VolumeInfo>) -> Unit)
+  fun setMute(deviceUdn: DeviceUdn, muteOperation: MuteOperation, callback: (Result<Unit>) -> Unit)
+  fun getPlaybackInfo(deviceUdn: DeviceUdn, callback: (Result<PlaybackInfo>) -> Unit)
+  fun getCurrentPosition(deviceUdn: DeviceUdn, callback: (Result<TimePosition>) -> Unit)
+  fun getTransportState(deviceUdn: DeviceUdn, callback: (Result<TransportState>) -> Unit)
 
   companion object {
     /** The codec used by MediaCastDlnaApi. */
@@ -682,13 +936,14 @@ interface MediaCastDlnaApi {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.initializeUpnpService$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              api.initializeUpnpService()
-              listOf(null)
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            api.initializeUpnpService{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -698,12 +953,15 @@ interface MediaCastDlnaApi {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isUpnpServiceInitialized$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.isUpnpServiceInitialized())
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            api.isUpnpServiceInitialized{ result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -713,13 +971,14 @@ interface MediaCastDlnaApi {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.shutdownUpnpService$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              api.shutdownUpnpService()
-              listOf(null)
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            api.shutdownUpnpService{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -731,13 +990,14 @@ interface MediaCastDlnaApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val optionsArg = args[0] as DiscoveryOptions
-            val wrapped: List<Any?> = try {
-              api.startDiscovery(optionsArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            api.startDiscovery(optionsArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -747,13 +1007,14 @@ interface MediaCastDlnaApi {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.stopDiscovery$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              api.stopDiscovery()
-              listOf(null)
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            api.stopDiscovery{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -763,12 +1024,15 @@ interface MediaCastDlnaApi {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDiscoveredDevices$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.getDiscoveredDevices())
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            api.getDiscoveredDevices{ result: Result<List<DlnaDevice>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -779,13 +1043,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.refreshDevice(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.refreshDevice(deviceUdnArg) { result: Result<DlnaDevice?> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -796,13 +1063,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.getDeviceServices(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getDeviceServices(deviceUdnArg) { result: Result<List<DlnaService>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -813,55 +1083,37 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
+            val deviceUdnArg = args[0] as DeviceUdn
             val serviceTypeArg = args[1] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.hasService(deviceUdnArg, serviceTypeArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            api.hasService(deviceUdnArg, serviceTypeArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.browseContentDirectory$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isDeviceOnline$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val parentIdArg = args[1] as String
-            val startIndexArg = args[2] as Long
-            val requestCountArg = args[3] as Long
-            val wrapped: List<Any?> = try {
-              listOf(api.browseContentDirectory(deviceUdnArg, parentIdArg, startIndexArg, requestCountArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.isDeviceOnline(deviceUdnArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.searchContentDirectory$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val containerIdArg = args[1] as String
-            val searchCriteriaArg = args[2] as String
-            val startIndexArg = args[3] as Long
-            val requestCountArg = args[4] as Long
-            val wrapped: List<Any?> = try {
-              listOf(api.searchContentDirectory(deviceUdnArg, containerIdArg, searchCriteriaArg, startIndexArg, requestCountArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -872,8 +1124,8 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val uriArg = args[1] as String
+            val deviceUdnArg = args[0] as DeviceUdn
+            val uriArg = args[1] as Url
             val metadataArg = args[2] as MediaMetadata
             api.setMediaUri(deviceUdnArg, uriArg, metadataArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
@@ -893,8 +1145,8 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val uriArg = args[1] as String
+            val deviceUdnArg = args[0] as DeviceUdn
+            val uriArg = args[1] as Url
             val metadataArg = args[2] as MediaMetadata
             val subtitleTracksArg = args[3] as List<SubtitleTrack>
             api.setMediaUriWithSubtitles(deviceUdnArg, uriArg, metadataArg, subtitleTracksArg) { result: Result<Unit> ->
@@ -915,13 +1167,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.supportsSubtitleControl(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.supportsSubtitleControl(deviceUdnArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -932,7 +1187,7 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
+            val deviceUdnArg = args[0] as DeviceUdn
             val subtitleTrackIdArg = args[1] as String?
             api.setSubtitleTrack(deviceUdnArg, subtitleTrackIdArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
@@ -952,13 +1207,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.getAvailableSubtitleTracks(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getAvailableSubtitleTracks(deviceUdnArg) { result: Result<List<SubtitleTrack>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -969,13 +1227,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.getCurrentSubtitleTrack(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getCurrentSubtitleTrack(deviceUdnArg) { result: Result<SubtitleTrack?> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -986,7 +1247,7 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
+            val deviceUdnArg = args[0] as DeviceUdn
             api.play(deviceUdnArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
@@ -1005,7 +1266,7 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
+            val deviceUdnArg = args[0] as DeviceUdn
             api.pause(deviceUdnArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
@@ -1024,7 +1285,7 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
+            val deviceUdnArg = args[0] as DeviceUdn
             api.stop(deviceUdnArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
@@ -1043,47 +1304,9 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val positionSecondsArg = args[1] as Long
-            api.seek(deviceUdnArg, positionSecondsArg) { result: Result<Unit> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(wrapError(error))
-              } else {
-                reply.reply(wrapResult(null))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.next$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            api.next(deviceUdnArg) { result: Result<Unit> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(wrapError(error))
-              } else {
-                reply.reply(wrapResult(null))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.previous$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            api.previous(deviceUdnArg) { result: Result<Unit> ->
+            val deviceUdnArg = args[0] as DeviceUdn
+            val positionArg = args[1] as TimePosition
+            api.seek(deviceUdnArg, positionArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))
@@ -1101,9 +1324,9 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val volumeArg = args[1] as Long
-            api.setVolume(deviceUdnArg, volumeArg) { result: Result<Unit> ->
+            val deviceUdnArg = args[0] as DeviceUdn
+            val volumeLevelArg = args[1] as VolumeLevel
+            api.setVolume(deviceUdnArg, volumeLevelArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))
@@ -1121,13 +1344,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.getVolumeInfo(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getVolumeInfo(deviceUdnArg) { result: Result<VolumeInfo> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -1138,9 +1364,9 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val mutedArg = args[1] as Boolean
-            api.setMute(deviceUdnArg, mutedArg) { result: Result<Unit> ->
+            val deviceUdnArg = args[0] as DeviceUdn
+            val muteOperationArg = args[1] as MuteOperation
+            api.setMute(deviceUdnArg, muteOperationArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))
@@ -1158,13 +1384,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.getPlaybackInfo(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getPlaybackInfo(deviceUdnArg) { result: Result<PlaybackInfo> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -1175,13 +1404,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.getCurrentPosition(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getCurrentPosition(deviceUdnArg) { result: Result<TimePosition> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -1192,58 +1424,16 @@ interface MediaCastDlnaApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val deviceUdnArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              listOf(api.getTransportState(deviceUdnArg))
-            } catch (exception: Throwable) {
-              wrapError(exception)
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getTransportState(deviceUdnArg) { result: Result<TransportState> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getPlatformVersion$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.getPlatformVersion())
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isUpnpAvailable$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.isUpnpAvailable())
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getNetworkInterfaces$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            val wrapped: List<Any?> = try {
-              listOf(api.getNetworkInterfaces())
-            } catch (exception: Throwable) {
-              wrapError(exception)
-            }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)

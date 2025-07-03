@@ -1,6 +1,10 @@
 package br.com.felnanuke2.media_cast_dlna
 
+import DeviceUdn
 import DlnaDevice
+import IpAddress
+import NetworkPort
+import Url
 import org.jupnp.model.meta.LocalDevice
 import org.jupnp.model.meta.RemoteDevice
 
@@ -19,17 +23,17 @@ fun RemoteDevice.toDlnaDevice(): DlnaDevice {
     val iconUrl = ""
 
     return DlnaDevice(
-        udn = identity.udn.identifierString,
+        udn = DeviceUdn(identity.udn.identifierString),
         friendlyName = deviceDetails.friendlyName ?: "Unknown Device",
         deviceType = this.type.type,
         manufacturerName = deviceDetails.manufacturerDetails?.manufacturer
             ?: "Unknown Manufacturer",
         modelName = deviceDetails.modelDetails?.modelName ?: "Unknown Model",
-        ipAddress = ipAddress,
-        port = port,
+        ipAddress = IpAddress(ipAddress),
+        port = NetworkPort(port),
         modelDescription = deviceDetails.modelDetails?.modelDescription,
-        presentationUrl = deviceDetails.presentationURI?.toString(),
-        iconUrl = iconUrl
+        presentationUrl = deviceDetails.presentationURI?.toString()?.let { Url(it) },
+        iconUrl = if (iconUrl.isNotEmpty()) Url(iconUrl) else null
     )
 }
 
@@ -49,16 +53,16 @@ fun LocalDevice.toDlnaDevice(): DlnaDevice {
     val iconUrl = ""
 
     return DlnaDevice(
-        udn = identity.udn.identifierString,
+        udn = DeviceUdn(identity.udn.identifierString),
         friendlyName = deviceDetails.friendlyName ?: "Unknown Local Device",
         deviceType = this.type.type,
         manufacturerName = deviceDetails.manufacturerDetails?.manufacturer
             ?: "Unknown Manufacturer",
         modelName = deviceDetails.modelDetails?.modelName ?: "Unknown Model",
-        ipAddress = ipAddress,
-        port = port,
+        ipAddress = IpAddress(ipAddress),
+        port = NetworkPort(port),
         modelDescription = deviceDetails.modelDetails?.modelDescription,
-        presentationUrl = deviceDetails.presentationURI?.toString(),
-        iconUrl = iconUrl
+        presentationUrl = deviceDetails.presentationURI?.toString()?.let { Url(it) },
+        iconUrl = if (iconUrl.isNotEmpty()) Url(iconUrl) else null
     )
 }

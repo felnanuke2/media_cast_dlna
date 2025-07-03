@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-07-03
+
+### 🔄 Refactored
+- **Example App Complete Restructure**: Major refactoring of the example application with clean architecture
+- **Service Layer Implementation**: Added dedicated `MediaCastService` for better separation of concerns
+- **Modular Widget Architecture**: Split UI into focused, reusable widgets
+- **State Management Improvements**: Enhanced state management with proper lifecycle handling
+
+### ✨ Enhanced
+- **Device Details Modal**: Improved device selection with detailed information display
+- **Real-time Monitoring**: Enhanced connectivity and playback state monitoring
+- **Error Handling**: Comprehensive error handling with user-friendly messages
+- **UI/UX Improvements**: Modern, responsive interface with better visual feedback
+- **Code Organization**: Clean folder structure with proper separation of concerns
+
+### 🏗️ Architecture
+- **Clean Architecture**: Implemented layered architecture (presentation, services, data, core)
+- **Repository Pattern**: Added test media repository for better data management
+- **Utility Classes**: Centralized utility functions for formatting, media handling, and UI operations
+- **Constants Management**: Centralized configuration and constants
+- **Theme System**: Dedicated theme configuration for consistent styling
+
+### 📁 New Structure
+- `core/` - Constants, models, themes, and utilities
+- `data/` - Repositories and data sources
+- `presentation/` - Widgets and UI components
+- `services/` - Business logic and external API interactions
+
+### 🔧 Technical Improvements
+- **Timer Management**: Improved timer handling for real-time updates
+- **Memory Management**: Better resource cleanup and disposal
+- **Performance**: Optimized rendering and state updates
+- **Type Safety**: Enhanced type safety throughout the codebase
+
+### 📖 Documentation
+- **Comprehensive Example README**: Detailed documentation for the example app
+- **Code Comments**: Improved inline documentation
+- **Architecture Guide**: Clear explanation of the project structure
+
 ## [0.1.0] - 2025-07-01
 
 ### Added

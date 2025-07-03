@@ -5,6 +5,8 @@ import ImageMetadata
 import MediaMetadata
 import SubtitleTrack
 import VideoMetadata
+import TimeDuration
+import Url
 import android.util.Log
 import org.jupnp.support.model.DIDLContent
 import org.jupnp.support.model.ProtocolInfo
@@ -62,7 +64,7 @@ public fun createDefaultMetadata(
         }
         DIDLParser().generate(didl)
     } catch (e: Exception) {
-        Log.e("MediaCastDlna", "Error generating DIDL metadata", e)
+        
         ""
     }
 }
@@ -109,24 +111,24 @@ private fun createAudioItem(
     // Add album art if available
     metadata?.albumArtUri?.let { albumArtUri ->
         try {
-            audioItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(albumArtUri)))
-            Log.d("MediaCastDlna", "  Album Art: $albumArtUri")
+            audioItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(albumArtUri.value)))
+            
         } catch (e: Exception) {
-            Log.w("MediaCastDlna", "Invalid album art URI: $albumArtUri", e)
+            
         }
     }
 
     didl.addItem(audioItem)
     
     // Log the essential info
-    Log.d("MediaCastDlna", "Created simple audio DIDL item:")
-    Log.d("MediaCastDlna", "  Title: $title")
-    Log.d("MediaCastDlna", "  URI: $uri")
-    Log.d("MediaCastDlna", "  MIME Type: $audioMimeType")
-    Log.d("MediaCastDlna", "  Artist: $artist")
-    Log.d("MediaCastDlna", "  Album: $album")
+    
+    
+    
+    
+    
+    
     if (metadata?.albumArtUri != null) {
-        Log.d("MediaCastDlna", "  Album Art: ${metadata.albumArtUri}")
+        
     }
 }
 
@@ -148,7 +150,7 @@ private fun createVideoItem(
 
     val resource = Res(
         ProtocolInfo(protocolInfo),
-        metadata?.duration?.toLong(),
+        metadata?.duration?.seconds?.toLong(),
         uri
     )
 
@@ -163,13 +165,13 @@ private fun createVideoItem(
         val protocolInfoString = "http-get:*:${subtitleTrack.mimeType}:DLNA.ORG_PN=TEXT_SRT"
         val subtitleResource = Res(
             ProtocolInfo(protocolInfoString),
-            null, // Subtitle files don't have duration
-            subtitleTrack.uri
+            0L, // Subtitle files don't have duration
+            subtitleTrack.uri.value
         )
         
         videoItem.addResource(subtitleResource)
         
-        Log.d("MediaCastDlna", "  Added subtitle track: ${subtitleTrack.language} - ${subtitleTrack.uri}")
+        
     }
 
     // Set metadata properties based on Pigeon definition
@@ -183,17 +185,17 @@ private fun createVideoItem(
                 if (resolutionParts.size == 2) {
                     resource.resolution = "${resolutionParts[0]}x${resolutionParts[1]}"
                 } else {
-                    Log.w("MediaCastDlna", "Invalid resolution format: $it")
+                    
                 }
             } catch (e: Exception) {
-                Log.w("MediaCastDlna", "Invalid resolution format: $it", e)
+                
             }
         }
         meta.thumbnailUri?.let {
             try {
-                videoItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(it)))
+                videoItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(it.value)))
             } catch (e: Exception) {
-                Log.w("MediaCastDlna", "Invalid thumbnail URI: $it", e)
+                
             }
         }
         meta.upnpClass?.let {
@@ -208,7 +210,7 @@ private fun createVideoItem(
 
     didl.addItem(videoItem)
     
-    Log.d("MediaCastDlna", "Created video DIDL item with ${subtitleTracks?.size ?: 0} subtitle tracks")
+    
 }
 
 /**
@@ -241,10 +243,10 @@ private fun createImageItem(
                 if (resolutionParts.size == 2) {
                     resource.resolution = "${resolutionParts[0]}x${resolutionParts[1]}"
                 } else {
-                    Log.w("MediaCastDlna", "Invalid resolution format: $it")
+                    
                 }
             } catch (e: Exception) {
-                Log.w("MediaCastDlna", "Invalid resolution format: $it", e)
+                
             }
         }
         meta.date?.let {
@@ -252,9 +254,9 @@ private fun createImageItem(
         }
         meta.thumbnailUri?.let {
             try {
-                imageItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(it)))
+                imageItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(it.value)))
             } catch (e: Exception) {
-                Log.w("MediaCastDlna", "Invalid thumbnail URI: $it", e)
+                
             }
         }
         meta.upnpClass?.let {
@@ -387,9 +389,9 @@ public fun parseMediaMetadataFromDidl(didlMetadata: String?, enableDebugLogging:
                     album = album,
                     genre = genre,
                     duration = try {
-                        item.firstResource?.duration?.let { parseTimeToSeconds(it).toLong() }
+                        item.firstResource?.duration?.let { TimeDuration(parseTimeToSeconds(it).toLong()) }
                     } catch (e: Exception) { null },
-                    albumArtUri = albumArtUri,
+                    albumArtUri = albumArtUri?.let { Url(it) },
                     description = description,
                     originalTrackNumber = originalTrackNumber?.toLong(),
                     upnpClass = try { item.clazz?.value } catch (e: Exception) { null }
@@ -406,10 +408,10 @@ public fun parseMediaMetadataFromDidl(didlMetadata: String?, enableDebugLogging:
                     title = item.title,
                     resolution = try { item.firstResource?.resolution } catch (e: Exception) { null },
                     duration = try {
-                        item.firstResource?.duration?.let { parseTimeToSeconds(it).toLong() }
+                        item.firstResource?.duration?.let { TimeDuration(parseTimeToSeconds(it).toLong()) }
                     } catch (e: Exception) { null },
                     description = description,
-                    thumbnailUri = thumbnailUri,
+                    thumbnailUri = thumbnailUri?.let { Url(it) },
                     genre = genre,
                     upnpClass = try { item.clazz?.value } catch (e: Exception) { null },
                     bitrate = try { item.firstResource?.bitrate?.toLong() } catch (e: Exception) { null }
@@ -426,7 +428,7 @@ public fun parseMediaMetadataFromDidl(didlMetadata: String?, enableDebugLogging:
                     title = item.title,
                     resolution = try { item.firstResource?.resolution } catch (e: Exception) { null },
                     description = description,
-                    thumbnailUri = thumbnailUri,
+                    thumbnailUri = thumbnailUri?.let { Url(it) },
                     date = date,
                     upnpClass = try { item.clazz?.value } catch (e: Exception) { null }
                 )
@@ -442,7 +444,7 @@ public fun parseMediaMetadataFromDidl(didlMetadata: String?, enableDebugLogging:
             }
         }
     } catch (e: Exception) {
-        Log.w("MediaCastDlna", "Failed to parse DIDL metadata: $didlMetadata", e)
+        
         // Return a basic fallback metadata
         AudioMetadata(
             title = "Unknown",
@@ -478,7 +480,7 @@ private fun getPropertyValue(item: DIDLObject, propertyName: String): String? {
             }
         }
     } catch (e: Exception) {
-        Log.w("MediaCastDlna", "Failed to extract property $propertyName", e)
+        
         null
     }
 }
@@ -500,7 +502,7 @@ private fun getAllPropertyValues(item: DIDLObject, propertyName: String): List<S
             }
         }
     } catch (e: Exception) {
-        Log.w("MediaCastDlna", "Failed to extract properties $propertyName", e)
+        
         emptyList()
     }
 }
@@ -540,13 +542,13 @@ private fun parseTimeToSeconds(timeString: String?): Double {
  */
 private fun logItemProperties(item: DIDLObject, tag: String = "MediaCastDlna") {
     try {
-        Log.d(tag, "=== DIDL Item Properties Debug ===")
-        Log.d(tag, "Item type: ${item.javaClass.simpleName}")
-        Log.d(tag, "Title: ${item.title}")
-        Log.d(tag, "ID: ${item.id}")
-        Log.d(tag, "UPnP Class: ${item.clazz?.value}")
         
-        Log.d(tag, "Properties count: ${item.properties.size}")
+        
+        
+        
+        
+        
+        
         item.properties.forEachIndexed { index, property ->
             try {
                 val propertyName = property.javaClass.simpleName
@@ -557,24 +559,23 @@ private fun logItemProperties(item: DIDLObject, tag: String = "MediaCastDlna") {
                 } catch (e: Exception) {
                     property.toString()
                 }
-                Log.d(tag, "  Property[$index]: $propertyName = $propertyValue")
+                
             } catch (e: Exception) {
-                Log.w(tag, "  Property[$index]: Error reading property", e)
+                
             }
         }
         
         // Log resources information
-        Log.d(tag, "Resources count: ${item.resources.size}")
+        
         item.resources.forEachIndexed { index, resource ->
-            Log.d(tag, "  Resource[$index]: ${resource.value} (${resource.protocolInfo})")
-            resource.duration?.let { Log.d(tag, "    Duration: $it") }
-            resource.resolution?.let { Log.d(tag, "    Resolution: $it") }
-            resource.bitrate?.let { Log.d(tag, "    Bitrate: $it") }
+            resource.duration?.let {  }
+            resource.resolution?.let {  }
+            resource.bitrate?.let {  }
         }
         
-        Log.d(tag, "=== End Properties Debug ===")
+        
     } catch (e: Exception) {
-        Log.e(tag, "Error logging item properties", e)
+        
     }
 }
 

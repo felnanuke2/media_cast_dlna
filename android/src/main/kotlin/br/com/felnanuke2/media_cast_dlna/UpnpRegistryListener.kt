@@ -1,8 +1,6 @@
 package br.com.felnanuke2.media_cast_dlna
 
-import MediaCastDlnaApi
-import android.os.Handler
-import android.os.Looper
+import DlnaDevice
 import android.util.Log
 import org.jupnp.model.meta.LocalDevice
 import org.jupnp.model.meta.RemoteDevice
@@ -14,7 +12,7 @@ import java.lang.Exception
  * RegistryListener implementation for handling UPnP device discovery events.
  * This class manages device discovery callbacks and communicates with Flutter
  * through the provided MediaCastDlnaApi and DeviceDiscoveryApi instances.
- * 
+ *
  * IMPORTANT: All Flutter API calls must be executed on the main UI thread.
  * The UPnP registry callbacks are executed on background threads (e.g., jupnp-4),
  * so this class uses a Handler to post all Flutter API calls to the main thread
@@ -23,9 +21,8 @@ import java.lang.Exception
 class UpnpRegistryListener(
 ) : RegistryListener {
 
-    private var remoteDevices: MutableList<RemoteDevice> = mutableListOf()
-    private var localDevice: MutableList<LocalDevice> = mutableListOf()
-    private val mainHandler = Handler(Looper.getMainLooper())
+    private val _devices = mutableListOf<DlnaDevice>()
+    val devices: List<DlnaDevice> get() = _devices
 
     companion object {
         // Device types that we're interested in for media casting
@@ -38,31 +35,16 @@ class UpnpRegistryListener(
             "urn:schemas-upnp-org:device:MediaServer:3",
             "urn:schemas-upnp-org:device:MediaServer:4"
         )
-        
+
         // Device type prefixes to filter for media devices
         private val MEDIA_DEVICE_PREFIXES = setOf(
-            "MediaRenderer",
-            "MediaServer"
+            "MediaRenderer", "MediaServer"
         )
-        
+
         // Devices to exclude (like Internet Gateway Devices)
         private val EXCLUDED_DEVICE_PREFIXES = setOf(
-            "InternetGatewayDevice",
-            "WANDevice",
-            "LANDevice",
-            "WFADevice"
+            "InternetGatewayDevice", "WANDevice", "LANDevice", "WFADevice"
         )
-    }
-
-    /**
-     * Helper method to safely post Flutter API calls to the main thread
-     */
-    private fun runOnMainThread(action: () -> Unit) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            action()
-        } else {
-            mainHandler.post(action)
-        }
     }
 
     /**
@@ -71,29 +53,27 @@ class UpnpRegistryListener(
     private fun isMediaDevice(device: RemoteDevice): Boolean {
         val deviceType = device.type.toString()
         val friendlyName = device.details?.friendlyName ?: "Unknown"
-        
-        Log.d("UpnpRegistryListener", "Checking device: $friendlyName, type: $deviceType")
-        
+
+
         // First check if it's explicitly excluded
         if (EXCLUDED_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }) {
-            Log.d("UpnpRegistryListener", "Device excluded: $friendlyName ($deviceType)")
             return false
         }
-        
+
         // Check for exact match with known media device types
         if (MEDIA_DEVICE_TYPES.contains(deviceType)) {
-            Log.d("UpnpRegistryListener", "Device accepted (exact match): $friendlyName ($deviceType)")
+           
             return true
         }
-        
+
         // Check for partial match with media device prefixes
         val isMediaDevice = MEDIA_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }
         if (isMediaDevice) {
-            Log.d("UpnpRegistryListener", "Device accepted (partial match): $friendlyName ($deviceType)")
+           
         } else {
-            Log.d("UpnpRegistryListener", "Device rejected: $friendlyName ($deviceType)")
+
         }
-        
+
         return isMediaDevice
     }
 
@@ -103,41 +83,37 @@ class UpnpRegistryListener(
     private fun isMediaDevice(device: LocalDevice): Boolean {
         val deviceType = device.type.toString()
         val friendlyName = device.details?.friendlyName ?: "Unknown"
-        
-        Log.d("UpnpRegistryListener", "Checking local device: $friendlyName, type: $deviceType")
-        
+
+
         // First check if it's explicitly excluded
         if (EXCLUDED_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }) {
-            Log.d("UpnpRegistryListener", "Local device excluded: $friendlyName ($deviceType)")
             return false
         }
-        
+
         // Check for exact match with known media device types
         if (MEDIA_DEVICE_TYPES.contains(deviceType)) {
-            Log.d("UpnpRegistryListener", "Local device accepted (exact match): $friendlyName ($deviceType)")
+          
             return true
         }
-        
+
         // Check for partial match with media device prefixes
         val isMediaDevice = MEDIA_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }
         if (isMediaDevice) {
-            Log.d("UpnpRegistryListener", "Local device accepted (partial match): $friendlyName ($deviceType)")
+          
         } else {
-            Log.d("UpnpRegistryListener", "Local device rejected: $friendlyName ($deviceType)")
         }
-        
+
         return isMediaDevice
     }
 
     override fun remoteDeviceDiscoveryStarted(registry: Registry?, device: RemoteDevice?) {
         // This method is called when remote device discovery starts.
-        // You can notify Flutter that discovery has started if needed.
-        // For example, you might want to clear the existing list of devices.
-        remoteDevices.clear()
+
         device?.let {
             // Only notify Flutter if this is a media device
             if (isMediaDevice(it)) {
-
+              
+                // Note: We don't add the device here yet, only when discovery is complete
             }
         }
     }
@@ -145,19 +121,46 @@ class UpnpRegistryListener(
     override fun remoteDeviceDiscoveryFailed(
         registry: Registry?, device: RemoteDevice?, e: Exception?
     ) {
+        device?.let {
+            if (isMediaDevice(it)) {
+                Log.w(
+                    "UpnpRegistryListener",
+                    "Remote device discovery failed for: ${it.details?.friendlyName}",
+                    e
+                )
 
+                // Remove the device from our list if it failed discovery
+                val dlnaDevice = it.toDlnaDevice()
+                val iterator = _devices.iterator()
+                while (iterator.hasNext()) {
+                    if (iterator.next().udn == dlnaDevice?.udn) {
+                        iterator.remove()
+                     
+                        break
+                    }
+                }
+            }
+        }
     }
 
     override fun remoteDeviceAdded(registry: Registry?, device: RemoteDevice?) {
         device?.let {
             // Only process media devices
             if (isMediaDevice(it)) {
-                // Add the discovered remote device to the list
-                remoteDevices.add(it)
+               
 
-                // Convert to DlnaDevice and notify Flutter
+                // Convert to DlnaDevice and add to devices list
                 val dlnaDevice = it.toDlnaDevice()
-
+                dlnaDevice?.let { dlna ->
+                    // Check if device already exists to avoid duplicates
+                    val existingIndex = _devices.indexOfFirst { d -> d.udn == dlna.udn }
+                    if (existingIndex == -1) {
+                        _devices.add(dlna)
+                      
+                    } else {
+                       
+                    }
+                }
             }
         }
     }
@@ -166,35 +169,33 @@ class UpnpRegistryListener(
         device?.let {
             // Only process media devices
             if (isMediaDevice(it)) {
-                // Update the device in the list if it exists
-                val index = remoteDevices.indexOfFirst { d -> d.identity == it.identity }
-                if (index != -1) {
-                    remoteDevices[index] = it
-                } else {
-                    remoteDevices.add(it)
-                }
-
-                // Convert to DlnaDevice and notify Flutter about the update
+                // Convert to DlnaDevice and update in the list
                 val dlnaDevice = it.toDlnaDevice()
-
+                dlnaDevice.let { dlna ->
+                    val index = _devices.indexOfFirst { d -> d.udn == dlna.udn }
+                    if (index != -1) {
+                        _devices[index] = dlna
+                       
+                    } else {
+                        _devices.add(dlna)
+                       
+                    }
+                }
             }
         }
     }
 
     override fun remoteDeviceRemoved(registry: Registry?, device: RemoteDevice?) {
-        device?.let {
-            // Only process media devices
-            if (isMediaDevice(it)) {
-                val iterator = remoteDevices.iterator()
-                while (iterator.hasNext()) {
-                    if (iterator.next().identity == it.identity) {
-                        iterator.remove()
-                        // Notify Flutter about the removed device
-                        val dlnaDevice = it.toDlnaDevice()
-
-                        break;
-                    }
-                }
+        //remove device with same udn
+        val deviceUdn = device?.identity?.udn ?: return
+       
+        // Remove the device from our list
+        val iterator = _devices.iterator()
+        while (iterator.hasNext()) {
+            if (iterator.next().udn.value == deviceUdn.identifierString) {
+                iterator.remove()
+              
+                break
             }
         }
     }
@@ -203,12 +204,20 @@ class UpnpRegistryListener(
         device?.let {
             // Only process media devices
             if (isMediaDevice(it)) {
-                // Add the discovered local device to the list
-                localDevice.add(it)
+              
 
-                // Convert to DlnaDevice and notify Flutter
+                // Convert to DlnaDevice and add to devices list
                 val dlnaDevice = it.toDlnaDevice()
-
+                dlnaDevice?.let { dlna ->
+                    // Check if device already exists to avoid duplicates
+                    val existingIndex = _devices.indexOfFirst { d -> d.udn == dlna.udn }
+                    if (existingIndex == -1) {
+                        _devices.add(dlna)
+                    
+                    } else {
+                      
+                    }
+                }
             }
         }
     }
@@ -217,14 +226,18 @@ class UpnpRegistryListener(
         device?.let {
             // Only process media devices
             if (isMediaDevice(it)) {
-                val iterator = localDevice.iterator()
-                while (iterator.hasNext()) {
-                    if (iterator.next().identity == it.identity) {
-                        iterator.remove()
-                        // Notify Flutter about the removed local device
-                        val dlnaDevice = it.toDlnaDevice()
+              
 
-                        break;
+                // Remove the device from our list
+                val dlnaDevice = it.toDlnaDevice()
+                dlnaDevice?.let { dlna ->
+                    val iterator = _devices.iterator()
+                    while (iterator.hasNext()) {
+                        if (iterator.next().udn == dlna.udn) {
+                            iterator.remove()
+                         
+                            break
+                        }
                     }
                 }
             }
@@ -233,15 +246,15 @@ class UpnpRegistryListener(
 
     override fun beforeShutdown(registry: Registry?) {
         // This method is called before the registry is shut down.
-        // You can perform any necessary cleanup here, such as notifying Flutter
-        // that device discovery is stopping.
-        TODO("Implement pre-shutdown logic if needed")
+        // Clear all devices from the list
+
+        _devices.clear()
     }
 
     override fun afterShutdown() {
         // This method is called after the registry has been shut down.
-        // You can perform any necessary cleanup here, such as notifying Flutter
-        // that device discovery has stopped.
-        TODO("Implement post-shutdown logic if needed")
+        // Ensure devices list is cleared
+
+        _devices.clear()
     }
 }

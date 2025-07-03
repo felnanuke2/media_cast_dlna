@@ -3,6 +3,9 @@ package br.com.felnanuke2.media_cast_dlna.core
 import PlaybackInfo
 import TransportState
 import SubtitleTrack
+import TimePosition
+import TimeDuration
+import Url
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -32,50 +35,50 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
      * Sets media URI using coroutines for cleaner async handling
      */
     suspend fun setMediaUri(deviceUdn: String, uri: String, finalMetadata: String) {
-        Log.d("MediaCastDlna", "MediaControlManager.setMediaUri called - deviceUdn: $deviceUdn")
-        Log.d("MediaCastDlna", "URI: $uri")
-        Log.d("MediaCastDlna", "Metadata: $finalMetadata")
+        
+        
+        
         
         try {
             val (device, avTransportService) = requireDeviceAndService(deviceUdn, "AVTransport")
-            Log.d("MediaCastDlna", "Found device and AVTransport service: ${device.details.friendlyName}")
+            
             
             val controlPoint = requireUpnpService().controlPoint
-            Log.d("MediaCastDlna", "Got control point, creating SetAVTransportURI callback...")
+            
             
             val setUriCallback = object : SetAVTransportURI(avTransportService, uri, finalMetadata) {
                 override fun success(invocation: ActionInvocation<*>?) {
-                    Log.d("MediaCastDlna", "SetAVTransportURI successful for device $deviceUdn")
+                    
                     invocation?.let { inv ->
-                        Log.d("MediaCastDlna", "Invocation details - Action: ${inv.action?.name}, Input count: ${inv.input?.size}")
+                        
                         inv.output?.forEach { output ->
-                            Log.d("MediaCastDlna", "Output: ${output.argument.name} = ${output.value}")
+                            
                         }
                     }
                 }
                 override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                    Log.e("MediaCastDlna", "SetAVTransportURI failed for device $deviceUdn: $defaultMsg")
+                    
                     operation?.let { resp ->
-                        Log.e("MediaCastDlna", "Response status: ${resp.responseDetails}")
-                        Log.e("MediaCastDlna", "Response message: ${resp.statusMessage}")
+                        
+                        
                     }
                     invocation?.let { inv ->
-                        Log.e("MediaCastDlna", "Failed invocation details - Action: ${inv.action?.name}")
+                        
                         inv.input?.forEach { input ->
-                            Log.e("MediaCastDlna", "Input: ${input.argument.name} = ${input.value}")
+                            
                         }
                     }
                 }
             }
             
-            Log.d("MediaCastDlna", "Executing SetAVTransportURI callback...")
+            
             controlPoint.executeSuspending(setUriCallback)
-            Log.d("MediaCastDlna", "SetAVTransportURI execution completed")
+            
             
             // Add a small delay to ensure the device processes the URI before play is called
             kotlinx.coroutines.delay(500)
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "Exception in setMediaUri: ${e.message}", e)
+            
             throw e
         }
     }
@@ -84,45 +87,45 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
      * Plays media using coroutines
      */
     suspend fun play(deviceUdn: String) {
-        Log.d("MediaCastDlna", "MediaControlManager.play called - deviceUdn: $deviceUdn")
+        
         
         try {
             val (device, avTransportService) = requireDeviceAndService(deviceUdn, "AVTransport")
-            Log.d("MediaCastDlna", "Found device and AVTransport service: ${device.details.friendlyName}")
+            
             
             val controlPoint = requireUpnpService().controlPoint
-            Log.d("MediaCastDlna", "Got control point, creating Play callback...")
+            
             
             val playCallback = object : Play(avTransportService) {
                 override fun success(invocation: ActionInvocation<*>?) {
-                    Log.d("MediaCastDlna", "Play action successful for device $deviceUdn")
+                    
                     invocation?.let { inv ->
-                        Log.d("MediaCastDlna", "Invocation details - Action: ${inv.action?.name}, Input count: ${inv.input?.size}")
+                        
                         inv.output?.forEach { output ->
-                            Log.d("MediaCastDlna", "Output: ${output.argument.name} = ${output.value}")
+                            
                         }
                     }
                 }
                 override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                    Log.e("MediaCastDlna", "Play action failed for device $deviceUdn: $defaultMsg")
+                    
                     operation?.let { resp ->
-                        Log.e("MediaCastDlna", "Response status: ${resp.responseDetails}")
-                        Log.e("MediaCastDlna", "Response message: ${resp.statusMessage}")
+                        
+                        
                     }
                     invocation?.let { inv ->
-                        Log.e("MediaCastDlna", "Failed invocation details - Action: ${inv.action?.name}")
+                        
                         inv.input?.forEach { input ->
-                            Log.e("MediaCastDlna", "Input: ${input.argument.name} = ${input.value}")
+                            
                         }
                     }
                 }
             }
             
-            Log.d("MediaCastDlna", "Executing Play callback...")
+            
             controlPoint.executeSuspending(playCallback)
-            Log.d("MediaCastDlna", "Play execution completed")
+            
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "Exception in play: ${e.message}", e)
+            
             throw e
         }
     }
@@ -137,7 +140,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         // First check if device is playing
         val transportInfo = controlPoint.getTransportInfoSuspending(avTransportService)
         if (transportInfo?.currentTransportState != org.jupnp.support.model.TransportState.PLAYING) {
-            Log.w("MediaCastDlna", "Cannot pause: Device is not in PLAYING state (current: ${transportInfo?.currentTransportState})")
+
             return
         }
         
@@ -150,10 +153,10 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         
         val pauseCallback = object : ActionCallback(actionInvocation) {
             override fun success(invocation: ActionInvocation<*>?) {
-                Log.d("MediaCastDlna", "Pause action successful for device $deviceUdn")
+                
             }
             override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                Log.e("MediaCastDlna", "Pause action failed for device $deviceUdn: $defaultMsg")
+                
             }
         }
         
@@ -170,7 +173,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         // First check if device is already stopped
         val transportInfo = controlPoint.getTransportInfoSuspending(avTransportService)
         if (transportInfo?.currentTransportState == org.jupnp.support.model.TransportState.STOPPED) {
-            Log.w("MediaCastDlna", "Cannot stop: Device is already in STOPPED state.")
+            
             return
         }
         
@@ -183,10 +186,10 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         
         val stopCallback = object : ActionCallback(actionInvocation) {
             override fun success(invocation: ActionInvocation<*>?) {
-                Log.d("MediaCastDlna", "Stop action successful for device $deviceUdn")
+                
             }
             override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                Log.e("MediaCastDlna", "Stop action failed for device $deviceUdn: $defaultMsg")
+                
             }
         }
         
@@ -213,10 +216,10 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         
         val seekCallback = object : ActionCallback(actionInvocation) {
             override fun success(invocation: ActionInvocation<*>?) {
-                Log.d("MediaCastDlna", "Seek action successful for device $deviceUdn to $timeString")
+                
             }
             override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                Log.e("MediaCastDlna", "Seek action failed for device $deviceUdn: $defaultMsg")
+                
             }
         }
         
@@ -239,10 +242,10 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         
         val nextCallback = object : ActionCallback(actionInvocation) {
             override fun success(invocation: ActionInvocation<*>?) {
-                Log.d("MediaCastDlna", "Next action successful for device $deviceUdn")
+                
             }
             override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                Log.e("MediaCastDlna", "Next action failed for device $deviceUdn: $defaultMsg")
+                
             }
         }
         
@@ -265,10 +268,10 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         
         val previousCallback = object : ActionCallback(actionInvocation) {
             override fun success(invocation: ActionInvocation<*>?) {
-                Log.d("MediaCastDlna", "Previous action successful for device $deviceUdn")
+                
             }
             override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
-                Log.e("MediaCastDlna", "Previous action failed for device $deviceUdn: $defaultMsg")
+                
             }
         }
         
@@ -286,7 +289,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             val positionInfo = controlPoint.getPositionInfoSuspending(avTransportService)
             parseTimeToSeconds(positionInfo?.relTime).toLong()
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "GetCurrentPosition failed for device $deviceUdn", e)
+            
             -1L
         }
     }
@@ -309,7 +312,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                 else -> TransportState.STOPPED
             }
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "GetTransportState failed for device $deviceUdn", e)
+            
             TransportState.STOPPED
         }
     }
@@ -344,17 +347,17 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             
             PlaybackInfo(
                 state = state,
-                position = parseTimeToSeconds(positionInfo?.relTime).toLong(),
-                duration = parseTimeToSeconds(positionInfo?.trackDuration).toLong(),
+                position = TimePosition(parseTimeToSeconds(positionInfo?.relTime).toLong()),
+                duration = TimeDuration(parseTimeToSeconds(positionInfo?.trackDuration).toLong()),
                 currentTrackUri = positionInfo?.trackURI,
                 currentTrackMetadata = parseMediaMetadataFromDidl(positionInfo?.trackMetaData)
             )
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "GetPlaybackInfo failed for device $deviceUdn", e)
+            
             PlaybackInfo(
                 state = TransportState.STOPPED,
-                position = 0L,
-                duration = 0L,
+                position = TimePosition(0),
+                duration = TimeDuration(0),
                 currentTrackUri = null,
                 currentTrackMetadata = null
             )
@@ -366,15 +369,15 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
      */
     suspend fun castVideo(deviceUdn: String, videoUrl: String, metadata: String) {
         try {
-            Log.d("MediaCastDlna", "Setting media URI for device $deviceUdn...")
+            
             setMediaUri(deviceUdn, videoUrl, metadata)
             
-            Log.d("MediaCastDlna", "Starting playback for device $deviceUdn...")
+            
             play(deviceUdn)
             
-            Log.d("MediaCastDlna", "Video cast successful for device $deviceUdn")
+            
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "Failed to cast video on device $deviceUdn", e)
+            
             throw RuntimeException("Failed to cast video: ${e.message}", e)
         }
     }
@@ -388,23 +391,23 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         finalMetadata: String,
         subtitleTracks: List<SubtitleTrack>
     ) {
-        Log.d("MediaCastDlna", "MediaControlManager.setMediaUriWithSubtitles called - deviceUdn: $deviceUdn")
-        Log.d("MediaCastDlna", "URI: $uri")
-        Log.d("MediaCastDlna", "Subtitle tracks: ${subtitleTracks.size}")
+        
+        
+        
         
         try {
             val (device, avTransportService) = requireDeviceAndService(deviceUdn, "AVTransport")
-            Log.d("MediaCastDlna", "Found device and AVTransport service: ${device.details.friendlyName}")
+            
             
             val controlPoint = requireUpnpService().controlPoint
-            Log.d("MediaCastDlna", "Got control point, creating SetAVTransportURI callback...")
+            
             
             // Enhanced metadata with subtitle information
             val enhancedMetadata = enhanceMetadataWithSubtitles(finalMetadata, subtitleTracks)
             
             val setUriCallback = object : SetAVTransportURI(avTransportService, uri, enhancedMetadata) {
                 override fun success(invocation: ActionInvocation<*>?) {
-                    Log.d("MediaCastDlna", "SetAVTransportURI successful for device $deviceUdn")
+                    
                 }
 
                 override fun failure(
@@ -413,7 +416,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                     defaultMsg: String?
                 ) {
                     val errorMsg = "SetAVTransportURI failed: ${operation?.responseDetails} - $defaultMsg"
-                    Log.e("MediaCastDlna", errorMsg)
+                    
                     throw RuntimeException(errorMsg)
                 }
             }
@@ -424,7 +427,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             }
             
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "setMediaUriWithSubtitles failed for device $deviceUdn", e)
+            
             throw RuntimeException("Failed to set media URI with subtitles: ${e.message}", e)
         }
     }
@@ -440,10 +443,10 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             val setSubtitleAction = avTransportService.getAction("SetCurrentSubtitle")
             val result = setSubtitleAction != null
             
-            Log.d("MediaCastDlna", "Device $deviceUdn subtitle support: $result")
+            
             result
         } catch (e: Exception) {
-            Log.w("MediaCastDlna", "Could not check subtitle support for device $deviceUdn", e)
+            
             false
         }
     }
@@ -457,33 +460,33 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         finalMetadata: String,
         subtitleTracks: List<SubtitleTrack>
     ) {
-        Log.d("MediaCastDlna", "Enhanced setMediaUriWithSubtitles called - deviceUdn: $deviceUdn")
-        Log.d("MediaCastDlna", "URI: $uri")
-        Log.d("MediaCastDlna", "Subtitle tracks: ${subtitleTracks.size}")
+        
+        
+        
         
         try {
             val (device, avTransportService) = requireDeviceAndService(deviceUdn, "AVTransport")
-            Log.d("MediaCastDlna", "Found device and AVTransport service: ${device.details.friendlyName}")
+            
             
             val controlPoint = requireUpnpService().controlPoint
-            Log.d("MediaCastDlna", "Got control point, creating SetAVTransportURI callback...")
+            
             
             // Check if device supports subtitle control
             val supportsSubtitles = deviceSupportsSubtitleControl(deviceUdn)
             
             val metadataToUse = if (supportsSubtitles && subtitleTracks.isNotEmpty()) {
-                Log.d("MediaCastDlna", "Device supports subtitles, enhancing metadata...")
+                
                 enhanceMetadataWithSubtitles(finalMetadata, subtitleTracks)
             } else {
                 if (!supportsSubtitles && subtitleTracks.isNotEmpty()) {
-                    Log.w("MediaCastDlna", "Device does not support subtitle control, playing without subtitles")
+                    
                 }
                 finalMetadata
             }
             
             val setUriCallback = object : SetAVTransportURI(avTransportService, uri, metadataToUse) {
                 override fun success(invocation: ActionInvocation<*>?) {
-                    Log.d("MediaCastDlna", "SetAVTransportURI successful for device $deviceUdn")
+                    
                 }
 
                 override fun failure(
@@ -492,7 +495,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                     defaultMsg: String?
                 ) {
                     val errorMsg = "SetAVTransportURI failed: ${operation?.responseDetails} - $defaultMsg"
-                    Log.e("MediaCastDlna", errorMsg)
+                    
                     throw RuntimeException(errorMsg)
                 }
             }
@@ -503,7 +506,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             }
             
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "Enhanced setMediaUriWithSubtitles failed for device $deviceUdn", e)
+            
             throw RuntimeException("Failed to set media URI with subtitles: ${e.message}", e)
         }
     }
@@ -512,12 +515,12 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
      * Enable or disable subtitle track
      */
     suspend fun setSubtitleTrack(deviceUdn: String, subtitleTrackId: String?) {
-        Log.d("MediaCastDlna", "Setting subtitle track: $subtitleTrackId for device: $deviceUdn")
+        
         
         try {
             // First check if the device supports subtitle control
             if (!deviceSupportsSubtitleControl(deviceUdn)) {
-                Log.w("MediaCastDlna", "Device $deviceUdn does not support subtitle track control")
+                
                 throw UnsupportedOperationException("Device does not support subtitle track control")
             }
             
@@ -534,7 +537,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             
             val callback = object : ActionCallback(actionInvocation) {
                 override fun success(invocation: ActionInvocation<*>?) {
-                    Log.d("MediaCastDlna", "Subtitle track set successfully")
+                    
                 }
 
                 override fun failure(
@@ -542,7 +545,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                     operation: UpnpResponse?,
                     defaultMsg: String?
                 ) {
-                    Log.w("MediaCastDlna", "Failed to set subtitle track: $defaultMsg")
+                    
                 }
             }
             
@@ -552,7 +555,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             // Re-throw UnsupportedOperationException as-is for proper handling
             throw e
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "setSubtitleTrack failed", e)
+            
             throw RuntimeException("Failed to set subtitle track: ${e.message}", e)
         }
     }
@@ -561,12 +564,12 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
      * Get available subtitle tracks for current media
      */
     suspend fun getAvailableSubtitleTracks(deviceUdn: String): List<SubtitleTrack> {
-        Log.d("MediaCastDlna", "Getting available subtitle tracks for device: $deviceUdn")
+        
         
         try {
             // First check if the device supports subtitle control
             if (!deviceSupportsSubtitleControl(deviceUdn)) {
-                Log.w("MediaCastDlna", "Device $deviceUdn does not support subtitle track control")
+                
                 return emptyList()
             }
             
@@ -583,7 +586,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             
             return emptyList()
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "getAvailableSubtitleTracks failed", e)
+            
             return emptyList()
         }
     }
@@ -592,12 +595,12 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
      * Get currently active subtitle track
      */
     suspend fun getCurrentSubtitleTrack(deviceUdn: String): SubtitleTrack? {
-        Log.d("MediaCastDlna", "Getting current subtitle track for device: $deviceUdn")
+        
         
         try {
             // First check if the device supports subtitle control
             if (!deviceSupportsSubtitleControl(deviceUdn)) {
-                Log.w("MediaCastDlna", "Device $deviceUdn does not support subtitle track control")
+                
                 return null
             }
             
@@ -614,12 +617,12 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                 
                 // This would need to be implemented with a synchronous callback
                 // For now, return null as most devices don't support this action
-                Log.w("MediaCastDlna", "GetCurrentSubtitle action found but not implemented yet")
+                
             }
             
             return null
         } catch (e: Exception) {
-            Log.e("MediaCastDlna", "getCurrentSubtitleTrack failed", e)
+            
             return null
         }
     }
@@ -644,7 +647,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                         // This is likely a subtitle track
                         val track = SubtitleTrack(
                             id = "track_$index",
-                            uri = resource.value,
+                            uri = Url(resource.value),
                             mimeType = mimeType,
                             language = extractLanguageFromResource(resource) ?: "unknown",
                             title = extractTitleFromResource(resource),
@@ -657,7 +660,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             
             subtitleTracks
         } catch (e: Exception) {
-            Log.w("MediaCastDlna", "Failed to parse subtitle tracks from metadata", e)
+            
             emptyList()
         }
     }
@@ -685,7 +688,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
      */
     private fun enhanceMetadataWithSubtitles(metadata: String, subtitleTracks: List<SubtitleTrack>): String {
         return try {
-            Log.d("MediaCastDlna", "Enhancing metadata with ${subtitleTracks.size} subtitle tracks")
+            
             
             val parser = DIDLParser()
             val didl = parser.parse(metadata)
@@ -695,7 +698,7 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                 val item = didl.items[0]
                 
                 subtitleTracks.forEach { track ->
-                    Log.d("MediaCastDlna", "Adding subtitle track: ${track.language} - ${track.uri}")
+                    
                     
                     // Create protocol info with proper DLNA profile for subtitles
                     val protocolInfoString = when {
@@ -708,25 +711,25 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                     
                     val subtitleResource = Res(
                         ProtocolInfo(protocolInfoString),
-                        null, // Subtitle files don't have duration
-                        track.uri
+                        0L, // Subtitle files don't have duration
+                        track.uri.value
                     )
                     
                     // Note: Language attribute would need custom implementation
                     // as the Res class doesn't have a setLanguage method
                     
                     item.addResource(subtitleResource)
-                    Log.d("MediaCastDlna", "Added subtitle resource with protocol: $protocolInfoString")
+                    
                 }
             }
             
             val enhancedMetadata = parser.generate(didl, true)
-            Log.d("MediaCastDlna", "Enhanced metadata generated successfully")
-            Log.v("MediaCastDlna", "Enhanced metadata: $enhancedMetadata")
+            
+            
             
             return enhancedMetadata
         } catch (e: Exception) {
-            Log.w("MediaCastDlna", "Failed to enhance metadata with subtitles, using original", e)
+            
             return metadata
         }
     }
@@ -763,11 +766,11 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
             val subtitleActions = actions.filter { it.contains("subtitle", ignoreCase = true) || it.contains("caption", ignoreCase = true) }
             debug["subtitleRelatedActions"] = subtitleActions
             
-            Log.d("MediaCastDlna", "Device capabilities for $deviceUdn: $debug")
+            
             
         } catch (e: Exception) {
             debug["error"] = e.message ?: "Unknown error"
-            Log.e("MediaCastDlna", "Failed to get device capabilities for $deviceUdn", e)
+            
         }
         
         return debug
@@ -805,11 +808,11 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
                 debug["resources"] = resourceInfo.joinToString("\n")
             }
             
-            Log.d("MediaCastDlna", "Metadata debug info: $debug")
+            
             
         } catch (e: Exception) {
             debug["error"] = e.message ?: "Unknown error"
-            Log.e("MediaCastDlna", "Failed to debug metadata", e)
+            
         }
         
         return debug
