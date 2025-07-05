@@ -170,6 +170,14 @@ class MediaCastService {
     await _api.setMute(deviceUdn, MuteOperation(shouldMute: !currentMuteState));
   }
 
+  /// Sets playback speed
+  Future<void> setPlaybackSpeed({
+    required DeviceUdn deviceUdn,
+    required double speed,
+  }) async {
+    await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: speed));
+  }
+
   /// Disposes the service and cleans up resources
   void dispose() {
     stopMonitoring();

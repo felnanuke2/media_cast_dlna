@@ -2,16 +2,42 @@
 
 <div align="center">
 
+<img src="icon.png" alt="Media Cast DLNA Plugin Icon" width="128" height="128" style="border-radius: 16px; margin-bottom: 20px;" />
+
 [![Pub Version](https://img.shields.io/pub/v/media_cast_dlna?style=for-the-badge)](https://pub.dev/packages/media_cast_dlna)
-[![Platform](https://img.shields.io/badge/platform-Android-brightgreen?style=for-the-badge)](https://github.com/felnanuke2/media_cast_dlna)
+[![Platform](https://img.shields.io/badge/platform-Android%20Only-brightgreen?style=for-the-badge)](https://github.com/felnanuke2/media_cast_dlna)
 [![Flutter](https://img.shields.io/badge/Flutter-3.3.0+-blue?style=for-the-badge&logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/license-MIT-purple?style=for-the-badge)](LICENSE)
 
-**A powerful Flutter plugin for discovering and controlling DLNA/UPnP media devices on your local network**
+**A powerful Flutter plugin for discovering and controlling DLNA/UPnP media devices on your local network (Android only)**
 
 *Cast your media to smart TVs, speakers, and other DLNA-enabled devices with ease!*
 
 </div>
+
+---
+
+## 🚨 Platform Support Notice
+
+**Currently, this plugin supports Android only.** iOS support has been temporarily removed due to Apple's strict privacy limitations and requirements for device discovery functionality.
+
+### Why iOS is not supported (for now):
+
+- **Multicast Permission Restrictions**: Apple requires special entitlements for multicast networking, which is essential for DLNA device discovery
+- **App Store Review Challenges**: Getting multicast permissions approved is difficult and not guaranteed
+- **Privacy Limitations**: Apple's privacy framework restricts network device discovery capabilities
+- **Development Complexity**: The additional overhead doesn't justify the uncertain approval process
+
+### Future iOS Support:
+
+We may reconsider iOS support in the future, but for now, **we recommend using AirPlay for iOS casting functionality**, which is natively supported by Apple and provides a better user experience on iOS devices.
+
+### Alternative for iOS:
+
+For iOS users who need casting functionality, consider:
+- **AirPlay**: Built-in iOS casting solution
+- **Third-party solutions**: Apps that have already obtained necessary permissions
+- **Web-based approaches**: Using browser-based casting methods
 
 ---
 
@@ -44,7 +70,7 @@ Add the following permissions to your `android/app/src/main/AndroidManifest.xml`
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     
     <application
-        android:label="your_app_name"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         
@@ -54,6 +80,15 @@ Add the following permissions to your `android/app/src/main/AndroidManifest.xml`
         <service android:name="org.jupnp.android.AndroidUpnpServiceImpl"/>
     </application>
 </manifest>
+```
+
+**Note**: Create a `strings.xml` file in `android/app/src/main/res/values/` directory:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DLNA Media Example</string>
+</resources>
 ```
 
 ### Step 4: Import and Initialize
@@ -70,6 +105,44 @@ import 'package:media_cast_dlna/media_cast_dlna.dart';
 // - DiscoveryOptions, SubtitleTrack, etc. (configuration classes)
 ```
 
+---
+
+## ⚠️ Device Compatibility Notice
+
+**Important**: Not all DLNA/UPnP media renderers support every feature offered by this plugin. Device capabilities vary significantly between manufacturers and models.
+
+### 🎬 Subtitle Support Warning
+
+**Subtitle control methods may not work on all devices:**
+- `setMediaUriWithSubtitles()` - Device-dependent subtitle embedding
+- `supportsSubtitleControl()` - Always check before using subtitle features
+- `setSubtitleTrack()` - Track switching support varies
+- `getAvailableSubtitleTracks()` - Not all devices report available tracks
+
+**Testing Recommendation**: We recommend testing subtitle functionality with your specific DLNA devices before releasing your app, as support varies widely between manufacturers.
+
+### ⚡ Playback Speed Control Warning
+
+**Playback speed control is not universally supported:**
+- `setPlaybackSpeed()` - Many DLNA devices don't support variable speed playback
+- Speed values like 0.5x, 1.25x, 2.0x may be ignored or cause errors
+- Some devices only support play/pause/stop operations
+
+**User Experience**: Consider implementing graceful error handling and informing users when speed control is not available on their device.
+
+### 📋 Compatibility Testing
+
+**Before deploying your app**, please test these features with your target devices:
+
+1. **Test with multiple device brands** (Samsung, LG, Sony, etc.)
+2. **Verify subtitle rendering** works as expected
+3. **Check playback speed control** functionality
+4. **Implement fallback behaviors** for unsupported features
+
+**Feedback Welcome**: If you encounter compatibility issues or find devices that work well with these features, please share your findings in the [GitHub Issues](https://github.com/felnanuke2/media_cast_dlna/issues) to help other developers.
+
+---
+
 ## 🚀 What is Media Cast DLNA?
 
 Media Cast DLNA is a comprehensive Flutter plugin that transforms your app into a media casting powerhouse. Built with cutting-edge technology using the **Pigeon package** for seamless native interface generation, this plugin provides robust DLNA/UPnP functionality for discovering and controlling media devices on your local network.
@@ -78,8 +151,9 @@ Media Cast DLNA is a comprehensive Flutter plugin that transforms your app into 
 
 - **🔍 Smart Device Discovery**: Automatically find DLNA/UPnP devices (TVs, speakers, media players)
 - **📱 Media Renderer Control**: Full playback control with play, pause, stop, seek, volume management
-- **🎬 Advanced Subtitle Support**: Handle subtitle tracks for enhanced viewing experience
-- **⚡ Real-time Status Monitoring**: Get instant updates on playback state, position, and volume changes
+- **🎬 Advanced Subtitle Support**: Handle subtitle tracks for enhanced viewing experience ⚠️ *Device-dependent*
+- **⚡ Playback Speed Control**: Variable speed playback (0.5x, 1.25x, 2.0x, etc.) ⚠️ *Limited device support*
+- **📊 Real-time Status Monitoring**: Get instant updates on playback state, position, and volume changes
 - **🔧 Native Performance**: Powered by Pigeon-generated native interfaces for optimal performance
 
 ## 🏠 Unlocking Your Home Network: A Look at DLNA-Enabled TVs, Speakers, and Media Devices
@@ -155,16 +229,15 @@ This plugin leverages the power of **Pigeon** - Google's code generation tool th
 
 ### Native Libraries Used:
 - **Android**: jUPnP (Java UPnP library)
-- **iOS**: UPnAtom *(Coming Soon)*
 
 ## 📱 Platform Support
 
 | Platform | Status | Version |
 |----------|--------|---------|
 | 🤖 **Android** | ✅ **Available** | API 21+ |
-| 🍎 **iOS** | 🚧 **Coming Soon** | iOS 12.0+ |
+| 🍎 **iOS** | ❌ **Not Available** | See notice above |
 
-> **Note**: iOS support is currently in development and will be released in the next major update. Stay tuned!
+> **Note**: iOS support has been temporarily removed due to Apple's privacy limitations. For iOS users, we recommend using AirPlay for casting functionality.
 
 ## 🎮 Quick Start Guide
 
@@ -324,6 +397,8 @@ class PlaybackController {
 
 ### Subtitle Support
 
+> **⚠️ Compatibility Warning**: Subtitle functionality is device-dependent. Not all DLNA media renderers support subtitle control. Always use `supportsSubtitleControl()` to check device capabilities before attempting to use subtitle features.
+
 ```dart
 // Cast media with subtitle tracks using the new typed classes
 Future<void> _castWithSubtitles(DlnaDevice renderer, String mediaUrl) async {
@@ -377,6 +452,60 @@ Future<void> _manageSubtitles(DeviceUdn deviceUdn) async {
     
     // Disable subtitles
     await _api.setSubtitleTrack(deviceUdn, null);
+  }
+}
+```
+
+### Playback Speed Control
+
+> **⚠️ Compatibility Warning**: Playback speed control is not supported by all DLNA media renderers. Many devices only support standard play/pause/stop operations. Test this feature with your target devices before implementing it in production.
+
+```dart
+// Control playback speed on compatible devices
+Future<void> _controlPlaybackSpeed(DeviceUdn deviceUdn) async {
+  try {
+    // Set playback to half speed
+    await _api.setPlaybackSpeed(
+      deviceUdn, 
+      PlaybackSpeed(value: 0.5)
+    );
+    
+    // Set playback to normal speed
+    await _api.setPlaybackSpeed(
+      deviceUdn, 
+      PlaybackSpeed(value: 1.0)
+    );
+    
+    // Set playback to 1.25x speed
+    await _api.setPlaybackSpeed(
+      deviceUdn, 
+      PlaybackSpeed(value: 1.25)
+    );
+    
+    // Set playback to double speed
+    await _api.setPlaybackSpeed(
+      deviceUdn, 
+      PlaybackSpeed(value: 2.0)
+    );
+    
+  } catch (e) {
+    // Handle cases where device doesn't support speed control
+    print('Device does not support playback speed control: $e');
+    
+    // Fallback to normal playback controls
+    await _api.play(deviceUdn);
+  }
+}
+
+// Example: Implementing speed control with user feedback
+Future<void> _setSpeedWithUserFeedback(DeviceUdn deviceUdn, double speed) async {
+  try {
+    await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: speed));
+    print('Playback speed set to ${speed}x');
+  } catch (e) {
+    // Inform user that speed control is not available
+    print('Speed control not supported on this device');
+    // You might want to disable speed control UI elements
   }
 }
 ```
@@ -482,6 +611,105 @@ Future<void> _diagnosePlayback(DeviceUdn deviceUdn) async {
     
   } catch (e) {
     print('Diagnostic failed: $e');
+  }
+}
+```
+
+#### 4. Subtitle Support Issues
+```dart
+Future<void> _troubleshootSubtitles(DeviceUdn deviceUdn) async {
+  try {
+    // Always check subtitle support first
+    bool supportsSubtitles = await _api.supportsSubtitleControl(deviceUdn);
+    print('Device supports subtitle control: $supportsSubtitles');
+    
+    if (!supportsSubtitles) {
+      print('⚠️ Device does not support subtitle control');
+      print('Consider using burned-in subtitles in video file');
+      return;
+    }
+    
+    // Test subtitle track retrieval
+    try {
+      List<SubtitleTrack> tracks = await _api.getAvailableSubtitleTracks(deviceUdn);
+      print('Available subtitle tracks: ${tracks.length}');
+      for (var track in tracks) {
+        print('  - ${track.title} (${track.language}): ${track.uri.value}');
+      }
+    } catch (e) {
+      print('Failed to get subtitle tracks: $e');
+    }
+    
+  } catch (e) {
+    print('Subtitle diagnosis failed: $e');
+  }
+}
+```
+
+#### 5. Playback Speed Control Issues
+```dart
+Future<void> _troubleshootPlaybackSpeed(DeviceUdn deviceUdn) async {
+  try {
+    // Test if device supports speed control
+    try {
+      await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: 1.0));
+      print('✅ Device supports playback speed control');
+      
+      // Test common speed values
+      final speedValues = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+      for (double speed in speedValues) {
+        try {
+          await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: speed));
+          await Future.delayed(Duration(milliseconds: 500));
+          print('✅ Speed $speed x supported');
+        } catch (e) {
+          print('❌ Speed $speed x not supported: $e');
+        }
+      }
+      
+    } catch (e) {
+      print('⚠️ Device does not support playback speed control: $e');
+      print('Fallback to standard play/pause/stop operations');
+    }
+    
+  } catch (e) {
+    print('Speed control diagnosis failed: $e');
+  }
+}
+```
+
+#### 6. Device Compatibility Testing
+```dart
+Future<void> _testDeviceCompatibility(DeviceUdn deviceUdn) async {
+  print('🔍 Testing device compatibility...');
+  
+  try {
+    // Basic functionality test
+    final services = await _api.getDeviceServices(deviceUdn);
+    print('Services: ${services.length}');
+    
+    // Test volume control
+    try {
+      await _api.setVolume(deviceUdn, VolumeLevel(percentage: 50));
+      print('✅ Volume control supported');
+    } catch (e) {
+      print('❌ Volume control not supported: $e');
+    }
+    
+    // Test subtitle support
+    bool hasSubtitles = await _api.supportsSubtitleControl(deviceUdn);
+    print('Subtitle support: ${hasSubtitles ? "✅" : "❌"}');
+    
+    // Test speed control
+    try {
+      await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: 1.0));
+      print('✅ Speed control supported');
+    } catch (e) {
+      print('❌ Speed control not supported');
+    }
+    
+  } catch (e) {
+    print('Compatibility test failed: $e');
   }
 }
 ```
@@ -712,10 +940,6 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
                             onPressed: () => _api.stop(_selectedRenderer!.udn),
                             icon: Icon(Icons.stop, color: Colors.red),
                           ),
-                          IconButton(
-                            onPressed: () => _api.next(_selectedRenderer!.udn),
-                            icon: Icon(Icons.skip_next),
-                          ),
                         ],
                       ),
                       
@@ -922,6 +1146,34 @@ Enum representing playback state.
 - `stopped` - Stopped
 - `transitioning` - Changing state
 
+#### `PlaybackSpeed`
+Represents playback speed for variable speed control.
+
+**Properties:**
+- `value` - Speed multiplier (e.g., 0.5 for half speed, 2.0 for double speed)
+
+**Common Values:**
+- `0.5` - Half speed (slow motion)
+- `1.0` - Normal speed
+- `1.25` - 1.25x speed
+- `1.5` - 1.5x speed  
+- `2.0` - Double speed
+
+**⚠️ Note**: Not all DLNA devices support playback speed control. Always implement error handling.
+
+#### `SubtitleTrack`
+Represents a subtitle track for media content.
+
+**Properties:**
+- `id` - Unique track identifier
+- `uri` - Subtitle file URL
+- `language` - Language code (e.g., 'en', 'es')
+- `mimeType` - Subtitle format (e.g., 'text/srt', 'text/vtt')
+- `title` - Human-readable track name
+- `isDefault` - Whether this is the default track
+
+**⚠️ Note**: Subtitle support varies widely between DLNA devices.
+
 ## 🛠️ Development & Contribution
 
 ### Built With Pigeon
@@ -939,7 +1191,6 @@ media_cast_dlna/
 ├── pigeons/                    # Pigeon interface definitions
 ├── lib/                       # Dart implementation
 ├── android/                   # Android implementation (Kotlin)
-├── ios/                      # iOS implementation (Swift) - Coming Soon
 └── example/                  # Example app
 ```
 

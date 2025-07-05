@@ -120,7 +120,7 @@ flutter run
 ## 📱 Platform Support
 
 - **Android**: Full support (API 21+)
-- **iOS**: Coming soon
+- **iOS**: Not supported (see main README for details)
 
 ## 🧪 Testing
 

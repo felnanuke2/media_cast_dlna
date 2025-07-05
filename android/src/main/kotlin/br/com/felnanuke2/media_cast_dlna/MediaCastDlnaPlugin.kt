@@ -13,6 +13,7 @@ import VolumeInfo
 import VolumeLevel
 import MuteOperation
 import MuteState
+import PlaybackSpeed
 import TimePosition
 import TimeDuration
 import Url
@@ -492,6 +493,32 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
             try {
                 val transportState = mediaControlManager.getTransportState(deviceUdn.value)
                 callback(Result.success(transportState))
+            } catch (e: Exception) {
+                callback(Result.failure(e))
+            }
+        }
+    }
+
+    override fun setPlaybackSpeed(
+        deviceUdn: DeviceUdn,
+        speed: PlaybackSpeed,
+        callback: (Result<Unit>) -> Unit
+    ) {
+        if (!isServiceBound || upnpService == null) {
+            callback(Result.failure(Exception("UPnP service not initialized")))
+            return
+        }
+
+        pluginScope.launch {
+            try {
+                withTimeout(10000L) { // 10 second timeout
+                    mediaControlManager.setPlaybackSpeed(deviceUdn.value, speed.value)
+                }
+                callback(Result.success(Unit))
+            } catch (e: UnsupportedOperationException) {
+                callback(Result.failure(e))
+            } catch (e: TimeoutCancellationException) {
+                callback(Result.failure(Exception("Operation timed out: ${e.message}")))
             } catch (e: Exception) {
                 callback(Result.failure(e))
             }

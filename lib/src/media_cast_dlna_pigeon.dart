@@ -740,6 +740,27 @@ class PlaybackInfo {
   }
 }
 
+class PlaybackSpeed {
+  PlaybackSpeed({
+    required this.value,
+  });
+
+  double value;
+
+  Object encode() {
+    return <Object?>[
+      value,
+    ];
+  }
+
+  static PlaybackSpeed decode(Object result) {
+    result as List<Object?>;
+    return PlaybackSpeed(
+      value: result[0]! as double,
+    );
+  }
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -814,6 +835,9 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is PlaybackInfo) {
       buffer.putUint8(150);
       writeValue(buffer, value.encode());
+    }    else if (value is PlaybackSpeed) {
+      buffer.putUint8(151);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -867,6 +891,8 @@ class _PigeonCodec extends StandardMessageCodec {
         return MediaItem.decode(readValue(buffer)!);
       case 150: 
         return PlaybackInfo.decode(readValue(buffer)!);
+      case 151: 
+        return PlaybackSpeed.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -1511,6 +1537,28 @@ class MediaCastDlnaApi {
       );
     } else {
       return (pigeonVar_replyList[0] as TransportState?)!;
+    }
+  }
+
+  Future<void> setPlaybackSpeed(DeviceUdn deviceUdn, PlaybackSpeed speed) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setPlaybackSpeed$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[deviceUdn, speed]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
     }
   }
 }

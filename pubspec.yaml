@@ -1,6 +1,6 @@
 name: media_cast_dlna
 description: A powerful Flutter plugin for discovering and controlling DLNA/UPnP media devices. Cast your media to smart TVs, speakers, and other DLNA-enabled devices with ease! Built with Pigeon for type-safe native interfaces.
-version: 0.1.1
+version: 0.1.3
 homepage: https://github.com/felnanuke2/media_cast_dlna
 repository: https://github.com/felnanuke2/media_cast_dlna
 issue_tracker: https://github.com/felnanuke2/media_cast_dlna/issues
@@ -23,7 +23,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
   flutter_test:
@@ -51,9 +50,6 @@ flutter:
       android:
         package: br.com.felnanuke2.media_cast_dlna
         pluginClass: MediaCastDlnaPlugin
-      ios:
-        pluginClass: MediaCastDlnaPlugin
-
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

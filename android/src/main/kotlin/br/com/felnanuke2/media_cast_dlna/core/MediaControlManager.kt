@@ -817,5 +817,42 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         
         return debug
     }
+    
+    /**
+     * Sets playback speed using the standard UPnP Play action with Speed parameter
+     */
+    suspend fun setPlaybackSpeed(deviceUdn: String, speed: Double) {
+        val (_, avTransportService) = requireDeviceAndService(deviceUdn, "AVTransport")
+        val controlPoint = requireUpnpService().controlPoint
+        
+        // Use the standard Play action which supports Speed parameter
+        val playAction = avTransportService.getAction("Play")
+            ?: throw UnsupportedOperationException("Play action not available on device $deviceUdn")
+
+//        log each parameter supported and expected by the action
+        Log.d("MediaControlManager", "Available parameters for Play action: ${playAction.arguments.joinToString { "${it.name} (${it.datatype.displayString})" }}")
+        val speedString = speed.toString()
+        
+        Log.d("MediaControlManager", "Setting playback speed to $speedString (from $speed) for device $deviceUdn")
+        
+        val actionInvocation = ActionInvocation(playAction).apply {
+            setInput("InstanceID", UnsignedIntegerFourBytes(0))
+            setInput("Speed", speedString)
+        }
+        
+        val speedCallback = object : ActionCallback(actionInvocation) {
+            override fun success(invocation: ActionInvocation<*>?) {
+                Log.d("MediaControlManager", "Playback speed set to $speedString for device $deviceUdn")
+            }
+            
+            override fun failure(invocation: ActionInvocation<*>?, operation: UpnpResponse?, defaultMsg: String?) {
+                Log.e("MediaControlManager", "Failed to set playback speed for device $deviceUdn: $defaultMsg")
+                // If the device doesn't support speed parameter, throw a more descriptive error
+                throw UnsupportedOperationException("Device $deviceUdn does not support playback speed control: $defaultMsg")
+            }
+        }
+        
+        controlPoint.executeSuspending(speedCallback)
+    }
 }
 

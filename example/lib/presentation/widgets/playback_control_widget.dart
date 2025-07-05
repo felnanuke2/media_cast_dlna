@@ -14,6 +14,7 @@ class PlaybackControlWidget extends StatelessWidget {
   final Function(int) onSeek;
   final VoidCallback onToggleMute;
   final Function(bool) onSliderDragChanged;
+  final Function(double) onSpeedChange;
 
   const PlaybackControlWidget({
     super.key,
@@ -24,6 +25,7 @@ class PlaybackControlWidget extends StatelessWidget {
     required this.onSeek,
     required this.onToggleMute,
     required this.onSliderDragChanged,
+    required this.onSpeedChange,
   });
 
   @override
@@ -43,6 +45,8 @@ class PlaybackControlWidget extends StatelessWidget {
             _buildSeekSlider(context),
             const SizedBox(height: AppConstants.defaultPadding),
             _buildPlaybackButtons(context),
+            const SizedBox(height: AppConstants.defaultPadding),
+            _buildSpeedControl(context),
             const SizedBox(height: AppConstants.defaultPadding),
             _buildVolumeControl(context),
           ],
@@ -320,6 +324,55 @@ class PlaybackControlWidget extends StatelessWidget {
         Text(
           '${playbackState.currentVolume}%',
           style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSpeedControl(BuildContext context) {
+    // Define available speed options
+    final List<double> speedOptions = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+    
+    return Row(
+      children: [
+        Icon(
+          Icons.speed,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        const SizedBox(width: AppConstants.defaultPadding),
+        Text(
+          'Speed:',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(width: AppConstants.smallPadding),
+        Expanded(
+          child: DropdownButton<double>(
+            value: playbackState.playbackSpeed,
+            isExpanded: true,
+            icon: const Icon(Icons.arrow_drop_down),
+            underline: Container(
+              height: 1,
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+            ),
+            items: speedOptions.map((double speed) {
+              return DropdownMenuItem<double>(
+                value: speed,
+                child: Text(
+                  '${speed}x',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              );
+            }).toList(),
+            onChanged: isDeviceOnline
+                ? (double? newSpeed) {
+                    if (newSpeed != null) {
+                      onSpeedChange(newSpeed);
+                    }
+                  }
+                : null,
+          ),
         ),
       ],
     );

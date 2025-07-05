@@ -7,8 +7,6 @@ import 'package:pigeon/pigeon.dart';
     kotlinOut:
         'android/src/main/kotlin/br/com/felnanuke2/media_cast_dlna/MediaCastDlnaPigeon.kt',
     kotlinOptions: KotlinOptions(),
-    swiftOut: 'ios/Classes/MediaCastDlnaPigeon.swift',
-    swiftOptions: SwiftOptions(),
     dartPackageName: 'media_cast_dlna',
   ),
 )
@@ -364,4 +362,15 @@ abstract class MediaCastDlnaApi {
 
   @async
   TransportState getTransportState(DeviceUdn deviceUdn);
+
+  @async
+  void setPlaybackSpeed(
+    DeviceUdn deviceUdn,
+    PlaybackSpeed speed,
+  );
+}
+
+class PlaybackSpeed {
+  PlaybackSpeed({required this.value});
+  final double value;
 }

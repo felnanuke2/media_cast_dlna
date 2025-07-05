@@ -261,6 +261,26 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
     );
   }
 
+  /// Handles playback speed changes
+  Future<void> _onSpeedChange(double speed) async {
+    if (_selectedDevice?.udn == null) return;
+
+    try {
+      await _mediaService.setPlaybackSpeed(
+        deviceUdn: _selectedDevice!.udn,
+        speed: speed,
+      );
+      setState(() {
+        _playbackState = _playbackState.copyWith(playbackSpeed: speed);
+      });
+      UiUtils.showSuccessSnackBar(context, 'Playback speed set to ${speed}x');
+    } catch (e) {
+      if (mounted) {
+        UiUtils.showErrorSnackBar(context, 'Failed to set playback speed: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -309,6 +329,7 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
                 onSeek: _onSeek,
                 onToggleMute: _onToggleMute,
                 onSliderDragChanged: _onSliderDragChanged,
+                onSpeedChange: _onSpeedChange,
               ),
             ),
             SliverToBoxAdapter(

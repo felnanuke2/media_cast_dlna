@@ -10,6 +10,7 @@ class PlaybackState {
   final String currentTrackTitle;
   final String? currentThumbnailUrl;
   final bool isSliderBeingDragged;
+  final double playbackSpeed;
 
   const PlaybackState({
     this.currentPosition = 0,
@@ -20,6 +21,7 @@ class PlaybackState {
     this.currentTrackTitle = '',
     this.currentThumbnailUrl,
     this.isSliderBeingDragged = false,
+    this.playbackSpeed = 1.0,
   });
 
   PlaybackState copyWith({
@@ -31,6 +33,7 @@ class PlaybackState {
     String? currentTrackTitle,
     String? currentThumbnailUrl,
     bool? isSliderBeingDragged,
+    double? playbackSpeed,
   }) {
     return PlaybackState(
       currentPosition: currentPosition ?? this.currentPosition,
@@ -41,6 +44,7 @@ class PlaybackState {
       currentTrackTitle: currentTrackTitle ?? this.currentTrackTitle,
       currentThumbnailUrl: currentThumbnailUrl ?? this.currentThumbnailUrl,
       isSliderBeingDragged: isSliderBeingDragged ?? this.isSliderBeingDragged,
+      playbackSpeed: playbackSpeed ?? this.playbackSpeed,
     );
   }
 }
