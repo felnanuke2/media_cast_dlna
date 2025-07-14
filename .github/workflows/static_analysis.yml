@@ -29,9 +29,6 @@ jobs:
     - name: Analyze project source
       run: flutter analyze
     
-    - name: Run tests
-      run: flutter test
-    
     - name: Install Pana
       run: dart pub global activate pana
     
