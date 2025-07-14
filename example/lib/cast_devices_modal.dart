@@ -343,7 +343,7 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
         })
         .catchError((error) {
           // Handle any errors that occur during discovery
-          print('Error during device discovery: $error');
+          debugPrint('Error during device discovery: $error');
         });
   }
 }

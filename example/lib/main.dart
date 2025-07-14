@@ -223,7 +223,9 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
         mediaUrl: media.url,
         metadata: media.toMediaMetadata(),
       );
-      UiUtils.showSuccessSnackBar(context, 'Playing: ${media.title}');
+      if (mounted) {
+        UiUtils.showSuccessSnackBar(context, 'Playing: ${media.title}');
+      }
     } catch (e) {
       if (mounted) {
         UiUtils.showErrorSnackBar(context, '${AppConstants.playbackError}: $e');
@@ -246,7 +248,9 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
         mediaUrl: url,
         metadata: metadata,
       );
-      UiUtils.showSuccessSnackBar(context, 'Playing custom media');
+      if (mounted) {
+        UiUtils.showSuccessSnackBar(context, 'Playing custom media');
+      }
     } catch (e) {
       if (mounted) {
         UiUtils.showErrorSnackBar(context, '${AppConstants.playbackError}: $e');
@@ -282,7 +286,9 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
       setState(() {
         _playbackState = _playbackState.copyWith(playbackSpeed: speed);
       });
-      UiUtils.showSuccessSnackBar(context, 'Playback speed set to ${speed}x');
+      if (mounted) {
+        UiUtils.showSuccessSnackBar(context, 'Playback speed set to ${speed}x');
+      }
     } catch (e) {
       if (mounted) {
         UiUtils.showErrorSnackBar(context, 'Failed to set playback speed: $e');
