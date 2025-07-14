@@ -5,6 +5,100 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-07-14
+
+### ⚠️ **BREAKING CHANGES**
+This release contains significant API changes that require code updates when upgrading from v0.1.3. Please see the [Migration Notes](#migration-notes) section below for detailed upgrade instructions.
+
+### ✨ New Features
+- **Enhanced Device Information**: Added comprehensive device details support
+  - New `DeviceIcon` class for device icon management with multiple icon sizes
+  - New `ManufacturerDetails` class with manufacturer info and optional URI
+  - New `ModelDetails` class with model name, description, number, and URI
+  - Support for multiple device icons with different sizes and formats
+
+### 🔧 Technical Improvements
+- **Android Architecture Refactoring**: Major restructuring of Android native code
+  - Added `DeviceConstants` for centralized configuration
+  - Created `DeviceDetailsConverter` for manufacturer and model details conversion
+  - Implemented `DlnaDeviceConverter` for unified device conversion
+  - Added `IconConverter` for device icon handling
+  - Created `DeviceNetworkExtractor` for network information extraction
+  - Implemented `DeviceConverterFactory` for dependency injection
+  - Added `UrlUtils` for URL and URI operations
+- **Code Quality**: Improved code formatting and consistency across all files
+- **Type Safety**: Enhanced type safety with structured device information classes
+
+### 🏗️ API Changes
+- **Breaking Changes**: Updated `DlnaDevice` structure
+  - Replaced `manufacturerName` with `manufacturerDetails` object
+  - Replaced `modelName` with `modelDetails` object
+  - Replaced `modelDescription` with `modelDetails.modelDescription`
+  - Replaced `iconUrl` with `icons` list for multiple icon support
+  - All IP addresses and ports now use `.value` property for access
+
+### 🎨 UI/UX Improvements
+- **Example App Enhancements**:
+  - Added device icon display in cast devices modal
+  - Enhanced device details modal with comprehensive information
+  - Improved device list with manufacturer and model details
+  - Added support for displaying multiple device icons
+  - Better formatting and presentation of device information
+
+### 🔄 Code Organization
+- **Clean Architecture**: Implemented SOLID principles in Android code
+  - Single Responsibility Principle with focused converter classes
+  - Open/Closed Principle with extensible converter architecture
+  - Dependency Inversion with factory pattern implementation
+- **Modular Design**: Separated concerns into focused packages
+  - `constants/` - Configuration constants
+  - `converters/` - Data conversion logic
+  - `extractors/` - Data extraction utilities
+  - `factory/` - Object creation and dependency injection
+  - `utils/` - Utility functions
+
+### 🚀 DevOps & Publishing
+- **GitHub Actions**: Added automated workflows
+  - **Static Analysis**: Automated code quality checks with Pana analysis
+  - **Publishing**: Automated pub.dev publishing workflow
+  - **CI/CD**: Continuous integration with Flutter analysis and tests
+
+### 📖 Documentation Updates
+- **API Documentation**: Updated for new device information structure
+- **Breaking Changes**: Clear migration guide for new device properties
+- **Code Comments**: Improved inline documentation throughout
+
+### 🔧 Maintenance
+- **Pubspec Updates**: 
+  - Updated version to 0.1.4
+  - Simplified package description
+  - Removed unused topics
+- **Code Formatting**: Consistent formatting across all Dart and Kotlin files
+- **Import Cleanup**: Optimized imports and removed unused dependencies
+
+### ⚠️ Migration Notes
+**For existing users upgrading from v0.1.3:**
+
+**⚠️ BREAKING CHANGES - This is a major API update that requires code changes**
+
+- Replace `device.manufacturerName` with `device.manufacturerDetails.manufacturer`
+- Replace `device.modelName` with `device.modelDetails.modelName`
+- Replace `device.modelDescription` with `device.modelDetails.modelDescription`
+- Replace `device.iconUrl` with `device.icons?[0].uri` (if available)
+- Use `device.ipAddress.value` instead of `device.ipAddress` for IP address strings
+- Use `device.port.value` instead of `device.port` for port numbers
+
+**Example migration:**
+```dart
+// Before (v0.1.3)
+Text('${device.manufacturerName} - ${device.modelName}')
+Text('IP: ${device.ipAddress}:${device.port}')
+
+// After (v0.2.0)
+Text('${device.manufacturerDetails.manufacturer} - ${device.modelDetails.modelName}')
+Text('IP: ${device.ipAddress.value}:${device.port.value}')
+```
+
 ## [0.1.3] - 2025-07-05
 
 ### ✨ New Features

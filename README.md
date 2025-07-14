@@ -1206,7 +1206,7 @@ Contributions are welcome! Please:
 
 ## 📖 Learning Resources
 
-- [DLNA/UPnP Specification](http://upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v2.0.pdf)
+- [DLNA/UPnP Specification](https://upnp.org/specs/arch/UPnP-arch-DeviceArchitecture-v2.0.pdf)
 - [Flutter Plugin Development](https://docs.flutter.dev/development/packages-and-plugins/developing-packages)
 - [Pigeon Documentation](https://pub.dev/packages/pigeon)
 

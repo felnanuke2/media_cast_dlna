@@ -24,10 +24,7 @@ import java.util.*
  * Utility to create DIDL-Lite metadata for DLNA media items with comprehensive metadata support.
  */
 public fun createDefaultMetadata(
-    uri: String,
-    title: String,
-    metadata: MediaMetadata? = null,
-    mimeType: String? = null
+    uri: String, title: String, metadata: MediaMetadata? = null, mimeType: String? = null
 ): String {
     return try {
         val didl = DIDLContent()
@@ -53,9 +50,11 @@ public fun createDefaultMetadata(
                     mimeType?.startsWith("video/") == true -> {
                         createVideoItem(didl, itemId, parentId, uri, title, null, mimeType, null)
                     }
+
                     mimeType?.startsWith("image/") == true -> {
                         createImageItem(didl, itemId, parentId, uri, title, null, mimeType)
                     }
+
                     else -> {
                         createAudioItem(didl, itemId, parentId, uri, title, null, mimeType)
                     }
@@ -64,7 +63,7 @@ public fun createDefaultMetadata(
         }
         DIDLParser().generate(didl)
     } catch (e: Exception) {
-        
+
         ""
     }
 }
@@ -83,23 +82,19 @@ private fun createAudioItem(
 ) {
     // Use the most basic, compatible setup
     val audioMimeType = mimeType ?: "audio/mpeg" // Default to MP3 for maximum compatibility
-    
+
     // Create resource with minimal protocol info
     val resource = Res(
-        ProtocolInfo("http-get:*:$audioMimeType:*"),
-        null, // No duration for simplicity
+        ProtocolInfo("http-get:*:$audioMimeType:*"), null, // No duration for simplicity
         uri
     )
 
     // Create MusicTrack with the full constructor for maximum compatibility
     val artist = metadata?.artist ?: "Unknown Artist"
     val album = metadata?.album ?: "Unknown Album"
-    
+
     val audioItem = MusicTrack(
-        itemId,
-        parentId,
-        title,
-        artist,  // creator
+        itemId, parentId, title, artist,  // creator
         album,   // album
         artist,  // artist
         resource // resource
@@ -112,23 +107,19 @@ private fun createAudioItem(
     metadata?.albumArtUri?.let { albumArtUri ->
         try {
             audioItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(albumArtUri.value)))
-            
+
         } catch (e: Exception) {
-            
+
         }
     }
 
     didl.addItem(audioItem)
-    
+
     // Log the essential info
-    
-    
-    
-    
-    
-    
+
+
     if (metadata?.albumArtUri != null) {
-        
+
     }
 }
 
@@ -149,9 +140,7 @@ private fun createVideoItem(
     val protocolInfo = "http-get:*:$videoMimeType:*"
 
     val resource = Res(
-        ProtocolInfo(protocolInfo),
-        metadata?.duration?.seconds?.toLong(),
-        uri
+        ProtocolInfo(protocolInfo), metadata?.duration?.seconds?.toLong(), uri
     )
 
     // Set bitrate if available
@@ -164,14 +153,13 @@ private fun createVideoItem(
     subtitleTracks?.forEach { subtitleTrack ->
         val protocolInfoString = "http-get:*:${subtitleTrack.mimeType}:DLNA.ORG_PN=TEXT_SRT"
         val subtitleResource = Res(
-            ProtocolInfo(protocolInfoString),
-            0L, // Subtitle files don't have duration
+            ProtocolInfo(protocolInfoString), 0L, // Subtitle files don't have duration
             subtitleTrack.uri.value
         )
-        
+
         videoItem.addResource(subtitleResource)
-        
-        
+
+
     }
 
     // Set metadata properties based on Pigeon definition
@@ -185,17 +173,17 @@ private fun createVideoItem(
                 if (resolutionParts.size == 2) {
                     resource.resolution = "${resolutionParts[0]}x${resolutionParts[1]}"
                 } else {
-                    
+
                 }
             } catch (e: Exception) {
-                
+
             }
         }
         meta.thumbnailUri?.let {
             try {
                 videoItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(it.value)))
             } catch (e: Exception) {
-                
+
             }
         }
         meta.upnpClass?.let {
@@ -209,8 +197,8 @@ private fun createVideoItem(
     }
 
     didl.addItem(videoItem)
-    
-    
+
+
 }
 
 /**
@@ -243,10 +231,10 @@ private fun createImageItem(
                 if (resolutionParts.size == 2) {
                     resource.resolution = "${resolutionParts[0]}x${resolutionParts[1]}"
                 } else {
-                    
+
                 }
             } catch (e: Exception) {
-                
+
             }
         }
         meta.date?.let {
@@ -256,7 +244,7 @@ private fun createImageItem(
             try {
                 imageItem.addProperty(DIDLObject.Property.UPNP.ALBUM_ART_URI(URI.create(it.value)))
             } catch (e: Exception) {
-                
+
             }
         }
         meta.upnpClass?.let {
@@ -328,9 +316,7 @@ private fun detectImageMimeType(uri: String): String {
     ReplaceWith("createDefaultMetadata(uri, title, metadata, null)")
 )
 public fun createDefaultMetadata(
-    uri: String,
-    title: String,
-    metadata: MediaMetadata? = null
+    uri: String, title: String, metadata: MediaMetadata? = null
 ): String {
     return createDefaultMetadata(uri, title, metadata, null)
 }
@@ -338,30 +324,32 @@ public fun createDefaultMetadata(
 /**
  * Parses DIDL-Lite metadata string back into MediaMetadata objects
  * This implementation safely extracts all available properties from the item.properties collection
- * 
+ *
  * @param didlMetadata The DIDL-Lite XML metadata string
  * @param enableDebugLogging If true, logs all available properties for debugging
  */
-public fun parseMediaMetadataFromDidl(didlMetadata: String?, enableDebugLogging: Boolean = false): MediaMetadata? {
+public fun parseMediaMetadataFromDidl(
+    didlMetadata: String?, enableDebugLogging: Boolean = false
+): MediaMetadata? {
     if (didlMetadata.isNullOrBlank()) {
         return null
     }
-    
+
     return try {
         val parser = DIDLParser()
         val didl = parser.parse(didlMetadata)
-        
+
         if (didl.items.isEmpty()) {
             return null
         }
-        
+
         val item = didl.items[0]
-        
+
         // Optional debug logging
         if (enableDebugLogging) {
             logItemProperties(item)
         }
-        
+
         when (item) {
             is MusicTrack -> {
                 // Extract properties safely from item.properties collection
@@ -369,20 +357,20 @@ public fun parseMediaMetadataFromDidl(didlMetadata: String?, enableDebugLogging:
                 val genre = getPropertyValue(item, "UPNP.GENRE")
                 val albumArtUri = getPropertyValue(item, "UPNP.ALBUM_ART_URI")
                 val description = item.description ?: getPropertyValue(item, "DC.DESCRIPTION")
-                val originalTrackNumber = getPropertyValue(item, "UPNP.ORIGINAL_TRACK_NUMBER")?.toIntOrNull()
-                
+                val originalTrackNumber =
+                    getPropertyValue(item, "UPNP.ORIGINAL_TRACK_NUMBER")?.toIntOrNull()
+
                 // Try multiple sources for artist information
-                val artist = try { 
-                    item.creator 
-                } catch (e: Exception) { 
-                    null 
+                val artist = try {
+                    item.creator
+                } catch (e: Exception) {
+                    null
                 } ?: try {
                     item.firstArtist?.name
                 } catch (e: Exception) {
                     null
-                } ?: getPropertyValue(item, "UPNP.ARTIST")
-                    ?: getPropertyValue(item, "DC.CREATOR")
-                
+                } ?: getPropertyValue(item, "UPNP.ARTIST") ?: getPropertyValue(item, "DC.CREATOR")
+
                 AudioMetadata(
                     title = item.title,
                     artist = artist,
@@ -390,66 +378,90 @@ public fun parseMediaMetadataFromDidl(didlMetadata: String?, enableDebugLogging:
                     genre = genre,
                     duration = try {
                         item.firstResource?.duration?.let { TimeDuration(parseTimeToSeconds(it).toLong()) }
-                    } catch (e: Exception) { null },
+                    } catch (e: Exception) {
+                        null
+                    },
                     albumArtUri = albumArtUri?.let { Url(it) },
                     description = description,
                     originalTrackNumber = originalTrackNumber?.toLong(),
-                    upnpClass = try { item.clazz?.value } catch (e: Exception) { null }
+                    upnpClass = try {
+                        item.clazz?.value
+                    } catch (e: Exception) {
+                        null
+                    }
                 )
             }
-            
+
             is VideoItem -> {
                 // Extract properties safely from item.properties collection
                 val genre = getPropertyValue(item, "UPNP.GENRE")
                 val thumbnailUri = getPropertyValue(item, "UPNP.ALBUM_ART_URI")
                 val description = item.description ?: getPropertyValue(item, "DC.DESCRIPTION")
-                
+
                 VideoMetadata(
                     title = item.title,
-                    resolution = try { item.firstResource?.resolution } catch (e: Exception) { null },
+                    resolution = try {
+                        item.firstResource?.resolution
+                    } catch (e: Exception) {
+                        null
+                    },
                     duration = try {
                         item.firstResource?.duration?.let { TimeDuration(parseTimeToSeconds(it).toLong()) }
-                    } catch (e: Exception) { null },
+                    } catch (e: Exception) {
+                        null
+                    },
                     description = description,
                     thumbnailUri = thumbnailUri?.let { Url(it) },
                     genre = genre,
-                    upnpClass = try { item.clazz?.value } catch (e: Exception) { null },
-                    bitrate = try { item.firstResource?.bitrate?.toLong() } catch (e: Exception) { null }
+                    upnpClass = try {
+                        item.clazz?.value
+                    } catch (e: Exception) {
+                        null
+                    },
+                    bitrate = try {
+                        item.firstResource?.bitrate?.toLong()
+                    } catch (e: Exception) {
+                        null
+                    }
                 )
             }
-            
+
             is ImageItem -> {
                 // Extract properties safely from item.properties collection
                 val thumbnailUri = getPropertyValue(item, "UPNP.ALBUM_ART_URI")
                 val description = item.description ?: getPropertyValue(item, "DC.DESCRIPTION")
                 val date = getPropertyValue(item, "DC.DATE")
-                
+
                 ImageMetadata(
                     title = item.title,
-                    resolution = try { item.firstResource?.resolution } catch (e: Exception) { null },
+                    resolution = try {
+                        item.firstResource?.resolution
+                    } catch (e: Exception) {
+                        null
+                    },
                     description = description,
                     thumbnailUri = thumbnailUri?.let { Url(it) },
                     date = date,
-                    upnpClass = try { item.clazz?.value } catch (e: Exception) { null }
+                    upnpClass = try {
+                        item.clazz?.value
+                    } catch (e: Exception) {
+                        null
+                    }
                 )
             }
-            
+
             else -> {
                 // For other types, create a basic audio metadata as fallback
                 AudioMetadata(
-                    title = item.title ?: "Unknown",
-                    artist = "Unknown",
-                    album = "Unknown"
+                    title = item.title ?: "Unknown", artist = "Unknown", album = "Unknown"
                 )
             }
         }
     } catch (e: Exception) {
-        
+
         // Return a basic fallback metadata
         AudioMetadata(
-            title = "Unknown",
-            artist = "Unknown",
-            album = "Unknown"
+            title = "Unknown", artist = "Unknown", album = "Unknown"
         )
     }
 }
@@ -466,7 +478,7 @@ public fun parseMediaMetadataFromDidl(didlMetadata: String?): MediaMetadata? {
  */
 private fun getPropertyValue(item: DIDLObject, propertyName: String): String? {
     return try {
-        item.properties.find { property -> 
+        item.properties.find { property ->
             property.javaClass.simpleName.contains(propertyName.substringAfter("."))
         }?.let { property ->
             // Try to get value through reflection
@@ -480,7 +492,7 @@ private fun getPropertyValue(item: DIDLObject, propertyName: String): String? {
             }
         }
     } catch (e: Exception) {
-        
+
         null
     }
 }
@@ -490,7 +502,7 @@ private fun getPropertyValue(item: DIDLObject, propertyName: String): String? {
  */
 private fun getAllPropertyValues(item: DIDLObject, propertyName: String): List<String> {
     return try {
-        item.properties.filter { property -> 
+        item.properties.filter { property ->
             property.javaClass.simpleName.contains(propertyName.substringAfter("."))
         }.mapNotNull { property ->
             try {
@@ -502,7 +514,7 @@ private fun getAllPropertyValues(item: DIDLObject, propertyName: String): List<S
             }
         }
     } catch (e: Exception) {
-        
+
         emptyList()
     }
 }
@@ -514,7 +526,7 @@ private fun parseTimeToSeconds(timeString: String?): Double {
     if (timeString.isNullOrBlank() || timeString == "NOT_IMPLEMENTED") {
         return 0.0
     }
-    
+
     return try {
         val parts = timeString.split(":")
         when (parts.size) {
@@ -524,11 +536,13 @@ private fun parseTimeToSeconds(timeString: String?): Double {
                 val seconds = parts[2].toDouble()
                 hours * 3600 + minutes * 60 + seconds
             }
+
             2 -> {
                 val minutes = parts[0].toDouble()
                 val seconds = parts[1].toDouble()
                 minutes * 60 + seconds
             }
+
             1 -> parts[0].toDouble()
             else -> 0.0
         }
@@ -542,13 +556,8 @@ private fun parseTimeToSeconds(timeString: String?): Double {
  */
 private fun logItemProperties(item: DIDLObject, tag: String = "MediaCastDlna") {
     try {
-        
-        
-        
-        
-        
-        
-        
+
+
         item.properties.forEachIndexed { index, property ->
             try {
                 val propertyName = property.javaClass.simpleName
@@ -559,23 +568,23 @@ private fun logItemProperties(item: DIDLObject, tag: String = "MediaCastDlna") {
                 } catch (e: Exception) {
                     property.toString()
                 }
-                
+
             } catch (e: Exception) {
-                
+
             }
         }
-        
+
         // Log resources information
-        
+
         item.resources.forEachIndexed { index, resource ->
-            resource.duration?.let {  }
-            resource.resolution?.let {  }
-            resource.bitrate?.let {  }
+            resource.duration?.let { }
+            resource.resolution?.let { }
+            resource.bitrate?.let { }
         }
-        
-        
+
+
     } catch (e: Exception) {
-        
+
     }
 }
 

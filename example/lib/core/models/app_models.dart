@@ -65,7 +65,8 @@ class DeviceConnectivityState {
   }) {
     return DeviceConnectivityState(
       isOnline: isOnline ?? this.isOnline,
-      lastConnectivityCheck: lastConnectivityCheck ?? this.lastConnectivityCheck,
+      lastConnectivityCheck:
+          lastConnectivityCheck ?? this.lastConnectivityCheck,
     );
   }
 }

@@ -60,9 +60,9 @@ class PlaybackControlWidget extends StatelessWidget {
       children: [
         Text(
           'Playback Controls',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const Spacer(),
         if (!isDeviceOnline) _buildOfflineIndicator(),
@@ -83,11 +83,7 @@ class PlaybackControlWidget extends StatelessWidget {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.wifi_off,
-            color: Colors.white,
-            size: 16,
-          ),
+          Icon(Icons.wifi_off, color: Colors.white, size: 16),
           SizedBox(width: 4),
           Text(
             'Device Offline',
@@ -174,7 +170,8 @@ class PlaybackControlWidget extends StatelessWidget {
                 width: AppConstants.thumbnailSize,
                 height: AppConstants.thumbnailSize,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _buildDefaultThumbnail(),
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildDefaultThumbnail(),
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
                   return _buildLoadingThumbnail();
@@ -186,11 +183,7 @@ class PlaybackControlWidget extends StatelessWidget {
   }
 
   Widget _buildDefaultThumbnail() {
-    return const Icon(
-      Icons.music_note,
-      size: 40,
-      color: Colors.grey,
-    );
+    return const Icon(Icons.music_note, size: 40, color: Colors.grey);
   }
 
   Widget _buildLoadingThumbnail() {
@@ -201,9 +194,7 @@ class PlaybackControlWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         color: Colors.grey[300],
       ),
-      child: const Center(
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
+      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 
@@ -233,10 +224,12 @@ class PlaybackControlWidget extends StatelessWidget {
           value: playbackState.isSliderBeingDragged
               ? playbackState.currentPosition.toDouble()
               : (playbackState.duration > 0
-                  ? playbackState.currentPosition.toDouble()
-                  : 0),
+                    ? playbackState.currentPosition.toDouble()
+                    : 0),
           min: 0,
-          max: playbackState.duration > 0 ? playbackState.duration.toDouble() : 100,
+          max: playbackState.duration > 0
+              ? playbackState.duration.toDouble()
+              : 100,
           onChanged: isDeviceOnline
               ? (value) {
                   onSliderDragChanged(true);
@@ -331,20 +324,26 @@ class PlaybackControlWidget extends StatelessWidget {
 
   Widget _buildSpeedControl(BuildContext context) {
     // Define available speed options
-    final List<double> speedOptions = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
-    
+    final List<double> speedOptions = [
+      0.25,
+      0.5,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      1.75,
+      2.0,
+    ];
+
     return Row(
       children: [
-        Icon(
-          Icons.speed,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+        Icon(Icons.speed, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: AppConstants.defaultPadding),
         Text(
           'Speed:',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(width: AppConstants.smallPadding),
         Expanded(
@@ -354,7 +353,9 @@ class PlaybackControlWidget extends StatelessWidget {
             icon: const Icon(Icons.arrow_drop_down),
             underline: Container(
               height: 1,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.3),
             ),
             items: speedOptions.map((double speed) {
               return DropdownMenuItem<double>(

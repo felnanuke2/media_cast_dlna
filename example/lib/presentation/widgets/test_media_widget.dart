@@ -32,9 +32,9 @@ class TestMediaWidget extends StatelessWidget {
           children: [
             Text(
               'Test Media',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: AppConstants.defaultPadding),
             ...testMediaItems.map((media) => _buildMediaItem(context, media)),
@@ -77,9 +77,9 @@ class TestMediaWidget extends StatelessWidget {
       children: [
         Text(
           'Play Custom URL',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppConstants.smallPadding),
         Row(

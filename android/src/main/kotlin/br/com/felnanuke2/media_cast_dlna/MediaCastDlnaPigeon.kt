@@ -353,6 +353,93 @@ data class DiscoveryOptions (
 }
 
 /**
+ * Represents a device icon with its properties
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class DeviceIcon (
+  val mimeType: String,
+  val width: Long,
+  val height: Long,
+  val uri: Url
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): DeviceIcon {
+      val mimeType = pigeonVar_list[0] as String
+      val width = pigeonVar_list[1] as Long
+      val height = pigeonVar_list[2] as Long
+      val uri = pigeonVar_list[3] as Url
+      return DeviceIcon(mimeType, width, height, uri)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      mimeType,
+      width,
+      height,
+      uri,
+    )
+  }
+}
+
+/**
+ * Represents detailed manufacturer information for a device
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ManufacturerDetails (
+  val manufacturer: String,
+  val manufacturerUri: Url? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ManufacturerDetails {
+      val manufacturer = pigeonVar_list[0] as String
+      val manufacturerUri = pigeonVar_list[1] as Url?
+      return ManufacturerDetails(manufacturer, manufacturerUri)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      manufacturer,
+      manufacturerUri,
+    )
+  }
+}
+
+/**
+ * Represents detailed model information for a device
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ModelDetails (
+  val modelName: String,
+  val modelDescription: String? = null,
+  val modelNumber: String? = null,
+  val modelUri: Url? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ModelDetails {
+      val modelName = pigeonVar_list[0] as String
+      val modelDescription = pigeonVar_list[1] as String?
+      val modelNumber = pigeonVar_list[2] as String?
+      val modelUri = pigeonVar_list[3] as Url?
+      return ModelDetails(modelName, modelDescription, modelNumber, modelUri)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      modelName,
+      modelDescription,
+      modelNumber,
+      modelUri,
+    )
+  }
+}
+
+/**
  * Represents a UPnP/DLNA device discovered on the network
  *
  * Generated class from Pigeon that represents data sent in messages.
@@ -361,13 +448,12 @@ data class DlnaDevice (
   val udn: DeviceUdn,
   val friendlyName: String,
   val deviceType: String,
-  val manufacturerName: String,
-  val modelName: String,
+  val manufacturerDetails: ManufacturerDetails,
+  val modelDetails: ModelDetails,
   val ipAddress: IpAddress,
   val port: NetworkPort,
-  val modelDescription: String? = null,
   val presentationUrl: Url? = null,
-  val iconUrl: Url? = null
+  val icons: List<DeviceIcon>? = null
 )
  {
   companion object {
@@ -375,14 +461,13 @@ data class DlnaDevice (
       val udn = pigeonVar_list[0] as DeviceUdn
       val friendlyName = pigeonVar_list[1] as String
       val deviceType = pigeonVar_list[2] as String
-      val manufacturerName = pigeonVar_list[3] as String
-      val modelName = pigeonVar_list[4] as String
+      val manufacturerDetails = pigeonVar_list[3] as ManufacturerDetails
+      val modelDetails = pigeonVar_list[4] as ModelDetails
       val ipAddress = pigeonVar_list[5] as IpAddress
       val port = pigeonVar_list[6] as NetworkPort
-      val modelDescription = pigeonVar_list[7] as String?
-      val presentationUrl = pigeonVar_list[8] as Url?
-      val iconUrl = pigeonVar_list[9] as Url?
-      return DlnaDevice(udn, friendlyName, deviceType, manufacturerName, modelName, ipAddress, port, modelDescription, presentationUrl, iconUrl)
+      val presentationUrl = pigeonVar_list[7] as Url?
+      val icons = pigeonVar_list[8] as List<DeviceIcon>?
+      return DlnaDevice(udn, friendlyName, deviceType, manufacturerDetails, modelDetails, ipAddress, port, presentationUrl, icons)
     }
   }
   fun toList(): List<Any?> {
@@ -390,13 +475,12 @@ data class DlnaDevice (
       udn,
       friendlyName,
       deviceType,
-      manufacturerName,
-      modelName,
+      manufacturerDetails,
+      modelDetails,
       ipAddress,
       port,
-      modelDescription,
       presentationUrl,
-      iconUrl,
+      icons,
     )
   }
 }
@@ -771,45 +855,60 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
       }
       143.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DlnaDevice.fromList(it)
+          DeviceIcon.fromList(it)
         }
       }
       144.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DlnaService.fromList(it)
+          ManufacturerDetails.fromList(it)
         }
       }
       145.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SubtitleTrack.fromList(it)
+          ModelDetails.fromList(it)
         }
       }
       146.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AudioMetadata.fromList(it)
+          DlnaDevice.fromList(it)
         }
       }
       147.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VideoMetadata.fromList(it)
+          DlnaService.fromList(it)
         }
       }
       148.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageMetadata.fromList(it)
+          SubtitleTrack.fromList(it)
         }
       }
       149.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          MediaItem.fromList(it)
+          AudioMetadata.fromList(it)
         }
       }
       150.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PlaybackInfo.fromList(it)
+          VideoMetadata.fromList(it)
         }
       }
       151.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ImageMetadata.fromList(it)
+        }
+      }
+      152.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          MediaItem.fromList(it)
+        }
+      }
+      153.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PlaybackInfo.fromList(it)
+        }
+      }
+      154.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PlaybackSpeed.fromList(it)
         }
@@ -875,40 +974,52 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
         stream.write(142)
         writeValue(stream, value.toList())
       }
-      is DlnaDevice -> {
+      is DeviceIcon -> {
         stream.write(143)
         writeValue(stream, value.toList())
       }
-      is DlnaService -> {
+      is ManufacturerDetails -> {
         stream.write(144)
         writeValue(stream, value.toList())
       }
-      is SubtitleTrack -> {
+      is ModelDetails -> {
         stream.write(145)
         writeValue(stream, value.toList())
       }
-      is AudioMetadata -> {
+      is DlnaDevice -> {
         stream.write(146)
         writeValue(stream, value.toList())
       }
-      is VideoMetadata -> {
+      is DlnaService -> {
         stream.write(147)
         writeValue(stream, value.toList())
       }
-      is ImageMetadata -> {
+      is SubtitleTrack -> {
         stream.write(148)
         writeValue(stream, value.toList())
       }
-      is MediaItem -> {
+      is AudioMetadata -> {
         stream.write(149)
         writeValue(stream, value.toList())
       }
-      is PlaybackInfo -> {
+      is VideoMetadata -> {
         stream.write(150)
         writeValue(stream, value.toList())
       }
-      is PlaybackSpeed -> {
+      is ImageMetadata -> {
         stream.write(151)
+        writeValue(stream, value.toList())
+      }
+      is MediaItem -> {
+        stream.write(152)
+        writeValue(stream, value.toList())
+      }
+      is PlaybackInfo -> {
+        stream.write(153)
+        writeValue(stream, value.toList())
+      }
+      is PlaybackSpeed -> {
+        stream.write(154)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)

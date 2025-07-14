@@ -6,23 +6,28 @@ class TestMediaRepository {
     return [
       const TestMediaItem(
         title: 'Big Buck Bunny (Video)',
-        url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        url:
+            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         type: 'video/mp4',
         description: 'Open source 3D computer-animated comedy short film',
-        thumbnailUri: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+        thumbnailUri:
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
         duration: 596, // 9:56
       ),
       const TestMediaItem(
         title: 'Sintel Trailer (Video)',
-        url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+        url:
+            'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
         type: 'video/mp4',
         description: 'Blender Foundation\'s third open movie',
-        thumbnailUri: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/Sintel.jpg',
+        thumbnailUri:
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/images/Sintel.jpg',
         duration: 888, // 14:48
       ),
       const TestMediaItem(
         title: 'Kalimba (Audio)',
-        url: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+        url:
+            'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
         type: 'audio/mpeg',
         description: 'Sample audio file for testing',
         artist: 'Mr. Scruff',

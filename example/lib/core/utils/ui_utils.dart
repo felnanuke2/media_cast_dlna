@@ -79,7 +79,11 @@ class UiUtils {
   }
 
   /// Shows a snackbar with the given message
-  static void showSnackBar(BuildContext context, String message, {Color? backgroundColor}) {
+  static void showSnackBar(
+    BuildContext context,
+    String message, {
+    Color? backgroundColor,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

@@ -43,9 +43,9 @@ class DeviceSelectionWidget extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 'Last checked: ${FormatUtils.formatTime(lastConnectivityCheck!)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
             ],
           ] else ...[
@@ -61,9 +61,9 @@ class DeviceSelectionWidget extends StatelessWidget {
                   const SizedBox(height: AppConstants.smallPadding),
                   Text(
                     'Tap the cast button to find a device',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ],

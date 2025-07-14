@@ -39,7 +39,7 @@ class DlnaHomePage extends StatefulWidget {
 class _DlnaHomePageState extends State<DlnaHomePage> {
   late final MediaCastService _mediaService;
   final TextEditingController _customUrlController = TextEditingController();
-  
+
   // State variables
   DlnaDevice? _selectedDevice;
   PlaybackState _playbackState = const PlaybackState();
@@ -65,7 +65,10 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
       await _mediaService.initialize();
     } catch (e) {
       if (mounted) {
-        UiUtils.showErrorSnackBar(context, '${AppConstants.initializationError}: $e');
+        UiUtils.showErrorSnackBar(
+          context,
+          '${AppConstants.initializationError}: $e',
+        );
       }
     }
   }
@@ -169,7 +172,9 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
         positionSeconds: positionSeconds,
       );
       setState(() {
-        _playbackState = _playbackState.copyWith(currentPosition: positionSeconds);
+        _playbackState = _playbackState.copyWith(
+          currentPosition: positionSeconds,
+        );
       });
     } catch (e) {
       if (mounted) {
@@ -188,7 +193,9 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
         currentMuteState: _playbackState.isMuted,
       );
       setState(() {
-        _playbackState = _playbackState.copyWith(isMuted: !_playbackState.isMuted);
+        _playbackState = _playbackState.copyWith(
+          isMuted: !_playbackState.isMuted,
+        );
       });
     } catch (e) {
       if (mounted) {
@@ -200,7 +207,9 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
   /// Handles slider drag state changes
   void _onSliderDragChanged(bool isDragging) {
     setState(() {
-      _playbackState = _playbackState.copyWith(isSliderBeingDragged: isDragging);
+      _playbackState = _playbackState.copyWith(
+        isSliderBeingDragged: isDragging,
+      );
     });
   }
 
@@ -231,7 +240,7 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
         title: 'Custom Media',
         url: url,
       );
-      
+
       await _mediaService.playMedia(
         deviceUdn: _selectedDevice!.udn,
         mediaUrl: url,
@@ -304,7 +313,9 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
                 _showCastDevicesModal();
               }
             },
-            tooltip: _selectedDevice != null ? 'Disconnect from device' : 'Cast to device',
+            tooltip: _selectedDevice != null
+                ? 'Disconnect from device'
+                : 'Cast to device',
           ),
         ],
       ),

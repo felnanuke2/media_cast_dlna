@@ -104,7 +104,8 @@ class MuteOperationFactory {
   static MuteOperation unmute() => MuteOperation(shouldMute: false);
 
   /// Create from boolean
-  static MuteOperation fromBoolean(bool shouldMute) => MuteOperation(shouldMute: shouldMute);
+  static MuteOperation fromBoolean(bool shouldMute) =>
+      MuteOperation(shouldMute: shouldMute);
 }
 
 /// Extension methods for MuteOperation to add object calisthenics behavior
@@ -136,7 +137,6 @@ class TimePositionFactory {
 
 /// Extension methods for TimePosition to add object calisthenics behavior
 extension TimePositionExtensions on TimePosition {
-
   int get totalMinutes => seconds ~/ 60;
   int get remainingSeconds => seconds % 60;
   bool get isAtStart => seconds == 0;
@@ -146,14 +146,17 @@ extension TimePositionExtensions on TimePosition {
   }
 
   TimePosition subtract(Duration duration) {
-    final newSeconds = (seconds - duration.inSeconds).clamp(0, double.infinity).toInt();
+    final newSeconds = (seconds - duration.inSeconds)
+        .clamp(0, double.infinity)
+        .toInt();
     return TimePosition(seconds: newSeconds);
   }
 
   bool isAfter(TimePosition other) => seconds > other.seconds;
   bool isBefore(TimePosition other) => seconds < other.seconds;
 
-  String get displayString => 'TimePosition(${totalMinutes}m ${remainingSeconds}s)';
+  String get displayString =>
+      'TimePosition(${totalMinutes}m ${remainingSeconds}s)';
 }
 
 /// Static factory methods for TimeDuration
@@ -180,7 +183,6 @@ class TimeDurationFactory {
 
 /// Extension methods for TimeDuration to add object calisthenics behavior
 extension TimeDurationExtensions on TimeDuration {
-
   int get totalMinutes => seconds ~/ 60;
   int get remainingSeconds => seconds % 60;
   bool get isZero => seconds == 0;
@@ -192,14 +194,17 @@ extension TimeDurationExtensions on TimeDuration {
   }
 
   TimeDuration subtract(TimeDuration other) {
-    final newSeconds = (seconds - other.seconds).clamp(0, double.infinity).toInt();
+    final newSeconds = (seconds - other.seconds)
+        .clamp(0, double.infinity)
+        .toInt();
     return TimeDuration(seconds: newSeconds);
   }
 
   bool isLongerThan(TimeDuration other) => seconds > other.seconds;
   bool isShorterThan(TimeDuration other) => seconds < other.seconds;
 
-  String get displayString => 'TimeDuration(${totalMinutes}m ${remainingSeconds}s)';
+  String get displayString =>
+      'TimeDuration(${totalMinutes}m ${remainingSeconds}s)';
 }
 
 /// Extension methods for PlaybackInfo to add object calisthenics behavior
@@ -207,7 +212,9 @@ extension PlaybackInfoExtensions on PlaybackInfo {
   /// Calculate remaining time
   TimeDuration get remainingTime {
     final remainingSeconds = duration.seconds - position.seconds;
-    return TimeDuration(seconds: remainingSeconds.clamp(0, double.infinity).toInt());
+    return TimeDuration(
+      seconds: remainingSeconds.clamp(0, double.infinity).toInt(),
+    );
   }
 
   /// Calculate progress percentage (0-100)
@@ -246,7 +253,6 @@ class DeviceUdnFactory {
 
 /// Extension methods for DeviceUdn to add object calisthenics behavior
 extension DeviceUdnExtensions on DeviceUdn {
-
   /// Check if UDN is valid UUID format
   bool get isUuidFormat => value.startsWith('uuid:');
 
@@ -262,7 +268,9 @@ class UrlFactory {
       throw ArgumentError('URL cannot be empty');
     }
     // Basic URL validation
-    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('ftp://')) {
+    if (!url.startsWith('http://') &&
+        !url.startsWith('https://') &&
+        !url.startsWith('ftp://')) {
       throw ArgumentError('URL must start with a valid protocol');
     }
     return Url(value: url);
@@ -283,7 +291,6 @@ class UrlFactory {
 
 /// Extension methods for Url to add object calisthenics behavior
 extension UrlExtensions on Url {
-
   bool get isHttp => value.startsWith('http://');
   bool get isHttps => value.startsWith('https://');
   bool get isSecure => isHttps;
@@ -319,9 +326,11 @@ class IpAddressFactory {
 
 /// Extension methods for IpAddress to add object calisthenics behavior
 extension IpAddressExtensions on IpAddress {
-
   bool get isLocalhost => value == '127.0.0.1';
-  bool get isPrivate => value.startsWith('192.168.') || value.startsWith('10.') || value.startsWith('172.');
+  bool get isPrivate =>
+      value.startsWith('192.168.') ||
+      value.startsWith('10.') ||
+      value.startsWith('172.');
   bool get isAny => value == '0.0.0.0';
 }
 
@@ -350,7 +359,6 @@ class NetworkPortFactory {
 
 /// Extension methods for NetworkPort to add object calisthenics behavior
 extension NetworkPortExtensions on NetworkPort {
-
   bool get isWellKnown => value < 1024;
   bool get isEphemeral => value >= 32768;
   bool get isHttp => value == 80;
@@ -382,7 +390,6 @@ class DiscoveryTimeoutFactory {
 
 /// Extension methods for DiscoveryTimeout to add object calisthenics behavior
 extension DiscoveryTimeoutExtensions on DiscoveryTimeout {
-
   bool get isShort => seconds <= 3;
   bool get isStandard => seconds == 5;
   bool get isLong => seconds >= 10;
@@ -405,15 +412,16 @@ class SearchTargetFactory {
   static SearchTarget all() => SearchTarget(target: 'ssdp:all');
 
   /// Search for media renderers
-  static SearchTarget mediaRenderer() => SearchTarget(target: 'urn:schemas-upnp-org:device:MediaRenderer:1');
+  static SearchTarget mediaRenderer() =>
+      SearchTarget(target: 'urn:schemas-upnp-org:device:MediaRenderer:1');
 
   /// Search for media servers
-  static SearchTarget mediaServer() => SearchTarget(target: 'urn:schemas-upnp-org:device:MediaServer:1');
+  static SearchTarget mediaServer() =>
+      SearchTarget(target: 'urn:schemas-upnp-org:device:MediaServer:1');
 }
 
 /// Extension methods for SearchTarget to add object calisthenics behavior
 extension SearchTargetExtensions on SearchTarget {
-
   bool get isRootDevice => target == 'upnp:rootdevice';
   bool get isAll => target == 'ssdp:all';
   bool get isMediaRenderer => target.contains('MediaRenderer');
@@ -424,13 +432,17 @@ extension SearchTargetExtensions on SearchTarget {
 class DiscoveryOptionsFactory {
   /// Create options for media renderers with standard timeout
   static DiscoveryOptions mediaRenderers() => DiscoveryOptions(
-    searchTarget: SearchTarget(target: 'urn:schemas-upnp-org:device:MediaRenderer:1'),
+    searchTarget: SearchTarget(
+      target: 'urn:schemas-upnp-org:device:MediaRenderer:1',
+    ),
     timeout: DiscoveryTimeout(seconds: 5),
   );
 
   /// Create options for media servers with standard timeout
   static DiscoveryOptions mediaServers() => DiscoveryOptions(
-    searchTarget: SearchTarget(target: 'urn:schemas-upnp-org:device:MediaServer:1'),
+    searchTarget: SearchTarget(
+      target: 'urn:schemas-upnp-org:device:MediaServer:1',
+    ),
     timeout: DiscoveryTimeout(seconds: 5),
   );
 

@@ -27,7 +27,9 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
   void initState() {
     super.initState();
     _localSelectedRendererUdn = widget.selectedRendererUdn;
-    _api.startDiscovery(DiscoveryOptions(timeout: DiscoveryTimeout(seconds: 10)));
+    _api.startDiscovery(
+      DiscoveryOptions(timeout: DiscoveryTimeout(seconds: 10)),
+    );
     _getDevices();
     _discoveryTimer = Timer.periodic(const Duration(seconds: 5), _getDevices);
   }
@@ -64,18 +66,31 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
                 _buildDetailRow('Name', device.friendlyName),
                 _buildDetailRow('UDN', device.udn.value),
                 _buildDetailRow('Type', device.deviceType),
-                _buildDetailRow('Manufacturer', device.manufacturerName),
-                _buildDetailRow('Model', device.modelName),
+                _buildDetailRow(
+                  'Manufacturer',
+                  device.manufacturerDetails.manufacturer,
+                ),
+                _buildDetailRow('Model', device.modelDetails.modelName),
                 _buildDetailRow('IP Address', device.ipAddress.value),
                 _buildDetailRow('Port', device.port.value.toString()),
                 _buildDetailRow(
                   'Description',
-                  device.modelDescription ?? 'No description',
+                  device.modelDetails.modelDescription ?? 'No description',
                 ),
                 if (device.presentationUrl != null)
-                  _buildDetailRow('Presentation URL', device.presentationUrl!.value),
-                if (device.iconUrl != null)
-                  _buildDetailRow('Icon URL', device.iconUrl!.value),
+                  _buildDetailRow(
+                    'Presentation URL',
+                    device.presentationUrl!.value,
+                  ),
+                if (device.icons != null && device.icons!.isNotEmpty)
+                  ...device.icons!.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final icon = entry.value;
+                    return _buildDetailRow(
+                      'Icon ${index + 1}',
+                      '${icon.uri.value} (${icon.width}x${icon.height}, ${icon.mimeType})',
+                    );
+                  }),
               ],
             ),
           ),
@@ -112,6 +127,94 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
         ],
       ),
     );
+  }
+
+  Widget _buildDeviceIcon(DlnaDevice device, bool isSelected) {
+    // Try to get the first available icon, preferring smaller sizes for list display
+    DeviceIcon? bestIcon;
+
+    if (device.icons != null && device.icons!.isNotEmpty) {
+      // Sort icons by size (width * height) and pick the smallest suitable one
+      final sortedIcons = List<DeviceIcon>.from(device.icons!)
+        ..sort((a, b) => (a.width * a.height).compareTo(b.width * b.height));
+
+      // Prefer icons that are reasonably sized for list display (32x32 to 64x64)
+      bestIcon = sortedIcons.firstWhere(
+        (icon) => icon.width >= 32 && icon.width <= 64,
+        orElse: () => sortedIcons.first,
+      );
+    }
+
+    const double iconSize = 40.0;
+
+    if (bestIcon != null) {
+      return Container(
+        width: iconSize,
+        height: iconSize,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected ? Border.all(color: Colors.blue, width: 2) : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.network(
+            bestIcon.uri.value,
+            width: iconSize,
+            height: iconSize,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback to default icon if image fails to load
+              return Icon(
+                isSelected ? Icons.cast_connected : Icons.cast,
+                color: isSelected ? Colors.blue : Colors.grey,
+                size: iconSize * 0.6,
+              );
+            },
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                width: iconSize,
+                height: iconSize,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Center(
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.grey[400]!,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    } else {
+      // Fallback to default cast icon if no device icon is available
+      return Container(
+        width: iconSize,
+        height: iconSize,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.blue.withValues(alpha: 0.1)
+              : Colors.grey.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected ? Border.all(color: Colors.blue, width: 2) : null,
+        ),
+        child: Icon(
+          isSelected ? Icons.cast_connected : Icons.cast,
+          color: isSelected ? Colors.blue : Colors.grey,
+          size: iconSize * 0.6,
+        ),
+      );
+    }
   }
 
   @override
@@ -182,10 +285,7 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
                   if (!isRenderer) return const SizedBox.shrink();
 
                   return ListTile(
-                    leading: Icon(
-                      isSelected ? Icons.cast_connected : Icons.cast,
-                      color: isSelected ? Colors.blue : Colors.grey,
-                    ),
+                    leading: _buildDeviceIcon(device, isSelected),
                     title: Text(
                       device.friendlyName,
                       style: TextStyle(
@@ -195,7 +295,7 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
                       ),
                     ),
                     subtitle: Text(
-                      '${device.manufacturerName} • ${device.ipAddress}',
+                      '${device.manufacturerDetails.manufacturer} • ${device.ipAddress.value}',
                       style: const TextStyle(fontSize: 12),
                     ),
                     trailing: Row(

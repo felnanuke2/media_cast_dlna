@@ -1,0 +1,17 @@
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    # Only run on tags that start with 'v'
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      id-token: write # Required for authentication using OIDC
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    # with:
+    #   working-directory: path/to/package/within/repository

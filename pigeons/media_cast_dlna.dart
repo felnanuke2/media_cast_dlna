@@ -10,7 +10,6 @@ import 'package:pigeon/pigeon.dart';
     dartPackageName: 'media_cast_dlna',
   ),
 )
-
 /// Represents a Unique Device Name (UDN) following object calisthenics
 class DeviceUdn {
   DeviceUdn({required this.value});
@@ -91,31 +90,67 @@ class DiscoveryOptions {
   final DiscoveryTimeout timeout;
 }
 
+/// Represents a device icon with its properties
+class DeviceIcon {
+  DeviceIcon({
+    required this.mimeType,
+    required this.width,
+    required this.height,
+    required this.uri,
+  });
+
+  final String mimeType;
+  final int width;
+  final int height;
+  final Url uri;
+}
+
+/// Represents detailed manufacturer information for a device
+class ManufacturerDetails {
+  ManufacturerDetails({required this.manufacturer, this.manufacturerUri});
+
+  final String manufacturer;
+  final Url? manufacturerUri;
+}
+
+/// Represents detailed model information for a device
+class ModelDetails {
+  ModelDetails({
+    required this.modelName,
+    this.modelDescription,
+    this.modelNumber,
+    this.modelUri,
+  });
+
+  final String modelName;
+  final String? modelDescription;
+  final String? modelNumber;
+  final Url? modelUri;
+}
+
 /// Represents a UPnP/DLNA device discovered on the network
 class DlnaDevice {
   DlnaDevice({
     required this.udn,
     required this.friendlyName,
     required this.deviceType,
-    required this.manufacturerName,
-    required this.modelName,
+    required this.manufacturerDetails,
+    required this.modelDetails,
     required this.ipAddress,
     required this.port,
-    this.modelDescription,
     this.presentationUrl,
-    this.iconUrl,
+    this.icons,
   });
 
   final DeviceUdn udn;
   final String friendlyName;
   final String deviceType;
-  final String manufacturerName;
-  final String modelName;
+  final ManufacturerDetails manufacturerDetails;
+  final ModelDetails modelDetails;
   final IpAddress ipAddress;
   final NetworkPort port;
-  final String? modelDescription;
   final Url? presentationUrl;
-  final Url? iconUrl;
+  final List<DeviceIcon>? icons;
 }
 
 /// Represents a UPnP service available on a device
@@ -364,10 +399,7 @@ abstract class MediaCastDlnaApi {
   TransportState getTransportState(DeviceUdn deviceUdn);
 
   @async
-  void setPlaybackSpeed(
-    DeviceUdn deviceUdn,
-    PlaybackSpeed speed,
-  );
+  void setPlaybackSpeed(DeviceUdn deviceUdn, PlaybackSpeed speed);
 }
 
 class PlaybackSpeed {

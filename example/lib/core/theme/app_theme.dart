@@ -18,17 +18,16 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     );
   }
@@ -41,7 +40,7 @@ class AppTheme {
   static const Color stoppedColor = Colors.red;
   static const Color transitioningColor = Colors.blue;
   static const Color noMediaColor = Colors.grey;
-  
+
   // Media type colors
   static const Color videoColor = Colors.red;
   static const Color audioColor = Colors.blue;

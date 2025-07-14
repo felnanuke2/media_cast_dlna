@@ -34,9 +34,7 @@ class MediaCastService {
           onPlaybackStateChanged(playbackState);
         } catch (e) {
           // Handle playback info error
-          onConnectivityChanged(
-            const DeviceConnectivityState(isOnline: false),
-          );
+          onConnectivityChanged(const DeviceConnectivityState(isOnline: false));
           timer.cancel();
         }
       },
@@ -81,7 +79,7 @@ class MediaCastService {
   /// Gets the current playback state for a device
   Future<PlaybackState> _getPlaybackState(DeviceUdn deviceUdn) async {
     final transportState = await _api.getTransportState(deviceUdn);
-    
+
     int currentPosition = 0;
     if (transportState == TransportState.playing ||
         transportState == TransportState.paused) {
