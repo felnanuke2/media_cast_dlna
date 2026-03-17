@@ -38,7 +38,10 @@ class DlnaHomePage extends StatefulWidget {
 
 class _DlnaHomePageState extends State<DlnaHomePage> {
   late final MediaCastService _mediaService;
+  late final MediaCastDlnaDiscoveryEvents _discoveryEvents;
   final TextEditingController _customUrlController = TextEditingController();
+  StreamSubscription<DlnaDevice>? _onDeviceFoundSubscription;
+  StreamSubscription<DeviceUdn>? _onRendererOfflineSubscription;
 
   // State variables
   DlnaDevice? _selectedDevice;
@@ -49,11 +52,21 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
   void initState() {
     super.initState();
     _mediaService = MediaCastService();
+    _discoveryEvents = MediaCastDlnaDiscoveryEvents();
+    _onDeviceFoundSubscription = _discoveryEvents.onDeviceFound.listen(
+      _handleDeviceFound,
+    );
+    _onRendererOfflineSubscription = _discoveryEvents.onRendererOffline.listen(
+      _handleRendererOffline,
+    );
     _initializeService();
   }
 
   @override
   void dispose() {
+    _onDeviceFoundSubscription?.cancel();
+    _onRendererOfflineSubscription?.cancel();
+    _discoveryEvents.dispose();
     _mediaService.dispose();
     _customUrlController.dispose();
     super.dispose();
@@ -97,10 +110,33 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
       },
       onConnectivityChanged: _handleConnectivityChanged,
     );
+  }
 
-    _mediaService.startDeviceConnectivityMonitoring(
-      deviceUdn: deviceUdn,
-      onConnectivityChanged: _handleConnectivityChanged,
+  void _handleDeviceFound(DlnaDevice device) {
+    final selectedUdn = _selectedDevice?.udn.value;
+    if (!mounted || selectedUdn == null || selectedUdn != device.udn.value) {
+      return;
+    }
+
+    _handleConnectivityChanged(
+      DeviceConnectivityState(
+        isOnline: true,
+        lastConnectivityCheck: DateTime.now(),
+      ),
+    );
+  }
+
+  void _handleRendererOffline(DeviceUdn deviceUdn) {
+    final selectedUdn = _selectedDevice?.udn.value;
+    if (!mounted || selectedUdn == null || selectedUdn != deviceUdn.value) {
+      return;
+    }
+
+    _handleConnectivityChanged(
+      DeviceConnectivityState(
+        isOnline: false,
+        lastConnectivityCheck: DateTime.now(),
+      ),
     );
   }
 

@@ -1678,4 +1678,22 @@ class DiscoveryEventsFlutterApi(private val binaryMessenger: BinaryMessenger, pr
       } 
     }
   }
+  /** Emitted when a MediaRenderer becomes unavailable on the network. */
+  fun onRendererOffline(deviceUdnArg: DeviceUdn, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(deviceUdnArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(createConnectionError(channelName)))
+      } 
+    }
+  }
 }

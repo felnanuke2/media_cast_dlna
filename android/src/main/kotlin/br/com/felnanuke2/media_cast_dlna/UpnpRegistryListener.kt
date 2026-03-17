@@ -99,6 +99,16 @@ class UpnpRegistryListener(
         }
     }
 
+    private fun notifyRendererOffline(deviceUdn: DeviceUdn) {
+        mainHandler.post {
+            discoveryEventsFlutterApi?.onRendererOffline(deviceUdn) { result ->
+                result.exceptionOrNull()?.let { error ->
+                    Log.w("UpnpRegistryListener", "Failed to send onRendererOffline callback", error)
+                }
+            }
+        }
+    }
+
     private fun matchesActiveSearchTarget(deviceType: String): Boolean {
         return when (activeFilter) {
             DiscoveryTargetFilter.ALL_MEDIA -> {
@@ -113,6 +123,18 @@ class UpnpRegistryListener(
                 deviceType.contains("MediaServer", ignoreCase = true)
             }
         }
+    }
+
+    private fun isRendererType(deviceType: String): Boolean {
+        return deviceType.contains("MediaRenderer", ignoreCase = true)
+    }
+
+    private fun isRendererDevice(device: RemoteDevice): Boolean {
+        return isMediaDevice(device) && isRendererType(device.type.toString())
+    }
+
+    private fun isRendererDevice(device: LocalDevice): Boolean {
+        return isMediaDevice(device) && isRendererType(device.type.toString())
     }
 
     /**
@@ -186,7 +208,12 @@ class UpnpRegistryListener(
                 while (iterator.hasNext()) {
                     if (iterator.next().udn == dlnaDevice?.udn) {
                         iterator.remove()
-                        dlnaDevice?.udn?.let { udn -> notifyDeviceLost(udn) }
+                        dlnaDevice?.udn?.let { udn ->
+                            notifyDeviceLost(udn)
+                            if (isRendererDevice(it)) {
+                                notifyRendererOffline(udn)
+                            }
+                        }
                         break
                     }
                 }
@@ -245,7 +272,11 @@ class UpnpRegistryListener(
         while (iterator.hasNext()) {
             if (iterator.next().udn.value == deviceUdn.identifierString) {
                 iterator.remove()
-                notifyDeviceLost(DeviceUdn(deviceUdn.identifierString))
+                val removedDeviceUdn = DeviceUdn(deviceUdn.identifierString)
+                notifyDeviceLost(removedDeviceUdn)
+                if (device != null && isRendererDevice(device)) {
+                    notifyRendererOffline(removedDeviceUdn)
+                }
                 break
             }
         }
@@ -287,6 +318,9 @@ class UpnpRegistryListener(
                         if (iterator.next().udn == dlna.udn) {
                             iterator.remove()
                             notifyDeviceLost(dlna.udn)
+                            if (isRendererDevice(it)) {
+                                notifyRendererOffline(dlna.udn)
+                            }
                             break
                         }
                     }

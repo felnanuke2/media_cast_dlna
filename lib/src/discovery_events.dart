@@ -10,6 +10,7 @@ class MediaCastDlnaDiscoveryEvents {
     _handler = _DiscoveryEventsHandler(
       onDeviceFound: _handleDeviceFound,
       onDeviceLost: _handleDeviceLost,
+      onRendererOffline: _handleRendererOffline,
     );
     DiscoveryEventsFlutterApi.setUp(_handler, binaryMessenger: binaryMessenger);
   }
@@ -20,11 +21,14 @@ class MediaCastDlnaDiscoveryEvents {
       StreamController<DlnaDevice>.broadcast();
   final StreamController<DeviceUdn> _onDeviceLostController =
       StreamController<DeviceUdn>.broadcast();
+  final StreamController<DeviceUdn> _onRendererOfflineController =
+      StreamController<DeviceUdn>.broadcast();
 
   final List<DlnaDevice> _knownDevices = <DlnaDevice>[];
 
   Stream<DlnaDevice> get onDeviceFound => _onDeviceFoundController.stream;
   Stream<DeviceUdn> get onDeviceLost => _onDeviceLostController.stream;
+  Stream<DeviceUdn> get onRendererOffline => _onRendererOfflineController.stream;
 
   List<DlnaDevice> get knownDevices => List<DlnaDevice>.unmodifiable(_knownDevices);
 
@@ -46,11 +50,16 @@ class MediaCastDlnaDiscoveryEvents {
     _onDeviceLostController.add(deviceUdn);
   }
 
+  void _handleRendererOffline(DeviceUdn deviceUdn) {
+    _onRendererOfflineController.add(deviceUdn);
+  }
+
   Future<void> dispose() async {
     DiscoveryEventsFlutterApi.setUp(null);
     await Future.wait<void>([
       _onDeviceFoundController.close(),
       _onDeviceLostController.close(),
+      _onRendererOfflineController.close(),
     ]);
   }
 }
@@ -59,11 +68,14 @@ class _DiscoveryEventsHandler implements DiscoveryEventsFlutterApi {
   _DiscoveryEventsHandler({
     required void Function(DlnaDevice) onDeviceFound,
     required void Function(DeviceUdn) onDeviceLost,
+    required void Function(DeviceUdn) onRendererOffline,
   })  : _onDeviceFound = onDeviceFound,
-        _onDeviceLost = onDeviceLost;
+        _onDeviceLost = onDeviceLost,
+        _onRendererOffline = onRendererOffline;
 
   final void Function(DlnaDevice) _onDeviceFound;
   final void Function(DeviceUdn) _onDeviceLost;
+  final void Function(DeviceUdn) _onRendererOffline;
 
   @override
   void onDeviceFound(DlnaDevice device) {
@@ -73,5 +85,10 @@ class _DiscoveryEventsHandler implements DiscoveryEventsFlutterApi {
   @override
   void onDeviceLost(DeviceUdn deviceUdn) {
     _onDeviceLost(deviceUdn);
+  }
+
+  @override
+  void onRendererOffline(DeviceUdn deviceUdn) {
+    _onRendererOffline(deviceUdn);
   }
 }

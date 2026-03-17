@@ -424,4 +424,7 @@ abstract class DiscoveryEventsFlutterApi {
   void onDeviceFound(DlnaDevice device);
 
   void onDeviceLost(DeviceUdn deviceUdn);
+
+  /// Emitted when a MediaRenderer becomes unavailable on the network.
+  void onRendererOffline(DeviceUdn deviceUdn);
 }

@@ -307,6 +307,15 @@ Future<void> _startDeviceDiscovery() async {
       });
     });
 
+    // Native renderer connectivity event (no polling timer needed)
+    discoveryEvents.onRendererOffline.listen((rendererUdn) {
+      if (_selectedRenderer?.udn.value == rendererUdn.value) {
+        setState(() {
+          _isSelectedRendererOnline = false;
+        });
+      }
+    });
+
     // Start discovery with timeout using the new wrapper classes
     await _api.startDiscovery(
       DiscoveryOptions(

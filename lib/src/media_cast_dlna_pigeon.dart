@@ -1719,6 +1719,9 @@ abstract class DiscoveryEventsFlutterApi {
 
   void onDeviceLost(DeviceUdn deviceUdn);
 
+  /// Emitted when a MediaRenderer becomes unavailable on the network.
+  void onRendererOffline(DeviceUdn deviceUdn);
+
   static void setUp(DiscoveryEventsFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
@@ -1762,6 +1765,31 @@ abstract class DiscoveryEventsFlutterApi {
               'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost was null, expected non-null DeviceUdn.');
           try {
             api.onDeviceLost(arg_deviceUdn!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final DeviceUdn? arg_deviceUdn = (args[0] as DeviceUdn?);
+          assert(arg_deviceUdn != null,
+              'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline was null, expected non-null DeviceUdn.');
+          try {
+            api.onRendererOffline(arg_deviceUdn!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
