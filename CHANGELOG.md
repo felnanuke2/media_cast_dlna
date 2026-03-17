@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-17
+
+### ⚠️ BREAKING CHANGES
+- **Discovery API migration to event-driven callbacks**: discovery should now be consumed through `MediaCastDlnaDiscoveryEvents` streams.
+- New native-to-Dart callbacks were added via Pigeon `@FlutterApi`: `onDeviceFound` and `onDeviceLost`.
+
+### ✨ Added
+- New Flutter-side helper: `MediaCastDlnaDiscoveryEvents`.
+- New event streams:
+  - `onDeviceFound` for discovered/updated devices.
+  - `onDeviceLost` for removed/offline devices.
+- Android UPnP registry integration now pushes events immediately when devices are added/updated/removed.
+
+### 🔄 Changed
+- Example app discovery flow migrated from polling to callbacks in `cast_devices_modal.dart`.
+- `getDiscoveredDevices()` is now considered a legacy snapshot API for compatibility.
+
+### Migration Notes
+**Before (polling):**
+```dart
+await api.startDiscovery(options);
+final devices = await api.getDiscoveredDevices();
+```
+
+**After (event-driven):**
+```dart
+final discoveryEvents = MediaCastDlnaDiscoveryEvents();
+discoveryEvents.onDeviceFound.listen((device) {
+  // add/update local list
+});
+discoveryEvents.onDeviceLost.listen((deviceUdn) {
+  // remove from local list
+});
+
+await api.startDiscovery(options);
+```
+
+Call `await discoveryEvents.dispose()` when no longer needed.
+
 ## [0.2.0] - 2025-07-14
 
 ### ⚠️ **BREAKING CHANGES**

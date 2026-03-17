@@ -55,6 +55,10 @@ private func wrapError(_ error: Any) -> [Any?] {
   ]
 }
 
+private func createConnectionError(withChannelName channelName: String) -> PigeonError {
+  return PigeonError(code: "channel-error", message: "Unable to establish connection on channel: '\(channelName)'.", details: "")
+}
+
 private func isNullish(_ value: Any?) -> Bool {
   return value is NSNull || value == nil
 }
@@ -1545,6 +1549,60 @@ class MediaCastDlnaApiSetup {
       }
     } else {
       getDeviceManuallyChannel.setMessageHandler(nil)
+    }
+  }
+}
+/// Flutter API for discovery events to avoid polling getDiscoveredDevices.
+///
+/// Generated protocol from Pigeon that represents Flutter messages that can be called from Swift.
+protocol DiscoveryEventsFlutterApiProtocol {
+  func onDeviceFound(device deviceArg: DlnaDevice, completion: @escaping (Result<Void, PigeonError>) -> Void)
+  func onDeviceLost(deviceUdn deviceUdnArg: DeviceUdn, completion: @escaping (Result<Void, PigeonError>) -> Void)
+}
+class DiscoveryEventsFlutterApi: DiscoveryEventsFlutterApiProtocol {
+  private let binaryMessenger: FlutterBinaryMessenger
+  private let messageChannelSuffix: String
+  init(binaryMessenger: FlutterBinaryMessenger, messageChannelSuffix: String = "") {
+    self.binaryMessenger = binaryMessenger
+    self.messageChannelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+  }
+  var codec: MediaCastDlnaPigeonPigeonCodec {
+    return MediaCastDlnaPigeonPigeonCodec.shared
+  }
+  func onDeviceFound(device deviceArg: DlnaDevice, completion: @escaping (Result<Void, PigeonError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound\(messageChannelSuffix)"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+    channel.sendMessage([deviceArg] as [Any?]) { response in
+      guard let listResponse = response as? [Any?] else {
+        completion(.failure(createConnectionError(withChannelName: channelName)))
+        return
+      }
+      if listResponse.count > 1 {
+        let code: String = listResponse[0] as! String
+        let message: String? = nilOrValue(listResponse[1])
+        let details: String? = nilOrValue(listResponse[2])
+        completion(.failure(PigeonError(code: code, message: message, details: details)))
+      } else {
+        completion(.success(Void()))
+      }
+    }
+  }
+  func onDeviceLost(deviceUdn deviceUdnArg: DeviceUdn, completion: @escaping (Result<Void, PigeonError>) -> Void) {
+    let channelName: String = "dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost\(messageChannelSuffix)"
+    let channel = FlutterBasicMessageChannel(name: channelName, binaryMessenger: binaryMessenger, codec: codec)
+    channel.sendMessage([deviceUdnArg] as [Any?]) { response in
+      guard let listResponse = response as? [Any?] else {
+        completion(.failure(createConnectionError(withChannelName: channelName)))
+        return
+      }
+      if listResponse.count > 1 {
+        let code: String = listResponse[0] as! String
+        let message: String? = nilOrValue(listResponse[1])
+        let details: String? = nilOrValue(listResponse[2])
+        completion(.failure(PigeonError(code: code, message: message, details: details)))
+      } else {
+        completion(.success(Void()))
+      }
     }
   }
 }

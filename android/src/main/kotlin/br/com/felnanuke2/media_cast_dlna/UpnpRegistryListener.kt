@@ -1,7 +1,11 @@
 package br.com.felnanuke2.media_cast_dlna
 
 import DlnaDevice
+import DiscoveryEventsFlutterApi
+import DeviceUdn
 import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import org.jupnp.model.meta.LocalDevice
 import org.jupnp.model.meta.RemoteDevice
 import org.jupnp.registry.Registry
@@ -19,10 +23,20 @@ import java.lang.Exception
  * to avoid the "Methods marked with @UiThread must be executed on the main thread" error.
  */
 class UpnpRegistryListener(
+    private val discoveryEventsFlutterApi: DiscoveryEventsFlutterApi? = null,
 ) : RegistryListener {
+
+    private enum class DiscoveryTargetFilter {
+        ALL_MEDIA,
+        MEDIA_RENDERER,
+        MEDIA_SERVER
+    }
 
     private val _devices = mutableListOf<DlnaDevice>()
     val devices: List<DlnaDevice> get() = _devices
+    private val mainHandler = Handler(Looper.getMainLooper())
+    @Volatile
+    private var activeFilter: DiscoveryTargetFilter = DiscoveryTargetFilter.ALL_MEDIA
 
     companion object {
         // Device types that we're interested in for media casting
@@ -47,13 +61,65 @@ class UpnpRegistryListener(
         )
     }
 
+    fun setSearchTarget(searchTarget: String?) {
+        activeFilter = when {
+            searchTarget.isNullOrBlank() -> DiscoveryTargetFilter.ALL_MEDIA
+            searchTarget.contains("MediaRenderer", ignoreCase = true) -> DiscoveryTargetFilter.MEDIA_RENDERER
+            searchTarget.contains("MediaServer", ignoreCase = true) -> DiscoveryTargetFilter.MEDIA_SERVER
+            else -> DiscoveryTargetFilter.ALL_MEDIA
+        }
+    }
+
+    fun clearDiscoveredDevices() {
+        val removedDevices = _devices.toList()
+        _devices.clear()
+
+        removedDevices.forEach { device ->
+            notifyDeviceLost(device.udn)
+        }
+    }
+
+    private fun notifyDeviceFound(device: DlnaDevice) {
+        mainHandler.post {
+            discoveryEventsFlutterApi?.onDeviceFound(device) { result ->
+                result.exceptionOrNull()?.let { error ->
+                    Log.w("UpnpRegistryListener", "Failed to send onDeviceFound callback", error)
+                }
+            }
+        }
+    }
+
+    private fun notifyDeviceLost(deviceUdn: DeviceUdn) {
+        mainHandler.post {
+            discoveryEventsFlutterApi?.onDeviceLost(deviceUdn) { result ->
+                result.exceptionOrNull()?.let { error ->
+                    Log.w("UpnpRegistryListener", "Failed to send onDeviceLost callback", error)
+                }
+            }
+        }
+    }
+
+    private fun matchesActiveSearchTarget(deviceType: String): Boolean {
+        return when (activeFilter) {
+            DiscoveryTargetFilter.ALL_MEDIA -> {
+                MEDIA_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }
+            }
+
+            DiscoveryTargetFilter.MEDIA_RENDERER -> {
+                deviceType.contains("MediaRenderer", ignoreCase = true)
+            }
+
+            DiscoveryTargetFilter.MEDIA_SERVER -> {
+                deviceType.contains("MediaServer", ignoreCase = true)
+            }
+        }
+    }
+
     /**
      * Check if a device is a media device (MediaRenderer or MediaServer)
      */
     private fun isMediaDevice(device: RemoteDevice): Boolean {
         val deviceType = device.type.toString()
-        val friendlyName = device.details?.friendlyName ?: "Unknown"
-
 
         // First check if it's explicitly excluded
         if (EXCLUDED_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }) {
@@ -62,19 +128,12 @@ class UpnpRegistryListener(
 
         // Check for exact match with known media device types
         if (MEDIA_DEVICE_TYPES.contains(deviceType)) {
-           
-            return true
+            return matchesActiveSearchTarget(deviceType)
         }
 
         // Check for partial match with media device prefixes
         val isMediaDevice = MEDIA_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }
-        if (isMediaDevice) {
-           
-        } else {
-
-        }
-
-        return isMediaDevice
+        return isMediaDevice && matchesActiveSearchTarget(deviceType)
     }
 
     /**
@@ -82,8 +141,6 @@ class UpnpRegistryListener(
      */
     private fun isMediaDevice(device: LocalDevice): Boolean {
         val deviceType = device.type.toString()
-        val friendlyName = device.details?.friendlyName ?: "Unknown"
-
 
         // First check if it's explicitly excluded
         if (EXCLUDED_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }) {
@@ -92,18 +149,12 @@ class UpnpRegistryListener(
 
         // Check for exact match with known media device types
         if (MEDIA_DEVICE_TYPES.contains(deviceType)) {
-          
-            return true
+            return matchesActiveSearchTarget(deviceType)
         }
 
         // Check for partial match with media device prefixes
         val isMediaDevice = MEDIA_DEVICE_PREFIXES.any { deviceType.contains(it, ignoreCase = true) }
-        if (isMediaDevice) {
-          
-        } else {
-        }
-
-        return isMediaDevice
+        return isMediaDevice && matchesActiveSearchTarget(deviceType)
     }
 
     override fun remoteDeviceDiscoveryStarted(registry: Registry?, device: RemoteDevice?) {
@@ -135,7 +186,7 @@ class UpnpRegistryListener(
                 while (iterator.hasNext()) {
                     if (iterator.next().udn == dlnaDevice?.udn) {
                         iterator.remove()
-                     
+                        dlnaDevice?.udn?.let { udn -> notifyDeviceLost(udn) }
                         break
                     }
                 }
@@ -156,7 +207,7 @@ class UpnpRegistryListener(
                     val existingIndex = _devices.indexOfFirst { d -> d.udn == dlna.udn }
                     if (existingIndex == -1) {
                         _devices.add(dlna)
-                      
+                        notifyDeviceFound(dlna)
                     } else {
                        
                     }
@@ -178,7 +229,7 @@ class UpnpRegistryListener(
                        
                     } else {
                         _devices.add(dlna)
-                       
+                        notifyDeviceFound(dlna)
                     }
                 }
             }
@@ -194,7 +245,7 @@ class UpnpRegistryListener(
         while (iterator.hasNext()) {
             if (iterator.next().udn.value == deviceUdn.identifierString) {
                 iterator.remove()
-              
+                notifyDeviceLost(DeviceUdn(deviceUdn.identifierString))
                 break
             }
         }
@@ -213,7 +264,7 @@ class UpnpRegistryListener(
                     val existingIndex = _devices.indexOfFirst { d -> d.udn == dlna.udn }
                     if (existingIndex == -1) {
                         _devices.add(dlna)
-                    
+                        notifyDeviceFound(dlna)
                     } else {
                       
                     }
@@ -235,7 +286,7 @@ class UpnpRegistryListener(
                     while (iterator.hasNext()) {
                         if (iterator.next().udn == dlna.udn) {
                             iterator.remove()
-                         
+                            notifyDeviceLost(dlna.udn)
                             break
                         }
                     }

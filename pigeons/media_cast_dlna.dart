@@ -417,3 +417,11 @@ class PlaybackSpeed {
   PlaybackSpeed({required this.value});
   final double value;
 }
+
+/// Flutter API for discovery events to avoid polling getDiscoveredDevices.
+@FlutterApi()
+abstract class DiscoveryEventsFlutterApi {
+  void onDeviceFound(DlnaDevice device);
+
+  void onDeviceLost(DeviceUdn deviceUdn);
+}

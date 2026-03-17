@@ -1,10 +1,15 @@
 {
-    "cSpell.words": [
-        "Didl",
-        "dlna",
-        "felnanuke",
-        "jupnp",
-        "kotlinx",
-        "Upnp"
-    ]
+  "cSpell.words": [
+    "Didl",
+    "dlna",
+    "felnanuke",
+    "jupnp",
+    "kotlinx",
+    "Upnp"
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/stable",
+  "chat.tools.terminal.autoApprove": {
+    "./generate_pigeon.sh": true,
+    "./android/gradlew": true
+  }
 }

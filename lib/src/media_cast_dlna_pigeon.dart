@@ -15,6 +15,16 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
+List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+  if (empty) {
+    return <Object?>[];
+  }
+  if (error == null) {
+    return <Object?>[result];
+  }
+  return <Object?>[error.code, error.message, error.details];
+}
+
 /// Represents the current transport state
 enum TransportState {
   stopped,
@@ -1697,6 +1707,69 @@ class MediaCastDlnaApi {
       );
     } else {
       return (pigeonVar_replyList[0] as DlnaDevice?);
+    }
+  }
+}
+
+/// Flutter API for discovery events to avoid polling getDiscoveredDevices.
+abstract class DiscoveryEventsFlutterApi {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  void onDeviceFound(DlnaDevice device);
+
+  void onDeviceLost(DeviceUdn deviceUdn);
+
+  static void setUp(DiscoveryEventsFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final DlnaDevice? arg_device = (args[0] as DlnaDevice?);
+          assert(arg_device != null,
+              'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound was null, expected non-null DlnaDevice.');
+          try {
+            api.onDeviceFound(arg_device!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final DeviceUdn? arg_deviceUdn = (args[0] as DeviceUdn?);
+          assert(arg_deviceUdn != null,
+              'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost was null, expected non-null DeviceUdn.');
+          try {
+            api.onDeviceLost(arg_deviceUdn!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
     }
   }
 }

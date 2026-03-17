@@ -121,6 +121,8 @@ import 'package:media_cast_dlna/media_cast_dlna.dart';
 
 **Testing Recommendation**: We recommend testing subtitle functionality with your specific DLNA devices before releasing your app, as support varies widely between manufacturers.
 
+Subtitle support is vendor-specific and not part of the DLNA standard. Samsung devices require sec:CaptionInfo extensions. LG and Sony support varies by model. When in doubt, test with your target device.
+
 ### ⚡ Playback Speed Control Warning
 
 **Playback speed control is not universally supported:**
@@ -283,6 +285,28 @@ class _MediaCastAppState extends State<MediaCastApp> {
 ```dart
 Future<void> _startDeviceDiscovery() async {
   try {
+    final discoveryEvents = MediaCastDlnaDiscoveryEvents();
+
+    discoveryEvents.onDeviceFound.listen((device) {
+      setState(() {
+        final existingIndex = _discoveredDevices.indexWhere(
+          (d) => d.udn.value == device.udn.value,
+        );
+
+        if (existingIndex >= 0) {
+          _discoveredDevices[existingIndex] = device;
+        } else {
+          _discoveredDevices.add(device);
+        }
+      });
+    });
+
+    discoveryEvents.onDeviceLost.listen((deviceUdn) {
+      setState(() {
+        _discoveredDevices.removeWhere((d) => d.udn.value == deviceUdn.value);
+      });
+    });
+
     // Start discovery with timeout using the new wrapper classes
     await _api.startDiscovery(
       DiscoveryOptions(
@@ -290,21 +314,6 @@ Future<void> _startDeviceDiscovery() async {
         searchTarget: SearchTarget(target: 'upnp:rootdevice'),
       ),
     );
-    
-    // Periodically check for discovered devices
-    Timer.periodic(Duration(seconds: 2), (timer) async {
-      final devices = await _api.getDiscoveredDevices();
-      setState(() {
-        _discoveredDevices = devices;
-      });
-      
-      // Stop timer after 30 seconds
-      if (timer.tick >= 15) {
-        timer.cancel();
-        await _api.stopDiscovery();
-      }
-    });
-    
   } catch (e) {
     print('Discovery failed: $e');
   }
@@ -1048,6 +1057,16 @@ final devicePort = NetworkPort(value: 8080);
 
 #### Discovery Pattern
 ```dart
+final discoveryEvents = MediaCastDlnaDiscoveryEvents();
+
+discoveryEvents.onDeviceFound.listen((device) {
+  // Add or update device in your state
+});
+
+discoveryEvents.onDeviceLost.listen((deviceUdn) {
+  // Remove device from your state
+});
+
 // Start discovery with typed options
 await _api.startDiscovery(
   DiscoveryOptions(
@@ -1056,11 +1075,21 @@ await _api.startDiscovery(
   ),
 );
 
-// Get discovered devices
-final devices = await _api.getDiscoveredDevices();
-
 // Stop discovery
 await _api.stopDiscovery();
+
+await discoveryEvents.dispose();
+```
+
+#### Migration from Polling to Discovery Events
+```dart
+// Before (polling)
+final devices = await _api.getDiscoveredDevices();
+
+// After (event-driven)
+final discoveryEvents = MediaCastDlnaDiscoveryEvents();
+discoveryEvents.onDeviceFound.listen((device) { /* update state */ });
+discoveryEvents.onDeviceLost.listen((deviceUdn) { /* update state */ });
 ```
 
 #### Playback Control Pattern
@@ -1115,7 +1144,14 @@ Main plugin class for DLNA operations.
 - `isUpnpServiceInitialized()` - Check if service is ready
 - `startDiscovery(options)` - Start device discovery
 - `stopDiscovery()` - Stop device discovery
-- `getDiscoveredDevices()` - Get list of discovered devices
+- `getDiscoveredDevices()` - Legacy snapshot API (polling)
+
+#### `MediaCastDlnaDiscoveryEvents`
+Event-driven discovery callbacks from native layer.
+
+**Streams:**
+- `onDeviceFound` - Emits when a renderer/server is discovered or updated
+- `onDeviceLost` - Emits when a device disappears from registry
 
 #### `DlnaDevice`
 Represents a discovered DLNA/UPnP device.
