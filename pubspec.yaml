@@ -14,6 +14,7 @@ topics:
 
 platforms:
   android:
+  ios:
   
 environment:
   sdk: ^3.8.1
@@ -48,6 +49,8 @@ flutter:
     platforms:
       android:
         package: br.com.felnanuke2.media_cast_dlna
+        pluginClass: MediaCastDlnaPlugin
+      ios:
         pluginClass: MediaCastDlnaPlugin
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Media Cast DLNA - Pigeon Code Generator Script
-# This script generates Android-specific code from the Pigeon definitions
-# iOS support has been temporarily removed due to Apple privacy limitations
+# This script generates platform-specific code from the Pigeon definitions
+# Supports both Android (Kotlin) and iOS (Swift) platforms
 
 set -e  # Exit on any error
 
@@ -32,10 +32,11 @@ print_error() {
 
 print_info "Generating platform-specific code from Pigeon definitions..."
 
-# Generate code using pigeon with explicit output paths (Android only)
+# Generate code using pigeon with explicit output paths (Android and iOS)
 dart run pigeon --input pigeons/media_cast_dlna.dart \
        --dart_out lib/src/media_cast_dlna_pigeon.dart \
-       --kotlin_out android/src/main/kotlin/br/com/felnanuke2/media_cast_dlna/MediaCastDlnaPigeon.kt
+       --kotlin_out android/src/main/kotlin/br/com/felnanuke2/media_cast_dlna/MediaCastDlnaPigeon.kt \
+       --swift_out ios/media_cast_dlna/Sources/media_cast_dlna/MediaCastDlnaPigeon.swift
 
 if [ $? -eq 0 ]; then
     print_success "Pigeon code generation completed successfully!"

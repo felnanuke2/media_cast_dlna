@@ -1061,6 +1061,14 @@ interface MediaCastDlnaApi {
   fun getCurrentPosition(deviceUdn: DeviceUdn, callback: (Result<TimePosition>) -> Unit)
   fun getTransportState(deviceUdn: DeviceUdn, callback: (Result<TransportState>) -> Unit)
   fun setPlaybackSpeed(deviceUdn: DeviceUdn, speed: PlaybackSpeed, callback: (Result<Unit>) -> Unit)
+  /**
+   * This method is designed mainly for iOS platform and
+   * the use is for once Multicast DNS is restricted on
+   * iOS you can specify a local IP and port to let the plugin return a device for that IP and port
+   * this will throw an exception if you try to use it on Android
+   * this will return null if the device is not found
+   */
+  fun getDeviceManually(uri: Url, callback: (Result<DlnaDevice?>) -> Unit)
 
   companion object {
     /** The codec used by MediaCastDlnaApi. */
@@ -1591,6 +1599,26 @@ interface MediaCastDlnaApi {
                 reply.reply(wrapError(error))
               } else {
                 reply.reply(wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDeviceManually$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val uriArg = args[0] as Url
+            api.getDeviceManually(uriArg) { result: Result<DlnaDevice?> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
               }
             }
           }
