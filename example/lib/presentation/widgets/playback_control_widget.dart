@@ -15,6 +15,7 @@ class PlaybackControlWidget extends StatelessWidget {
   final VoidCallback onToggleMute;
   final Function(bool) onSliderDragChanged;
   final Function(double) onSpeedChange;
+  final List<double> speedOptions;
 
   const PlaybackControlWidget({
     super.key,
@@ -26,6 +27,7 @@ class PlaybackControlWidget extends StatelessWidget {
     required this.onToggleMute,
     required this.onSliderDragChanged,
     required this.onSpeedChange,
+    required this.speedOptions,
   });
 
   @override
@@ -323,17 +325,9 @@ class PlaybackControlWidget extends StatelessWidget {
   }
 
   Widget _buildSpeedControl(BuildContext context) {
-    // Define available speed options
-    final List<double> speedOptions = [
-      0.25,
-      0.5,
-      0.75,
-      1.0,
-      1.25,
-      1.5,
-      1.75,
-      2.0,
-    ];
+    final selectedSpeed = speedOptions.contains(playbackState.playbackSpeed)
+        ? playbackState.playbackSpeed
+        : speedOptions.first;
 
     return Row(
       children: [
@@ -348,7 +342,7 @@ class PlaybackControlWidget extends StatelessWidget {
         const SizedBox(width: AppConstants.smallPadding),
         Expanded(
           child: DropdownButton<double>(
-            value: playbackState.playbackSpeed,
+            value: selectedSpeed,
             isExpanded: true,
             icon: const Icon(Icons.arrow_drop_down),
             underline: Container(

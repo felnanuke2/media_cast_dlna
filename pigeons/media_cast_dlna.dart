@@ -7,6 +7,9 @@ import 'package:pigeon/pigeon.dart';
     kotlinOut:
         'android/src/main/kotlin/br/com/felnanuke2/media_cast_dlna/MediaCastDlnaPigeon.kt',
     kotlinOptions: KotlinOptions(),
+    swiftOut:
+        'ios/media_cast_dlna/Sources/media_cast_dlna/MediaCastDlnaPigeon.swift',
+    swiftOptions: SwiftOptions(),
     dartPackageName: 'media_cast_dlna',
   ),
 )
@@ -399,10 +402,42 @@ abstract class MediaCastDlnaApi {
   TransportState getTransportState(DeviceUdn deviceUdn);
 
   @async
+  SupportedPlaybackSpeeds getSupportedPlaybackSpeeds(DeviceUdn deviceUdn);
+
+  @async
   void setPlaybackSpeed(DeviceUdn deviceUdn, PlaybackSpeed speed);
+
+  /// This method is designed mainly for iOS platform and
+  /// the use is for once Multicast DNS is restricted on
+  /// iOS you can specify a local IP and port to let the plugin return a device for that IP and port
+  /// this will throw an exception if you try to use it on Android
+  /// this will return null if the device is not found
+  @async
+  DlnaDevice? getDeviceManually(Url uri);
 }
 
 class PlaybackSpeed {
   PlaybackSpeed({required this.value});
   final double value;
+}
+
+class PlaybackSpeedToken {
+  PlaybackSpeedToken({required this.value});
+  final String value;
+}
+
+class SupportedPlaybackSpeeds {
+  SupportedPlaybackSpeeds({required this.values});
+  final List<PlaybackSpeedToken> values;
+}
+
+/// Flutter API for discovery events to avoid polling getDiscoveredDevices.
+@FlutterApi()
+abstract class DiscoveryEventsFlutterApi {
+  void onDeviceFound(DlnaDevice device);
+
+  void onDeviceLost(DeviceUdn deviceUdn);
+
+  /// Emitted when a MediaRenderer becomes unavailable on the network.
+  void onRendererOffline(DeviceUdn deviceUdn);
 }

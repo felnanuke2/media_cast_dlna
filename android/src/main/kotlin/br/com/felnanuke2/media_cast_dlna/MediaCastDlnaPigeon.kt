@@ -33,6 +33,9 @@ private fun wrapError(exception: Throwable): List<Any?> {
   }
 }
 
+private fun createConnectionError(channelName: String): FlutterError {
+  return FlutterError("channel-error",  "Unable to establish connection on channel: '$channelName'.", "")}
+
 /**
  * Error class for passing custom error details to Flutter via a thrown PlatformException.
  * @property code The error code.
@@ -780,6 +783,42 @@ data class PlaybackSpeed (
     )
   }
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class PlaybackSpeedToken (
+  val value: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PlaybackSpeedToken {
+      val value = pigeonVar_list[0] as String
+      return PlaybackSpeedToken(value)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      value,
+    )
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SupportedPlaybackSpeeds (
+  val values: List<PlaybackSpeedToken>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SupportedPlaybackSpeeds {
+      val values = pigeonVar_list[0] as List<PlaybackSpeedToken>
+      return SupportedPlaybackSpeeds(values)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      values,
+    )
+  }
+}
 private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -913,6 +952,16 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
           PlaybackSpeed.fromList(it)
         }
       }
+      155.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PlaybackSpeedToken.fromList(it)
+        }
+      }
+      156.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SupportedPlaybackSpeeds.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -1022,6 +1071,14 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
         stream.write(154)
         writeValue(stream, value.toList())
       }
+      is PlaybackSpeedToken -> {
+        stream.write(155)
+        writeValue(stream, value.toList())
+      }
+      is SupportedPlaybackSpeeds -> {
+        stream.write(156)
+        writeValue(stream, value.toList())
+      }
       else -> super.writeValue(stream, value)
     }
   }
@@ -1060,7 +1117,16 @@ interface MediaCastDlnaApi {
   fun getPlaybackInfo(deviceUdn: DeviceUdn, callback: (Result<PlaybackInfo>) -> Unit)
   fun getCurrentPosition(deviceUdn: DeviceUdn, callback: (Result<TimePosition>) -> Unit)
   fun getTransportState(deviceUdn: DeviceUdn, callback: (Result<TransportState>) -> Unit)
+  fun getSupportedPlaybackSpeeds(deviceUdn: DeviceUdn, callback: (Result<SupportedPlaybackSpeeds>) -> Unit)
   fun setPlaybackSpeed(deviceUdn: DeviceUdn, speed: PlaybackSpeed, callback: (Result<Unit>) -> Unit)
+  /**
+   * This method is designed mainly for iOS platform and
+   * the use is for once Multicast DNS is restricted on
+   * iOS you can specify a local IP and port to let the plugin return a device for that IP and port
+   * this will throw an exception if you try to use it on Android
+   * this will return null if the device is not found
+   */
+  fun getDeviceManually(uri: Url, callback: (Result<DlnaDevice?>) -> Unit)
 
   companion object {
     /** The codec used by MediaCastDlnaApi. */
@@ -1579,6 +1645,26 @@ interface MediaCastDlnaApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getSupportedPlaybackSpeeds$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getSupportedPlaybackSpeeds(deviceUdnArg) { result: Result<SupportedPlaybackSpeeds> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setPlaybackSpeed$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -1598,6 +1684,91 @@ interface MediaCastDlnaApi {
           channel.setMessageHandler(null)
         }
       }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDeviceManually$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val uriArg = args[0] as Url
+            api.getDeviceManually(uriArg) { result: Result<DlnaDevice?> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * Flutter API for discovery events to avoid polling getDiscoveredDevices.
+ *
+ * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
+ */
+class DiscoveryEventsFlutterApi(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by DiscoveryEventsFlutterApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      MediaCastDlnaPigeonPigeonCodec()
+    }
+  }
+  fun onDeviceFound(deviceArg: DlnaDevice, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(deviceArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun onDeviceLost(deviceUdnArg: DeviceUdn, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(deviceUdnArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(createConnectionError(channelName)))
+      } 
+    }
+  }
+  /** Emitted when a MediaRenderer becomes unavailable on the network. */
+  fun onRendererOffline(deviceUdnArg: DeviceUdn, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(deviceUdnArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(createConnectionError(channelName)))
+      } 
     }
   }
 }

@@ -9,7 +9,6 @@ import '../core/constants/app_constants.dart';
 class MediaCastService {
   final MediaCastDlnaApi _api;
   Timer? _playbackInfoTimer;
-  Timer? _deviceConnectivityTimer;
 
   MediaCastService() : _api = MediaCastDlnaApi();
 
@@ -41,39 +40,9 @@ class MediaCastService {
     );
   }
 
-  /// Starts monitoring device connectivity
-  void startDeviceConnectivityMonitoring({
-    required DeviceUdn deviceUdn,
-    required Function(DeviceConnectivityState) onConnectivityChanged,
-  }) {
-    _deviceConnectivityTimer?.cancel();
-    _deviceConnectivityTimer = Timer.periodic(
-      AppConstants.deviceConnectivityCheckInterval,
-      (timer) async {
-        try {
-          final isOnline = await _api.isDeviceOnline(deviceUdn);
-          final connectivityState = DeviceConnectivityState(
-            isOnline: isOnline,
-            lastConnectivityCheck: DateTime.now(),
-          );
-          onConnectivityChanged(connectivityState);
-        } catch (e) {
-          onConnectivityChanged(
-            DeviceConnectivityState(
-              isOnline: false,
-              lastConnectivityCheck: DateTime.now(),
-            ),
-          );
-          timer.cancel();
-        }
-      },
-    );
-  }
-
   /// Stops all monitoring timers
   void stopMonitoring() {
     _playbackInfoTimer?.cancel();
-    _deviceConnectivityTimer?.cancel();
   }
 
   /// Gets the current playback state for a device
@@ -174,6 +143,13 @@ class MediaCastService {
     required double speed,
   }) async {
     await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: speed));
+  }
+
+  /// Returns speed tokens declared by the renderer.
+  Future<SupportedPlaybackSpeeds> getSupportedPlaybackSpeeds({
+    required DeviceUdn deviceUdn,
+  }) async {
+    return _api.getSupportedPlaybackSpeeds(deviceUdn);
   }
 
   /// Disposes the service and cleans up resources

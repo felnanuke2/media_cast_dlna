@@ -18,28 +18,74 @@ class CastDevicesModal extends StatefulWidget {
 }
 
 class _CastDevicesModalState extends State<CastDevicesModal> {
-  List<DlnaDevice> _localDiscoveredDevices = [];
+  final List<DlnaDevice> _localDiscoveredDevices = [];
   DeviceUdn? _localSelectedRendererUdn;
-  Timer? _discoveryTimer;
+  bool _isSearching = true;
+  late final MediaCastDlnaDiscoveryEvents _discoveryEvents;
+  StreamSubscription<DlnaDevice>? _onDeviceFoundSubscription;
+  StreamSubscription<DeviceUdn>? _onDeviceLostSubscription;
   final _api = MediaCastDlnaApi();
 
   @override
   void initState() {
     super.initState();
     _localSelectedRendererUdn = widget.selectedRendererUdn;
+    _discoveryEvents = MediaCastDlnaDiscoveryEvents();
+    _onDeviceFoundSubscription = _discoveryEvents.onDeviceFound.listen(
+      _handleDeviceFound,
+    );
+    _onDeviceLostSubscription = _discoveryEvents.onDeviceLost.listen(
+      _handleDeviceLost,
+    );
     _api.startDiscovery(
       DiscoveryOptions(timeout: DiscoveryTimeout(seconds: 10)),
     );
-    _getDevices();
-    _discoveryTimer = Timer.periodic(const Duration(seconds: 5), _getDevices);
+    Future<void>.delayed(const Duration(seconds: 10), () {
+      if (!mounted) return;
+      setState(() {
+        _isSearching = false;
+      });
+    });
   }
 
   @override
   void dispose() {
     _api.stopDiscovery();
-    _discoveryTimer?.cancel();
+    _onDeviceFoundSubscription?.cancel();
+    _onDeviceLostSubscription?.cancel();
+    _discoveryEvents.dispose();
     _localSelectedRendererUdn = null;
     super.dispose();
+  }
+
+  void _handleDeviceFound(DlnaDevice device) {
+    if (!mounted) return;
+
+    setState(() {
+      final existingIndex = _localDiscoveredDevices.indexWhere(
+        (item) => item.udn.value == device.udn.value,
+      );
+
+      if (existingIndex >= 0) {
+        _localDiscoveredDevices[existingIndex] = device;
+      } else {
+        _localDiscoveredDevices.add(device);
+      }
+    });
+  }
+
+  void _handleDeviceLost(DeviceUdn deviceUdn) {
+    if (!mounted) return;
+
+    setState(() {
+      _localDiscoveredDevices.removeWhere(
+        (device) => device.udn.value == deviceUdn.value,
+      );
+
+      if (_localSelectedRendererUdn?.value == deviceUdn.value) {
+        _localSelectedRendererUdn = null;
+      }
+    });
   }
 
   @override
@@ -235,7 +281,7 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
             ],
           ),
           const SizedBox(height: 16),
-          if (_localDiscoveredDevices.isEmpty && _discoveryTimer != null) ...[
+          if (_localDiscoveredDevices.isEmpty && _isSearching) ...[
             const Center(
               child: Column(
                 children: [
@@ -329,21 +375,5 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
         ],
       ),
     );
-  }
-
-  void _getDevices([Timer? timer]) {
-    _api
-        .getDiscoveredDevices()
-        .then((devices) {
-          if (mounted) {
-            setState(() {
-              _localDiscoveredDevices = devices;
-            });
-          }
-        })
-        .catchError((error) {
-          // Handle any errors that occur during discovery
-          debugPrint('Error during device discovery: $error');
-        });
   }
 }

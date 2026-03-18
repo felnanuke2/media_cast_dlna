@@ -43,5 +43,14 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_upnp._tcp.</string>
+		<string>_http._tcp.</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app uses your local network to discover and connect to DLNA devices for media casting.</string>
 </dict>
 </plist>

@@ -1,6 +1,7 @@
 package br.com.felnanuke2.media_cast_dlna
 
 import DeviceUdn
+import DiscoveryEventsFlutterApi
 import DiscoveryOptions
 import DlnaDevice
 import DlnaService
@@ -14,6 +15,8 @@ import VolumeLevel
 import MuteOperation
 import MuteState
 import PlaybackSpeed
+import PlaybackSpeedToken
+import SupportedPlaybackSpeeds
 import TimePosition
 import TimeDuration
 import Url
@@ -26,7 +29,9 @@ import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.TimeoutCancellationException
@@ -37,17 +42,21 @@ import br.com.felnanuke2.media_cast_dlna.core.DefaultDidlMetadataConverter
 import br.com.felnanuke2.media_cast_dlna.core.MediaControlManager
 import br.com.felnanuke2.media_cast_dlna.core.DeviceDiscoveryManager
 import br.com.felnanuke2.media_cast_dlna.core.VolumeManager
+import br.com.felnanuke2.media_cast_dlna.core.WifiMulticastLockManager
 
 /** MediaCastDlnaPlugin - Refactored to act as a simple Facade with coroutines support */
 class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
     private var context: Context? = null
     private var upnpService: AndroidUpnpService? = null
     private var isServiceBound = false
-    private var upnpRegistryListener: UpnpRegistryListener = UpnpRegistryListener()
+    private lateinit var upnpRegistryListener: UpnpRegistryListener
+    private var discoveryEventsFlutterApi: DiscoveryEventsFlutterApi? = null
+    private var wifiMulticastLockManager: WifiMulticastLockManager? = null
 
     // Coroutine scope for managing async operations
     private val pluginScope =
         CoroutineScope(SupervisorJob() + Dispatchers.IO) // Changed to IO dispatcher
+    private var discoveryTimeoutJob: Job? = null
 
     // Service connection for UPnP service
     private val serviceConnection = object : ServiceConnection {
@@ -78,14 +87,21 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
     // --- Plugin lifecycle ---
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         context = flutterPluginBinding.applicationContext
+        wifiMulticastLockManager = context?.let { WifiMulticastLockManager(it) }
+        discoveryEventsFlutterApi = DiscoveryEventsFlutterApi(flutterPluginBinding.binaryMessenger)
+        upnpRegistryListener = UpnpRegistryListener(discoveryEventsFlutterApi)
         MediaCastDlnaApi.setUp(flutterPluginBinding.binaryMessenger, this)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         MediaCastDlnaApi.setUp(binding.binaryMessenger, null)
+        discoveryTimeoutJob?.cancel()
+        discoveryTimeoutJob = null
         if (upnpService != null && context != null) {
             context?.unbindService(serviceConnection)
         }
+        wifiMulticastLockManager?.cleanup()
+        discoveryEventsFlutterApi = null
         upnpService = null
         context = null
     }
@@ -123,6 +139,8 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
     override fun shutdownUpnpService(callback: (Result<Unit>) -> Unit) {
         pluginScope.launch {
             try {
+                discoveryTimeoutJob?.cancel()
+                discoveryTimeoutJob = null
                 if (upnpService != null && context != null && isServiceBound) {
                     try {
                         context!!.unbindService(serviceConnection)
@@ -146,7 +164,29 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
                 if (!isServiceBound) {
                     throw IllegalStateException("UPnP service is not bound. Please ensure the service is started before calling startDiscovery.")
                 }
+
+                if (options.timeout.seconds <= 0) {
+                    throw IllegalArgumentException("Discovery timeout must be greater than 0 seconds.")
+                }
+
+                upnpRegistryListener.setSearchTarget(options.searchTarget?.target)
+                upnpRegistryListener.clearDiscoveredDevices()
+
+                // Acquire WiFi multicast lock to ensure device discovery works on all Android ROMs
+                wifiMulticastLockManager?.acquireMulticastLock()
+
+                discoveryTimeoutJob?.cancel()
                 deviceDiscoveryManager.startDiscovery()
+
+                discoveryTimeoutJob = pluginScope.launch {
+                    delay(options.timeout.seconds * 1000)
+                    try {
+                        deviceDiscoveryManager.stopDiscovery()
+                    } finally {
+                        wifiMulticastLockManager?.releaseMulticastLock()
+                    }
+                }
+
                 callback(Result.success(Unit))
             } catch (e: Exception) {
                 callback(Result.failure(e))
@@ -157,7 +197,11 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
     override fun stopDiscovery(callback: (Result<Unit>) -> Unit) {
         pluginScope.launch {
             try {
+                discoveryTimeoutJob?.cancel()
+                discoveryTimeoutJob = null
                 deviceDiscoveryManager.stopDiscovery()
+                // Release WiFi multicast lock when discovery is stopped
+                wifiMulticastLockManager?.releaseMulticastLock()
                 callback(Result.success(Unit))
             } catch (e: Exception) {
                 callback(Result.failure(e))
@@ -231,6 +275,12 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
                 callback(Result.failure(e))
             }
         }
+    }
+
+    override fun getDeviceManually(uri: Url, callback: (Result<DlnaDevice?>) -> Unit) {
+        // This method is designed for iOS (mDNS-restricted environments).
+        // On Android, multicast discovery works normally; throw to inform the caller.
+        callback(Result.failure(UnsupportedOperationException("getDeviceManually is not supported on Android. Use startDiscovery() instead.")))
     }
 
     // --- Media Control (delegating to managers with coroutines) ---
@@ -493,6 +543,30 @@ class MediaCastDlnaPlugin : FlutterPlugin, MediaCastDlnaApi {
             try {
                 val transportState = mediaControlManager.getTransportState(deviceUdn.value)
                 callback(Result.success(transportState))
+            } catch (e: Exception) {
+                callback(Result.failure(e))
+            }
+        }
+    }
+
+    override fun getSupportedPlaybackSpeeds(
+        deviceUdn: DeviceUdn,
+        callback: (Result<SupportedPlaybackSpeeds>) -> Unit
+    ) {
+        if (!isServiceBound || upnpService == null) {
+            callback(Result.failure(Exception("UPnP service not initialized")))
+            return
+        }
+
+        pluginScope.launch {
+            try {
+                val supportedSpeeds = withTimeout(5000L) {
+                    mediaControlManager.getSupportedPlaybackSpeeds(deviceUdn.value)
+                }
+                val tokens = supportedSpeeds.map { PlaybackSpeedToken(it) }
+                callback(Result.success(SupportedPlaybackSpeeds(tokens)))
+            } catch (e: TimeoutCancellationException) {
+                callback(Result.failure(Exception("Operation timed out: ${e.message}")))
             } catch (e: Exception) {
                 callback(Result.failure(e))
             }

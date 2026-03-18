@@ -854,5 +854,51 @@ class MediaControlManager(upnpService: AndroidUpnpService?) : BaseManager(upnpSe
         
         controlPoint.executeSuspending(speedCallback)
     }
+
+    /**
+     * Returns speed tokens declared by renderer metadata (for example: ["1"], ["1", "2"]).
+     * Empty list means the device did not publish explicit supported values.
+     */
+    suspend fun getSupportedPlaybackSpeeds(deviceUdn: String): List<String> {
+        val (_, avTransportService) = requireDeviceAndService(deviceUdn, "AVTransport")
+        val playAction = avTransportService.getAction("Play")
+            ?: return emptyList()
+
+        val speedArgument = playAction.arguments.firstOrNull {
+            it.name.equals("Speed", ignoreCase = true)
+        } ?: return emptyList()
+
+        val relatedStateVarName = invokeOptionalGetter(speedArgument, "getRelatedStateVariableName") as? String
+            ?: return emptyList()
+
+        val stateVariable = avTransportService.stateVariables.firstOrNull {
+            it.name.equals(relatedStateVarName, ignoreCase = true)
+        } ?: return emptyList()
+
+        val typeDetails = invokeOptionalGetter(stateVariable, "getTypeDetails")
+        val allowedValues = invokeOptionalGetter(typeDetails, "getAllowedValues") as? Array<*>
+        val supportedSpeeds = allowedValues
+            ?.mapNotNull { it?.toString()?.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?.distinct()
+            ?: emptyList()
+
+        Log.d(
+            "MediaControlManager",
+            "Device $deviceUdn supported playback speed tokens: ${if (supportedSpeeds.isEmpty()) "<not declared>" else supportedSpeeds.joinToString(", ")}"
+        )
+
+        return supportedSpeeds
+    }
+
+    private fun invokeOptionalGetter(target: Any?, methodName: String): Any? {
+        if (target == null) return null
+        return runCatching {
+            val method = target.javaClass.methods.firstOrNull {
+                it.name == methodName && it.parameterCount == 0
+            } ?: return null
+            method.invoke(target)
+        }.getOrNull()
+    }
 }
 

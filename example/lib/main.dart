@@ -37,23 +37,48 @@ class DlnaHomePage extends StatefulWidget {
 }
 
 class _DlnaHomePageState extends State<DlnaHomePage> {
+  static const List<double> _defaultSpeedOptions = [
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+  ];
+
   late final MediaCastService _mediaService;
+  late final MediaCastDlnaDiscoveryEvents _discoveryEvents;
   final TextEditingController _customUrlController = TextEditingController();
+  StreamSubscription<DlnaDevice>? _onDeviceFoundSubscription;
+  StreamSubscription<DeviceUdn>? _onRendererOfflineSubscription;
 
   // State variables
   DlnaDevice? _selectedDevice;
   PlaybackState _playbackState = const PlaybackState();
   DeviceConnectivityState _connectivityState = const DeviceConnectivityState();
+  List<double> _supportedSpeedOptions = _defaultSpeedOptions;
 
   @override
   void initState() {
     super.initState();
     _mediaService = MediaCastService();
+    _discoveryEvents = MediaCastDlnaDiscoveryEvents();
+    _onDeviceFoundSubscription = _discoveryEvents.onDeviceFound.listen(
+      _handleDeviceFound,
+    );
+    _onRendererOfflineSubscription = _discoveryEvents.onRendererOffline.listen(
+      _handleRendererOffline,
+    );
     _initializeService();
   }
 
   @override
   void dispose() {
+    _onDeviceFoundSubscription?.cancel();
+    _onRendererOfflineSubscription?.cancel();
+    _discoveryEvents.dispose();
     _mediaService.dispose();
     _customUrlController.dispose();
     super.dispose();
@@ -78,9 +103,41 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
     setState(() {
       _selectedDevice = device;
       _connectivityState = const DeviceConnectivityState(isOnline: true);
+      _supportedSpeedOptions = _defaultSpeedOptions;
     });
 
     _startMonitoring(device.udn);
+    _loadSupportedPlaybackSpeeds(device.udn);
+  }
+
+  Future<void> _loadSupportedPlaybackSpeeds(DeviceUdn deviceUdn) async {
+    try {
+      final tokens = await _mediaService.getSupportedPlaybackSpeeds(
+        deviceUdn: deviceUdn,
+      );
+      final speeds =
+          tokens.values
+              .map((token) => double.tryParse(token.value.trim()))
+              .whereType<double>()
+              .toList()
+            ..sort();
+
+      if (!mounted || _selectedDevice?.udn.value != deviceUdn.value) {
+        return;
+      }
+
+      if (speeds.isNotEmpty) {
+        final currentSpeed = speeds.contains(_playbackState.playbackSpeed)
+            ? _playbackState.playbackSpeed
+            : speeds.first;
+        setState(() {
+          _supportedSpeedOptions = speeds;
+          _playbackState = _playbackState.copyWith(playbackSpeed: currentSpeed);
+        });
+      }
+    } catch (_) {
+      // Keep defaults when capability probing fails.
+    }
   }
 
   /// Starts monitoring for the selected device
@@ -97,10 +154,33 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
       },
       onConnectivityChanged: _handleConnectivityChanged,
     );
+  }
 
-    _mediaService.startDeviceConnectivityMonitoring(
-      deviceUdn: deviceUdn,
-      onConnectivityChanged: _handleConnectivityChanged,
+  void _handleDeviceFound(DlnaDevice device) {
+    final selectedUdn = _selectedDevice?.udn.value;
+    if (!mounted || selectedUdn == null || selectedUdn != device.udn.value) {
+      return;
+    }
+
+    _handleConnectivityChanged(
+      DeviceConnectivityState(
+        isOnline: true,
+        lastConnectivityCheck: DateTime.now(),
+      ),
+    );
+  }
+
+  void _handleRendererOffline(DeviceUdn deviceUdn) {
+    final selectedUdn = _selectedDevice?.udn.value;
+    if (!mounted || selectedUdn == null || selectedUdn != deviceUdn.value) {
+      return;
+    }
+
+    _handleConnectivityChanged(
+      DeviceConnectivityState(
+        isOnline: false,
+        lastConnectivityCheck: DateTime.now(),
+      ),
     );
   }
 
@@ -314,6 +394,7 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
                 _mediaService.stopMonitoring();
                 setState(() {
                   _selectedDevice = null;
+                  _supportedSpeedOptions = _defaultSpeedOptions;
                 });
               } else {
                 _showCastDevicesModal();
@@ -347,6 +428,7 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
                 onToggleMute: _onToggleMute,
                 onSliderDragChanged: _onSliderDragChanged,
                 onSpeedChange: _onSpeedChange,
+                speedOptions: _supportedSpeedOptions,
               ),
             ),
             SliverToBoxAdapter(
