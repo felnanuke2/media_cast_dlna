@@ -376,5 +376,4 @@ class _CastDevicesModalState extends State<CastDevicesModal> {
       ),
     );
   }
-
 }

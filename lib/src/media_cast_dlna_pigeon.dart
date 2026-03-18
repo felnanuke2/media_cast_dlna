@@ -15,7 +15,11 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse({
+  Object? result,
+  PlatformException? error,
+  bool empty = false,
+}) {
   if (empty) {
     return <Object?>[];
   }
@@ -26,96 +30,66 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
 }
 
 /// Represents the current transport state
-enum TransportState {
-  stopped,
-  playing,
-  paused,
-  transitioning,
-  noMediaPresent,
-}
+enum TransportState { stopped, playing, paused, transitioning, noMediaPresent }
 
 /// Represents a Unique Device Name (UDN) following object calisthenics
 class DeviceUdn {
-  DeviceUdn({
-    required this.value,
-  });
+  DeviceUdn({required this.value});
 
   String value;
 
   Object encode() {
-    return <Object?>[
-      value,
-    ];
+    return <Object?>[value];
   }
 
   static DeviceUdn decode(Object result) {
     result as List<Object?>;
-    return DeviceUdn(
-      value: result[0]! as String,
-    );
+    return DeviceUdn(value: result[0]! as String);
   }
 }
 
 /// Volume level representation following object calisthenics
 class VolumeLevel {
-  VolumeLevel({
-    required this.percentage,
-  });
+  VolumeLevel({required this.percentage});
 
   int percentage;
 
   Object encode() {
-    return <Object?>[
-      percentage,
-    ];
+    return <Object?>[percentage];
   }
 
   static VolumeLevel decode(Object result) {
     result as List<Object?>;
-    return VolumeLevel(
-      percentage: result[0]! as int,
-    );
+    return VolumeLevel(percentage: result[0]! as int);
   }
 }
 
 /// Mute state representation
 class MuteState {
-  MuteState({
-    required this.isMuted,
-  });
+  MuteState({required this.isMuted});
 
   bool isMuted;
 
   Object encode() {
-    return <Object?>[
-      isMuted,
-    ];
+    return <Object?>[isMuted];
   }
 
   static MuteState decode(Object result) {
     result as List<Object?>;
-    return MuteState(
-      isMuted: result[0]! as bool,
-    );
+    return MuteState(isMuted: result[0]! as bool);
   }
 }
 
 /// Volume information combining level and mute state
 class VolumeInfo {
-  VolumeInfo({
-    required this.level,
-    required this.muteState,
-  });
+  VolumeInfo({required this.level, required this.muteState});
 
   VolumeLevel level;
 
   MuteState muteState;
 
   Object encode() {
-    return <Object?>[
-      level,
-      muteState,
-    ];
+    return <Object?>[level, muteState];
   }
 
   static VolumeInfo decode(Object result) {
@@ -129,196 +103,142 @@ class VolumeInfo {
 
 /// Represents a mute operation
 class MuteOperation {
-  MuteOperation({
-    required this.shouldMute,
-  });
+  MuteOperation({required this.shouldMute});
 
   bool shouldMute;
 
   Object encode() {
-    return <Object?>[
-      shouldMute,
-    ];
+    return <Object?>[shouldMute];
   }
 
   static MuteOperation decode(Object result) {
     result as List<Object?>;
-    return MuteOperation(
-      shouldMute: result[0]! as bool,
-    );
+    return MuteOperation(shouldMute: result[0]! as bool);
   }
 }
 
 /// Represents a position in time (seconds)
 class TimePosition {
-  TimePosition({
-    required this.seconds,
-  });
+  TimePosition({required this.seconds});
 
   int seconds;
 
   Object encode() {
-    return <Object?>[
-      seconds,
-    ];
+    return <Object?>[seconds];
   }
 
   static TimePosition decode(Object result) {
     result as List<Object?>;
-    return TimePosition(
-      seconds: result[0]! as int,
-    );
+    return TimePosition(seconds: result[0]! as int);
   }
 }
 
 /// Represents a duration in time (seconds)
 class TimeDuration {
-  TimeDuration({
-    required this.seconds,
-  });
+  TimeDuration({required this.seconds});
 
   int seconds;
 
   Object encode() {
-    return <Object?>[
-      seconds,
-    ];
+    return <Object?>[seconds];
   }
 
   static TimeDuration decode(Object result) {
     result as List<Object?>;
-    return TimeDuration(
-      seconds: result[0]! as int,
-    );
+    return TimeDuration(seconds: result[0]! as int);
   }
 }
 
 /// Represents a URL following object calisthenics
 class Url {
-  Url({
-    required this.value,
-  });
+  Url({required this.value});
 
   String value;
 
   Object encode() {
-    return <Object?>[
-      value,
-    ];
+    return <Object?>[value];
   }
 
   static Url decode(Object result) {
     result as List<Object?>;
-    return Url(
-      value: result[0]! as String,
-    );
+    return Url(value: result[0]! as String);
   }
 }
 
 /// Represents an IP address following object calisthenics
 class IpAddress {
-  IpAddress({
-    required this.value,
-  });
+  IpAddress({required this.value});
 
   String value;
 
   Object encode() {
-    return <Object?>[
-      value,
-    ];
+    return <Object?>[value];
   }
 
   static IpAddress decode(Object result) {
     result as List<Object?>;
-    return IpAddress(
-      value: result[0]! as String,
-    );
+    return IpAddress(value: result[0]! as String);
   }
 }
 
 /// Represents a network port following object calisthenics
 class NetworkPort {
-  NetworkPort({
-    required this.value,
-  });
+  NetworkPort({required this.value});
 
   int value;
 
   Object encode() {
-    return <Object?>[
-      value,
-    ];
+    return <Object?>[value];
   }
 
   static NetworkPort decode(Object result) {
     result as List<Object?>;
-    return NetworkPort(
-      value: result[0]! as int,
-    );
+    return NetworkPort(value: result[0]! as int);
   }
 }
 
 /// Represents a discovery timeout following object calisthenics
 class DiscoveryTimeout {
-  DiscoveryTimeout({
-    required this.seconds,
-  });
+  DiscoveryTimeout({required this.seconds});
 
   int seconds;
 
   Object encode() {
-    return <Object?>[
-      seconds,
-    ];
+    return <Object?>[seconds];
   }
 
   static DiscoveryTimeout decode(Object result) {
     result as List<Object?>;
-    return DiscoveryTimeout(
-      seconds: result[0]! as int,
-    );
+    return DiscoveryTimeout(seconds: result[0]! as int);
   }
 }
 
 /// Represents a search target for discovery
 class SearchTarget {
-  SearchTarget({
-    required this.target,
-  });
+  SearchTarget({required this.target});
 
   String target;
 
   Object encode() {
-    return <Object?>[
-      target,
-    ];
+    return <Object?>[target];
   }
 
   static SearchTarget decode(Object result) {
     result as List<Object?>;
-    return SearchTarget(
-      target: result[0]! as String,
-    );
+    return SearchTarget(target: result[0]! as String);
   }
 }
 
 /// Discovery options with descriptive classes
 class DiscoveryOptions {
-  DiscoveryOptions({
-    this.searchTarget,
-    required this.timeout,
-  });
+  DiscoveryOptions({this.searchTarget, required this.timeout});
 
   SearchTarget? searchTarget;
 
   DiscoveryTimeout timeout;
 
   Object encode() {
-    return <Object?>[
-      searchTarget,
-      timeout,
-    ];
+    return <Object?>[searchTarget, timeout];
   }
 
   static DiscoveryOptions decode(Object result) {
@@ -348,12 +268,7 @@ class DeviceIcon {
   Url uri;
 
   Object encode() {
-    return <Object?>[
-      mimeType,
-      width,
-      height,
-      uri,
-    ];
+    return <Object?>[mimeType, width, height, uri];
   }
 
   static DeviceIcon decode(Object result) {
@@ -369,20 +284,14 @@ class DeviceIcon {
 
 /// Represents detailed manufacturer information for a device
 class ManufacturerDetails {
-  ManufacturerDetails({
-    required this.manufacturer,
-    this.manufacturerUri,
-  });
+  ManufacturerDetails({required this.manufacturer, this.manufacturerUri});
 
   String manufacturer;
 
   Url? manufacturerUri;
 
   Object encode() {
-    return <Object?>[
-      manufacturer,
-      manufacturerUri,
-    ];
+    return <Object?>[manufacturer, manufacturerUri];
   }
 
   static ManufacturerDetails decode(Object result) {
@@ -412,12 +321,7 @@ class ModelDetails {
   Url? modelUri;
 
   Object encode() {
-    return <Object?>[
-      modelName,
-      modelDescription,
-      modelNumber,
-      modelUri,
-    ];
+    return <Object?>[modelName, modelDescription, modelNumber, modelUri];
   }
 
   static ModelDetails decode(Object result) {
@@ -514,13 +418,7 @@ class DlnaService {
   Url eventSubUrl;
 
   Object encode() {
-    return <Object?>[
-      serviceType,
-      serviceId,
-      scpdUrl,
-      controlUrl,
-      eventSubUrl,
-    ];
+    return <Object?>[serviceType, serviceId, scpdUrl, controlUrl, eventSubUrl];
   }
 
   static DlnaService decode(Object result) {
@@ -559,14 +457,7 @@ class SubtitleTrack {
   bool? isDefault;
 
   Object encode() {
-    return <Object?>[
-      id,
-      uri,
-      mimeType,
-      language,
-      title,
-      isDefault,
-    ];
+    return <Object?>[id, uri, mimeType, language, title, isDefault];
   }
 
   static SubtitleTrack decode(Object result) {
@@ -583,8 +474,7 @@ class SubtitleTrack {
 }
 
 /// Abstract class for media metadata
-sealed class MediaMetadata {
-}
+sealed class MediaMetadata {}
 
 /// Audio-specific metadata
 class AudioMetadata extends MediaMetadata {
@@ -779,15 +669,7 @@ class MediaItem {
   List<SubtitleTrack>? subtitleTracks;
 
   Object encode() {
-    return <Object?>[
-      id,
-      title,
-      uri,
-      mimeType,
-      metadata,
-      size,
-      subtitleTracks,
-    ];
+    return <Object?>[id, title, uri, mimeType, metadata, size, subtitleTracks];
   }
 
   static MediaItem decode(Object result) {
@@ -847,58 +729,42 @@ class PlaybackInfo {
 }
 
 class PlaybackSpeed {
-  PlaybackSpeed({
-    required this.value,
-  });
+  PlaybackSpeed({required this.value});
 
   double value;
 
   Object encode() {
-    return <Object?>[
-      value,
-    ];
+    return <Object?>[value];
   }
 
   static PlaybackSpeed decode(Object result) {
     result as List<Object?>;
-    return PlaybackSpeed(
-      value: result[0]! as double,
-    );
+    return PlaybackSpeed(value: result[0]! as double);
   }
 }
 
 class PlaybackSpeedToken {
-  PlaybackSpeedToken({
-    required this.value,
-  });
+  PlaybackSpeedToken({required this.value});
 
   String value;
 
   Object encode() {
-    return <Object?>[
-      value,
-    ];
+    return <Object?>[value];
   }
 
   static PlaybackSpeedToken decode(Object result) {
     result as List<Object?>;
-    return PlaybackSpeedToken(
-      value: result[0]! as String,
-    );
+    return PlaybackSpeedToken(value: result[0]! as String);
   }
 }
 
 class SupportedPlaybackSpeeds {
-  SupportedPlaybackSpeeds({
-    required this.values,
-  });
+  SupportedPlaybackSpeeds({required this.values});
 
   List<PlaybackSpeedToken> values;
 
   Object encode() {
-    return <Object?>[
-      values,
-    ];
+    return <Object?>[values];
   }
 
   static SupportedPlaybackSpeeds decode(Object result) {
@@ -909,7 +775,6 @@ class SupportedPlaybackSpeeds {
   }
 }
 
-
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -917,88 +782,88 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is TransportState) {
+    } else if (value is TransportState) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is DeviceUdn) {
+    } else if (value is DeviceUdn) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    }    else if (value is VolumeLevel) {
+    } else if (value is VolumeLevel) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    }    else if (value is MuteState) {
+    } else if (value is MuteState) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    }    else if (value is VolumeInfo) {
+    } else if (value is VolumeInfo) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    }    else if (value is MuteOperation) {
+    } else if (value is MuteOperation) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    }    else if (value is TimePosition) {
+    } else if (value is TimePosition) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    }    else if (value is TimeDuration) {
+    } else if (value is TimeDuration) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    }    else if (value is Url) {
+    } else if (value is Url) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    }    else if (value is IpAddress) {
+    } else if (value is IpAddress) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    }    else if (value is NetworkPort) {
+    } else if (value is NetworkPort) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    }    else if (value is DiscoveryTimeout) {
+    } else if (value is DiscoveryTimeout) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    }    else if (value is SearchTarget) {
+    } else if (value is SearchTarget) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    }    else if (value is DiscoveryOptions) {
+    } else if (value is DiscoveryOptions) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    }    else if (value is DeviceIcon) {
+    } else if (value is DeviceIcon) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    }    else if (value is ManufacturerDetails) {
+    } else if (value is ManufacturerDetails) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    }    else if (value is ModelDetails) {
+    } else if (value is ModelDetails) {
       buffer.putUint8(145);
       writeValue(buffer, value.encode());
-    }    else if (value is DlnaDevice) {
+    } else if (value is DlnaDevice) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
-    }    else if (value is DlnaService) {
+    } else if (value is DlnaService) {
       buffer.putUint8(147);
       writeValue(buffer, value.encode());
-    }    else if (value is SubtitleTrack) {
+    } else if (value is SubtitleTrack) {
       buffer.putUint8(148);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioMetadata) {
+    } else if (value is AudioMetadata) {
       buffer.putUint8(149);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoMetadata) {
+    } else if (value is VideoMetadata) {
       buffer.putUint8(150);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageMetadata) {
+    } else if (value is ImageMetadata) {
       buffer.putUint8(151);
       writeValue(buffer, value.encode());
-    }    else if (value is MediaItem) {
+    } else if (value is MediaItem) {
       buffer.putUint8(152);
       writeValue(buffer, value.encode());
-    }    else if (value is PlaybackInfo) {
+    } else if (value is PlaybackInfo) {
       buffer.putUint8(153);
       writeValue(buffer, value.encode());
-    }    else if (value is PlaybackSpeed) {
+    } else if (value is PlaybackSpeed) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
-    }    else if (value is PlaybackSpeedToken) {
+    } else if (value is PlaybackSpeedToken) {
       buffer.putUint8(155);
       writeValue(buffer, value.encode());
-    }    else if (value is SupportedPlaybackSpeeds) {
+    } else if (value is SupportedPlaybackSpeeds) {
       buffer.putUint8(156);
       writeValue(buffer, value.encode());
     } else {
@@ -1009,62 +874,62 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 129: 
+      case 129:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : TransportState.values[value];
-      case 130: 
+      case 130:
         return DeviceUdn.decode(readValue(buffer)!);
-      case 131: 
+      case 131:
         return VolumeLevel.decode(readValue(buffer)!);
-      case 132: 
+      case 132:
         return MuteState.decode(readValue(buffer)!);
-      case 133: 
+      case 133:
         return VolumeInfo.decode(readValue(buffer)!);
-      case 134: 
+      case 134:
         return MuteOperation.decode(readValue(buffer)!);
-      case 135: 
+      case 135:
         return TimePosition.decode(readValue(buffer)!);
-      case 136: 
+      case 136:
         return TimeDuration.decode(readValue(buffer)!);
-      case 137: 
+      case 137:
         return Url.decode(readValue(buffer)!);
-      case 138: 
+      case 138:
         return IpAddress.decode(readValue(buffer)!);
-      case 139: 
+      case 139:
         return NetworkPort.decode(readValue(buffer)!);
-      case 140: 
+      case 140:
         return DiscoveryTimeout.decode(readValue(buffer)!);
-      case 141: 
+      case 141:
         return SearchTarget.decode(readValue(buffer)!);
-      case 142: 
+      case 142:
         return DiscoveryOptions.decode(readValue(buffer)!);
-      case 143: 
+      case 143:
         return DeviceIcon.decode(readValue(buffer)!);
-      case 144: 
+      case 144:
         return ManufacturerDetails.decode(readValue(buffer)!);
-      case 145: 
+      case 145:
         return ModelDetails.decode(readValue(buffer)!);
-      case 146: 
+      case 146:
         return DlnaDevice.decode(readValue(buffer)!);
-      case 147: 
+      case 147:
         return DlnaService.decode(readValue(buffer)!);
-      case 148: 
+      case 148:
         return SubtitleTrack.decode(readValue(buffer)!);
-      case 149: 
+      case 149:
         return AudioMetadata.decode(readValue(buffer)!);
-      case 150: 
+      case 150:
         return VideoMetadata.decode(readValue(buffer)!);
-      case 151: 
+      case 151:
         return ImageMetadata.decode(readValue(buffer)!);
-      case 152: 
+      case 152:
         return MediaItem.decode(readValue(buffer)!);
-      case 153: 
+      case 153:
         return PlaybackInfo.decode(readValue(buffer)!);
-      case 154: 
+      case 154:
         return PlaybackSpeed.decode(readValue(buffer)!);
-      case 155: 
+      case 155:
         return PlaybackSpeedToken.decode(readValue(buffer)!);
-      case 156: 
+      case 156:
         return SupportedPlaybackSpeeds.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -1077,9 +942,13 @@ class MediaCastDlnaApi {
   /// Constructor for [MediaCastDlnaApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  MediaCastDlnaApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  MediaCastDlnaApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -1087,12 +956,14 @@ class MediaCastDlnaApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> initializeUpnpService() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.initializeUpnpService$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.initializeUpnpService$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(null) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1109,12 +980,14 @@ class MediaCastDlnaApi {
   }
 
   Future<bool> isUpnpServiceInitialized() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isUpnpServiceInitialized$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isUpnpServiceInitialized$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(null) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1136,12 +1009,14 @@ class MediaCastDlnaApi {
   }
 
   Future<void> shutdownUpnpService() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.shutdownUpnpService$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.shutdownUpnpService$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(null) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1158,12 +1033,14 @@ class MediaCastDlnaApi {
   }
 
   Future<void> startDiscovery(DiscoveryOptions options) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.startDiscovery$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.startDiscovery$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[options]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1180,12 +1057,14 @@ class MediaCastDlnaApi {
   }
 
   Future<void> stopDiscovery() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.stopDiscovery$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.stopDiscovery$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(null) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1202,12 +1081,14 @@ class MediaCastDlnaApi {
   }
 
   Future<List<DlnaDevice>> getDiscoveredDevices() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDiscoveredDevices$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDiscoveredDevices$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(null) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1229,12 +1110,14 @@ class MediaCastDlnaApi {
   }
 
   Future<DlnaDevice?> refreshDevice(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.refreshDevice$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.refreshDevice$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1251,12 +1134,14 @@ class MediaCastDlnaApi {
   }
 
   Future<List<DlnaService>> getDeviceServices(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDeviceServices$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDeviceServices$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1278,14 +1163,17 @@ class MediaCastDlnaApi {
   }
 
   Future<bool> hasService(DeviceUdn deviceUdn, String serviceType) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.hasService$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.hasService$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[deviceUdn, serviceType]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[deviceUdn, serviceType])
+            as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -1305,12 +1193,14 @@ class MediaCastDlnaApi {
   }
 
   Future<bool> isDeviceOnline(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isDeviceOnline$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.isDeviceOnline$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1331,15 +1221,22 @@ class MediaCastDlnaApi {
     }
   }
 
-  Future<void> setMediaUri(DeviceUdn deviceUdn, Url uri, MediaMetadata metadata) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMediaUri$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+  Future<void> setMediaUri(
+    DeviceUdn deviceUdn,
+    Url uri,
+    MediaMetadata metadata,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMediaUri$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[deviceUdn, uri, metadata]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[deviceUdn, uri, metadata])
+            as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -1353,15 +1250,28 @@ class MediaCastDlnaApi {
     }
   }
 
-  Future<void> setMediaUriWithSubtitles(DeviceUdn deviceUdn, Url uri, MediaMetadata metadata, List<SubtitleTrack> subtitleTracks) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMediaUriWithSubtitles$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+  Future<void> setMediaUriWithSubtitles(
+    DeviceUdn deviceUdn,
+    Url uri,
+    MediaMetadata metadata,
+    List<SubtitleTrack> subtitleTracks,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMediaUriWithSubtitles$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[deviceUdn, uri, metadata, subtitleTracks]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[
+              deviceUdn,
+              uri,
+              metadata,
+              subtitleTracks,
+            ])
+            as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -1376,12 +1286,14 @@ class MediaCastDlnaApi {
   }
 
   Future<bool> supportsSubtitleControl(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.supportsSubtitleControl$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.supportsSubtitleControl$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1402,15 +1314,21 @@ class MediaCastDlnaApi {
     }
   }
 
-  Future<void> setSubtitleTrack(DeviceUdn deviceUdn, String? subtitleTrackId) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setSubtitleTrack$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+  Future<void> setSubtitleTrack(
+    DeviceUdn deviceUdn,
+    String? subtitleTrackId,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setSubtitleTrack$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[deviceUdn, subtitleTrackId]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[deviceUdn, subtitleTrackId])
+            as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -1424,13 +1342,17 @@ class MediaCastDlnaApi {
     }
   }
 
-  Future<List<SubtitleTrack>> getAvailableSubtitleTracks(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getAvailableSubtitleTracks$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+  Future<List<SubtitleTrack>> getAvailableSubtitleTracks(
+    DeviceUdn deviceUdn,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getAvailableSubtitleTracks$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1452,12 +1374,14 @@ class MediaCastDlnaApi {
   }
 
   Future<SubtitleTrack?> getCurrentSubtitleTrack(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getCurrentSubtitleTrack$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getCurrentSubtitleTrack$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1474,12 +1398,14 @@ class MediaCastDlnaApi {
   }
 
   Future<void> play(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.play$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.play$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1496,12 +1422,14 @@ class MediaCastDlnaApi {
   }
 
   Future<void> pause(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.pause$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.pause$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1518,12 +1446,14 @@ class MediaCastDlnaApi {
   }
 
   Future<void> stop(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.stop$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.stop$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1540,14 +1470,17 @@ class MediaCastDlnaApi {
   }
 
   Future<void> seek(DeviceUdn deviceUdn, TimePosition position) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.seek$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.seek$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[deviceUdn, position]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[deviceUdn, position])
+            as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -1562,14 +1495,17 @@ class MediaCastDlnaApi {
   }
 
   Future<void> setVolume(DeviceUdn deviceUdn, VolumeLevel volumeLevel) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setVolume$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setVolume$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[deviceUdn, volumeLevel]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[deviceUdn, volumeLevel])
+            as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -1584,12 +1520,14 @@ class MediaCastDlnaApi {
   }
 
   Future<VolumeInfo> getVolumeInfo(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getVolumeInfo$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getVolumeInfo$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1611,14 +1549,17 @@ class MediaCastDlnaApi {
   }
 
   Future<void> setMute(DeviceUdn deviceUdn, MuteOperation muteOperation) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMute$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setMute$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[deviceUdn, muteOperation]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[deviceUdn, muteOperation])
+            as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -1633,12 +1574,14 @@ class MediaCastDlnaApi {
   }
 
   Future<PlaybackInfo> getPlaybackInfo(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getPlaybackInfo$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getPlaybackInfo$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1660,12 +1603,14 @@ class MediaCastDlnaApi {
   }
 
   Future<TimePosition> getCurrentPosition(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getCurrentPosition$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getCurrentPosition$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1687,12 +1632,14 @@ class MediaCastDlnaApi {
   }
 
   Future<TransportState> getTransportState(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getTransportState$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getTransportState$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1713,13 +1660,17 @@ class MediaCastDlnaApi {
     }
   }
 
-  Future<SupportedPlaybackSpeeds> getSupportedPlaybackSpeeds(DeviceUdn deviceUdn) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getSupportedPlaybackSpeeds$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+  Future<SupportedPlaybackSpeeds> getSupportedPlaybackSpeeds(
+    DeviceUdn deviceUdn,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getSupportedPlaybackSpeeds$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1740,15 +1691,21 @@ class MediaCastDlnaApi {
     }
   }
 
-  Future<void> setPlaybackSpeed(DeviceUdn deviceUdn, PlaybackSpeed speed) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setPlaybackSpeed$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+  Future<void> setPlaybackSpeed(
+    DeviceUdn deviceUdn,
+    PlaybackSpeed speed,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setPlaybackSpeed$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
-        await pigeonVar_channel.send(<Object?>[deviceUdn, speed]) as List<Object?>?;
+        await pigeonVar_channel.send(<Object?>[deviceUdn, speed])
+            as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {
@@ -1768,12 +1725,14 @@ class MediaCastDlnaApi {
   /// this will throw an exception if you try to use it on Android
   /// this will return null if the device is not found
   Future<DlnaDevice?> getDeviceManually(Url uri) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDeviceManually$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getDeviceManually$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[uri]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1801,79 +1760,112 @@ abstract class DiscoveryEventsFlutterApi {
   /// Emitted when a MediaRenderer becomes unavailable on the network.
   void onRendererOffline(DeviceUdn deviceUdn);
 
-  static void setUp(DiscoveryEventsFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    DiscoveryEventsFlutterApi? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final DlnaDevice? arg_device = (args[0] as DlnaDevice?);
-          assert(arg_device != null,
-              'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound was null, expected non-null DlnaDevice.');
+          assert(
+            arg_device != null,
+            'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceFound was null, expected non-null DlnaDevice.',
+          );
           try {
             api.onDeviceFound(arg_device!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final DeviceUdn? arg_deviceUdn = (args[0] as DeviceUdn?);
-          assert(arg_deviceUdn != null,
-              'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost was null, expected non-null DeviceUdn.');
+          assert(
+            arg_deviceUdn != null,
+            'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onDeviceLost was null, expected non-null DeviceUdn.',
+          );
           try {
             api.onDeviceLost(arg_deviceUdn!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final DeviceUdn? arg_deviceUdn = (args[0] as DeviceUdn?);
-          assert(arg_deviceUdn != null,
-              'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline was null, expected non-null DeviceUdn.');
+          assert(
+            arg_deviceUdn != null,
+            'Argument for dev.flutter.pigeon.media_cast_dlna.DiscoveryEventsFlutterApi.onRendererOffline was null, expected non-null DeviceUdn.',
+          );
           try {
             api.onRendererOffline(arg_deviceUdn!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }

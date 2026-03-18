@@ -28,13 +28,16 @@ class MediaCastDlnaDiscoveryEvents {
 
   Stream<DlnaDevice> get onDeviceFound => _onDeviceFoundController.stream;
   Stream<DeviceUdn> get onDeviceLost => _onDeviceLostController.stream;
-  Stream<DeviceUdn> get onRendererOffline => _onRendererOfflineController.stream;
+  Stream<DeviceUdn> get onRendererOffline =>
+      _onRendererOfflineController.stream;
 
-  List<DlnaDevice> get knownDevices => List<DlnaDevice>.unmodifiable(_knownDevices);
+  List<DlnaDevice> get knownDevices =>
+      List<DlnaDevice>.unmodifiable(_knownDevices);
 
   void _handleDeviceFound(DlnaDevice device) {
-    final existingIndex =
-        _knownDevices.indexWhere((item) => item.udn.value == device.udn.value);
+    final existingIndex = _knownDevices.indexWhere(
+      (item) => item.udn.value == device.udn.value,
+    );
 
     if (existingIndex >= 0) {
       _knownDevices[existingIndex] = device;
@@ -69,9 +72,9 @@ class _DiscoveryEventsHandler implements DiscoveryEventsFlutterApi {
     required void Function(DlnaDevice) onDeviceFound,
     required void Function(DeviceUdn) onDeviceLost,
     required void Function(DeviceUdn) onRendererOffline,
-  })  : _onDeviceFound = onDeviceFound,
-        _onDeviceLost = onDeviceLost,
-        _onRendererOffline = onRendererOffline;
+  }) : _onDeviceFound = onDeviceFound,
+       _onDeviceLost = onDeviceLost,
+       _onRendererOffline = onRendererOffline;
 
   final void Function(DlnaDevice) _onDeviceFound;
   final void Function(DeviceUdn) _onDeviceLost;

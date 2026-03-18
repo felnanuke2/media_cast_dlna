@@ -115,11 +115,12 @@ class _DlnaHomePageState extends State<DlnaHomePage> {
       final tokens = await _mediaService.getSupportedPlaybackSpeeds(
         deviceUdn: deviceUdn,
       );
-      final speeds = tokens.values
-          .map((token) => double.tryParse(token.value.trim()))
-          .whereType<double>()
-          .toList()
-        ..sort();
+      final speeds =
+          tokens.values
+              .map((token) => double.tryParse(token.value.trim()))
+              .whereType<double>()
+              .toList()
+            ..sort();
 
       if (!mounted || _selectedDevice?.udn.value != deviceUdn.value) {
         return;

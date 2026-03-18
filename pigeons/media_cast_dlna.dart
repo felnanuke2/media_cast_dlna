@@ -402,7 +402,7 @@ abstract class MediaCastDlnaApi {
   TransportState getTransportState(DeviceUdn deviceUdn);
 
   @async
-    SupportedPlaybackSpeeds getSupportedPlaybackSpeeds(DeviceUdn deviceUdn);
+  SupportedPlaybackSpeeds getSupportedPlaybackSpeeds(DeviceUdn deviceUdn);
 
   @async
   void setPlaybackSpeed(DeviceUdn deviceUdn, PlaybackSpeed speed);
