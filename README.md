@@ -47,7 +47,7 @@ For iOS users who need casting functionality, consider:
 
 ```yaml
 dependencies:
-  media_cast_dlna: ^0.0.1
+  media_cast_dlna: ^0.3.1
 ```
 
 ### Step 2: Install the package
@@ -479,32 +479,21 @@ Future<void> _manageSubtitles(DeviceUdn deviceUdn) async {
 > **⚠️ Compatibility Warning**: Playback speed control is not supported by all DLNA media renderers. Many devices only support standard play/pause/stop operations. Test this feature with your target devices before implementing it in production.
 
 ```dart
-// Control playback speed on compatible devices
+// Query and apply playback speed using device-supported speed tokens.
 Future<void> _controlPlaybackSpeed(DeviceUdn deviceUdn) async {
   try {
-    // Set playback to half speed
-    await _api.setPlaybackSpeed(
-      deviceUdn, 
-      PlaybackSpeed(value: 0.5)
-    );
-    
-    // Set playback to normal speed
-    await _api.setPlaybackSpeed(
-      deviceUdn, 
-      PlaybackSpeed(value: 1.0)
-    );
-    
-    // Set playback to 1.25x speed
-    await _api.setPlaybackSpeed(
-      deviceUdn, 
-      PlaybackSpeed(value: 1.25)
-    );
-    
-    // Set playback to double speed
-    await _api.setPlaybackSpeed(
-      deviceUdn, 
-      PlaybackSpeed(value: 2.0)
-    );
+    final supported = await _api.getSupportedPlaybackSpeeds(deviceUdn);
+    final tokens = supported.values.map((token) => token.value).toList();
+
+    print('Supported speed tokens: $tokens');
+
+    if (tokens.contains('1.25')) {
+      await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: 1.25));
+      return;
+    }
+
+    // Fallback to normal speed when preferred tokens are unavailable
+    await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: 1.0));
     
   } catch (e) {
     // Handle cases where device doesn't support speed control
@@ -518,6 +507,17 @@ Future<void> _controlPlaybackSpeed(DeviceUdn deviceUdn) async {
 // Example: Implementing speed control with user feedback
 Future<void> _setSpeedWithUserFeedback(DeviceUdn deviceUdn, double speed) async {
   try {
+    final supported = await _api.getSupportedPlaybackSpeeds(deviceUdn);
+    final supportedValues = supported.values
+        .map((token) => double.tryParse(token.value))
+        .whereType<double>()
+        .toSet();
+
+    if (!supportedValues.contains(speed)) {
+      print('Speed ${speed}x is not advertised by this device.');
+      return;
+    }
+
     await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: speed));
     print('Playback speed set to ${speed}x');
   } catch (e) {
@@ -592,14 +592,29 @@ Future<void> _troubleshootDiscovery() async {
   print('1. Ensure WIFI permissions are granted');
   print('2. Check if device is on same network as DLNA devices');
   print('3. Verify DLNA devices are powered on and discoverable');
-  
-  // Try refreshing a specific device
+
+  // Use event-driven discovery callbacks instead of polling snapshots.
+  final discoveryEvents = MediaCastDlnaDiscoveryEvents();
+
+  discoveryEvents.onDeviceFound.listen((device) {
+    print('Found device: ${device.friendlyName}');
+  });
+
+  discoveryEvents.onDeviceLost.listen((deviceUdn) {
+    print('Lost device: ${deviceUdn.value}');
+  });
+
   try {
-    final deviceUdn = DeviceUdn(value: 'known-device-udn');
-    final refreshedDevice = await _api.refreshDevice(deviceUdn);
-    print('Device refreshed: ${refreshedDevice?.friendlyName}');
+    await _api.startDiscovery(
+      DiscoveryOptions(
+        timeout: DiscoveryTimeout(seconds: 10),
+        searchTarget: SearchTarget(target: 'upnp:rootdevice'),
+      ),
+    );
   } catch (e) {
-    print('Failed to refresh device: $e');
+    print('Failed to start discovery: $e');
+  } finally {
+    await discoveryEvents.dispose();
   }
 }
 ```
@@ -747,6 +762,7 @@ class DlnaMediaCastDemo extends StatefulWidget {
 
 class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
   final _api = MediaCastDlnaApi();
+  MediaCastDlnaDiscoveryEvents? _discoveryEvents;
   List<DlnaDevice> _devices = [];
   DlnaDevice? _selectedRenderer;
   bool _isDiscovering = false;
@@ -770,7 +786,31 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
   }
   
   Future<void> _startDiscovery() async {
+    _discoveryEvents?.dispose();
+
+    _discoveryEvents = MediaCastDlnaDiscoveryEvents();
     setState(() => _isDiscovering = true);
+
+    _discoveryEvents!.onDeviceFound.listen((device) {
+      if (!mounted) return;
+
+      setState(() {
+        final index = _devices.indexWhere((d) => d.udn.value == device.udn.value);
+        if (index >= 0) {
+          _devices[index] = device;
+        } else {
+          _devices.add(device);
+        }
+      });
+    });
+
+    _discoveryEvents!.onDeviceLost.listen((deviceUdn) {
+      if (!mounted) return;
+
+      setState(() {
+        _devices.removeWhere((d) => d.udn.value == deviceUdn.value);
+      });
+    });
     
     try {
       await _api.startDiscovery(
@@ -779,18 +819,11 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
           searchTarget: SearchTarget(target: 'upnp:rootdevice'),
         ),
       );
-      
-      // Poll for devices
-      Timer.periodic(Duration(seconds: 2), (timer) async {
-        final devices = await _api.getDiscoveredDevices();
-        setState(() => _devices = devices);
-        
-        if (timer.tick >= 10) {
-          timer.cancel();
-          await _api.stopDiscovery();
-          setState(() => _isDiscovering = false);
-        }
-      });
+
+      // Discovery now runs through callbacks; no polling timer required.
+      if (mounted) {
+        setState(() => _isDiscovering = false);
+      }
     } catch (e) {
       setState(() => _isDiscovering = false);
       _showError('Discovery failed: $e');
@@ -907,7 +940,7 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
                               color: isRenderer ? Colors.blue : Colors.orange,
                             ),
                             title: Text(device.friendlyName),
-                            subtitle: Text('${device.manufacturerName} • ${device.ipAddress}'),
+                            subtitle: Text('${device.manufacturerDetails.manufacturer} • ${device.ipAddress.value}'),
                             trailing: isRenderer
                                 ? ElevatedButton(
                                     onPressed: () => setState(() => _selectedRenderer = device),
@@ -994,6 +1027,12 @@ class _DlnaMediaCastDemoState extends State<DlnaMediaCastDemo> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.green),
     );
+  }
+
+  @override
+  void dispose() {
+    _discoveryEvents?.dispose();
+    super.dispose();
   }
 }
 ```
@@ -1145,7 +1184,7 @@ await _api.setMute(deviceUdn, MuteOperation(shouldMute: true));
 
 ### Core Classes
 
-#### `MediaCastDlna`
+#### `MediaCastDlnaApi`
 Main plugin class for DLNA operations.
 
 **Methods:**
@@ -1154,6 +1193,8 @@ Main plugin class for DLNA operations.
 - `startDiscovery(options)` - Start device discovery
 - `stopDiscovery()` - Stop device discovery
 - `getDiscoveredDevices()` - Legacy snapshot API (polling)
+- `getSupportedPlaybackSpeeds(deviceUdn)` - Get speed tokens advertised by the renderer
+- `getDeviceManually(uri)` - Manual lookup by URL (intended mainly for iOS-restricted scenarios)
 
 #### `MediaCastDlnaDiscoveryEvents`
 Event-driven discovery callbacks from native layer.
@@ -1161,6 +1202,7 @@ Event-driven discovery callbacks from native layer.
 **Streams:**
 - `onDeviceFound` - Emits when a renderer/server is discovered or updated
 - `onDeviceLost` - Emits when a device disappears from registry
+- `onRendererOffline` - Emits when a selected renderer becomes unavailable
 
 #### `DlnaDevice`
 Represents a discovered DLNA/UPnP device.
@@ -1169,9 +1211,9 @@ Represents a discovered DLNA/UPnP device.
 - `udn` - Unique Device Name
 - `friendlyName` - Human-readable name
 - `deviceType` - Type (MediaRenderer/MediaServer)
-- `manufacturerName` - Device manufacturer
-- `modelName` - Device model
-- `ipAddress` - Device IP address
+- `manufacturerDetails.manufacturer` - Device manufacturer
+- `modelDetails.modelName` - Device model
+- `ipAddress.value` - Device IP address
 
 #### `MediaMetadata`
 Metadata for media content.
@@ -1219,6 +1261,14 @@ Represents a subtitle track for media content.
 
 **⚠️ Note**: Subtitle support varies widely between DLNA devices.
 
+#### `SupportedPlaybackSpeeds` and `PlaybackSpeedToken`
+Represents the list of speed tokens a renderer reports for speed control.
+
+**Properties:**
+- `values` - List of `PlaybackSpeedToken` values (for example: `'1'`, `'1.25'`, `'2'`)
+
+**Recommendation:** Query supported speeds before calling `setPlaybackSpeed()` and fallback to `1.0x` when needed.
+
 ## 🛠️ Development & Contribution
 
 ### Built With Pigeon
@@ -1229,6 +1279,12 @@ To regenerate platform interfaces:
 ```bash
 flutter packages pub run pigeon --input pigeons/media_cast_dlna.dart
 ```
+
+### Tooling and Build Notes
+
+- Flutter version management is configured with `.fvmrc`.
+- Workspace settings include a fixed Flutter SDK path and safe auto-approved commands for local tooling.
+- Android build setup reads `flutter.sdk` from `android/local.properties` and includes `flutter.jar` as `compileOnly`.
 
 ### Project Structure
 ```
@@ -1292,6 +1348,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 *Star ⭐ this repository if it helped you!*
 
 </div>
-
-<a href='https://ko-fi.com/Y8Y61HCG2P' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
