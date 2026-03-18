@@ -867,6 +867,48 @@ class PlaybackSpeed {
   }
 }
 
+class PlaybackSpeedToken {
+  PlaybackSpeedToken({
+    required this.value,
+  });
+
+  String value;
+
+  Object encode() {
+    return <Object?>[
+      value,
+    ];
+  }
+
+  static PlaybackSpeedToken decode(Object result) {
+    result as List<Object?>;
+    return PlaybackSpeedToken(
+      value: result[0]! as String,
+    );
+  }
+}
+
+class SupportedPlaybackSpeeds {
+  SupportedPlaybackSpeeds({
+    required this.values,
+  });
+
+  List<PlaybackSpeedToken> values;
+
+  Object encode() {
+    return <Object?>[
+      values,
+    ];
+  }
+
+  static SupportedPlaybackSpeeds decode(Object result) {
+    result as List<Object?>;
+    return SupportedPlaybackSpeeds(
+      values: (result[0] as List<Object?>?)!.cast<PlaybackSpeedToken>(),
+    );
+  }
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -953,6 +995,12 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is PlaybackSpeed) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
+    }    else if (value is PlaybackSpeedToken) {
+      buffer.putUint8(155);
+      writeValue(buffer, value.encode());
+    }    else if (value is SupportedPlaybackSpeeds) {
+      buffer.putUint8(156);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -1014,6 +1062,10 @@ class _PigeonCodec extends StandardMessageCodec {
         return PlaybackInfo.decode(readValue(buffer)!);
       case 154: 
         return PlaybackSpeed.decode(readValue(buffer)!);
+      case 155: 
+        return PlaybackSpeedToken.decode(readValue(buffer)!);
+      case 156: 
+        return SupportedPlaybackSpeeds.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -1658,6 +1710,33 @@ class MediaCastDlnaApi {
       );
     } else {
       return (pigeonVar_replyList[0] as TransportState?)!;
+    }
+  }
+
+  Future<SupportedPlaybackSpeeds> getSupportedPlaybackSpeeds(DeviceUdn deviceUdn) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getSupportedPlaybackSpeeds$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[deviceUdn]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as SupportedPlaybackSpeeds?)!;
     }
   }
 

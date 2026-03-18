@@ -402,6 +402,9 @@ abstract class MediaCastDlnaApi {
   TransportState getTransportState(DeviceUdn deviceUdn);
 
   @async
+    SupportedPlaybackSpeeds getSupportedPlaybackSpeeds(DeviceUdn deviceUdn);
+
+  @async
   void setPlaybackSpeed(DeviceUdn deviceUdn, PlaybackSpeed speed);
 
   /// This method is designed mainly for iOS platform and
@@ -416,6 +419,16 @@ abstract class MediaCastDlnaApi {
 class PlaybackSpeed {
   PlaybackSpeed({required this.value});
   final double value;
+}
+
+class PlaybackSpeedToken {
+  PlaybackSpeedToken({required this.value});
+  final String value;
+}
+
+class SupportedPlaybackSpeeds {
+  SupportedPlaybackSpeeds({required this.values});
+  final List<PlaybackSpeedToken> values;
 }
 
 /// Flutter API for discovery events to avoid polling getDiscoveredDevices.

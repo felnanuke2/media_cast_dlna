@@ -27,8 +27,6 @@ class DeviceDiscoveryManager(
 
     fun stopDiscovery() {
         upnpService?.registry?.pause()
-        // Clean up expired devices when stopping discovery
-        cleanupOfflineDevices()
     }
 
     fun getDiscoveredDevices(): List<DlnaDevice> {
@@ -159,39 +157,18 @@ class DeviceDiscoveryManager(
     }
 
     fun cleanupOfflineDevices() {
-        upnpService?.registry?.devices?.toList()?.forEach { device ->
-            if (device is RemoteDevice) {
-                // Check if device has expired based on its max age
-                val maxAge = device.identity.maxAgeSeconds
-                val currentTime = System.currentTimeMillis() / 1000
-
-                // Simple expiration check - let UPnP handle the rest
-                if (maxAge > 0 && currentTime > maxAge) {
-                    upnpService?.registry?.removeDevice(device)
-                }
-            }
-        }
+        // Do not remove devices manually here.
+        // maxAgeSeconds is a cache-control TTL, not an absolute epoch timestamp, and
+        // manual removal can incorrectly mark still-reachable devices as offline.
+        // The UPnP registry is responsible for handling expiration/liveness updates.
     }
 
     /**
      * Removes expired devices from the registry
      */
     fun removeExpiredDevices() {
-        upnpService?.registry?.devices?.toList()?.forEach { device ->
-            if (device is RemoteDevice) {
-                try {
-                    // Let UPnP handle device expiration naturally
-                    // Just remove obviously stale devices
-                    val identity = device.identity
-                    if (identity.maxAgeSeconds <= 0) {
-                        upnpService?.registry?.removeDevice(device)
-                    }
-                } catch (e: Exception) {
-                    // If there's any error checking the device, it's likely stale
-                    upnpService?.registry?.removeDevice(device)
-                }
-            }
-        }
+        // Keep behavior consistent with cleanupOfflineDevices(): rely on registry-managed
+        // liveness instead of force-removing entries from this manager.
     }
 
     /**

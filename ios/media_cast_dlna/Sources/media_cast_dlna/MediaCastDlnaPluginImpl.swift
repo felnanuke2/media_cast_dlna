@@ -262,6 +262,16 @@ public class MediaCastDlnaPluginImpl: MediaCastDlnaApi {
                     userInfo: [NSLocalizedDescriptionKey: "Not implemented"])))
     }
 
+    func getSupportedPlaybackSpeeds(
+        deviceUdn: DeviceUdn, completion: @escaping (Result<SupportedPlaybackSpeeds, any Error>) -> Void
+    ) {
+        completion(
+            .failure(
+                NSError(
+                    domain: "MediaCastDlnaPluginImpl", code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Not implemented"])))
+    }
+
     func setPlaybackSpeed(
         deviceUdn: DeviceUdn, speed: PlaybackSpeed,
         completion: @escaping (Result<Void, any Error>) -> Void

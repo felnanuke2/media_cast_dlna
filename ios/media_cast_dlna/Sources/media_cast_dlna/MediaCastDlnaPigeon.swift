@@ -857,6 +857,46 @@ struct PlaybackSpeed {
   }
 }
 
+/// Generated class from Pigeon that represents data sent in messages.
+struct PlaybackSpeedToken {
+  var value: String
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> PlaybackSpeedToken? {
+    let value = pigeonVar_list[0] as! String
+
+    return PlaybackSpeedToken(
+      value: value
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      value
+    ]
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct SupportedPlaybackSpeeds {
+  var values: [PlaybackSpeedToken]
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> SupportedPlaybackSpeeds? {
+    let values = pigeonVar_list[0] as! [PlaybackSpeedToken]
+
+    return SupportedPlaybackSpeeds(
+      values: values
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      values
+    ]
+  }
+}
+
 private class MediaCastDlnaPigeonPigeonCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
@@ -916,6 +956,10 @@ private class MediaCastDlnaPigeonPigeonCodecReader: FlutterStandardReader {
       return PlaybackInfo.fromList(self.readValue() as! [Any?])
     case 154:
       return PlaybackSpeed.fromList(self.readValue() as! [Any?])
+    case 155:
+      return PlaybackSpeedToken.fromList(self.readValue() as! [Any?])
+    case 156:
+      return SupportedPlaybackSpeeds.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
     }
@@ -1002,6 +1046,12 @@ private class MediaCastDlnaPigeonPigeonCodecWriter: FlutterStandardWriter {
     } else if let value = value as? PlaybackSpeed {
       super.writeByte(154)
       super.writeValue(value.toList())
+    } else if let value = value as? PlaybackSpeedToken {
+      super.writeByte(155)
+      super.writeValue(value.toList())
+    } else if let value = value as? SupportedPlaybackSpeeds {
+      super.writeByte(156)
+      super.writeValue(value.toList())
     } else {
       super.writeValue(value)
     }
@@ -1053,6 +1103,7 @@ protocol MediaCastDlnaApi {
   func getPlaybackInfo(deviceUdn: DeviceUdn, completion: @escaping (Result<PlaybackInfo, Error>) -> Void)
   func getCurrentPosition(deviceUdn: DeviceUdn, completion: @escaping (Result<TimePosition, Error>) -> Void)
   func getTransportState(deviceUdn: DeviceUdn, completion: @escaping (Result<TransportState, Error>) -> Void)
+  func getSupportedPlaybackSpeeds(deviceUdn: DeviceUdn, completion: @escaping (Result<SupportedPlaybackSpeeds, Error>) -> Void)
   func setPlaybackSpeed(deviceUdn: DeviceUdn, speed: PlaybackSpeed, completion: @escaping (Result<Void, Error>) -> Void)
   /// This method is designed mainly for iOS platform and
   /// the use is for once Multicast DNS is restricted on
@@ -1509,6 +1560,23 @@ class MediaCastDlnaApiSetup {
       }
     } else {
       getTransportStateChannel.setMessageHandler(nil)
+    }
+    let getSupportedPlaybackSpeedsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getSupportedPlaybackSpeeds\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      getSupportedPlaybackSpeedsChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let deviceUdnArg = args[0] as! DeviceUdn
+        api.getSupportedPlaybackSpeeds(deviceUdn: deviceUdnArg) { result in
+          switch result {
+          case .success(let res):
+            reply(wrapResult(res))
+          case .failure(let error):
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      getSupportedPlaybackSpeedsChannel.setMessageHandler(nil)
     }
     let setPlaybackSpeedChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.setPlaybackSpeed\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {

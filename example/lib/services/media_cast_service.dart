@@ -145,6 +145,13 @@ class MediaCastService {
     await _api.setPlaybackSpeed(deviceUdn, PlaybackSpeed(value: speed));
   }
 
+  /// Returns speed tokens declared by the renderer.
+  Future<SupportedPlaybackSpeeds> getSupportedPlaybackSpeeds({
+    required DeviceUdn deviceUdn,
+  }) async {
+    return _api.getSupportedPlaybackSpeeds(deviceUdn);
+  }
+
   /// Disposes the service and cleans up resources
   void dispose() {
     stopMonitoring();

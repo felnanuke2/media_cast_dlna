@@ -783,6 +783,42 @@ data class PlaybackSpeed (
     )
   }
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class PlaybackSpeedToken (
+  val value: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PlaybackSpeedToken {
+      val value = pigeonVar_list[0] as String
+      return PlaybackSpeedToken(value)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      value,
+    )
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SupportedPlaybackSpeeds (
+  val values: List<PlaybackSpeedToken>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SupportedPlaybackSpeeds {
+      val values = pigeonVar_list[0] as List<PlaybackSpeedToken>
+      return SupportedPlaybackSpeeds(values)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      values,
+    )
+  }
+}
 private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -916,6 +952,16 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
           PlaybackSpeed.fromList(it)
         }
       }
+      155.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PlaybackSpeedToken.fromList(it)
+        }
+      }
+      156.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SupportedPlaybackSpeeds.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -1025,6 +1071,14 @@ private open class MediaCastDlnaPigeonPigeonCodec : StandardMessageCodec() {
         stream.write(154)
         writeValue(stream, value.toList())
       }
+      is PlaybackSpeedToken -> {
+        stream.write(155)
+        writeValue(stream, value.toList())
+      }
+      is SupportedPlaybackSpeeds -> {
+        stream.write(156)
+        writeValue(stream, value.toList())
+      }
       else -> super.writeValue(stream, value)
     }
   }
@@ -1063,6 +1117,7 @@ interface MediaCastDlnaApi {
   fun getPlaybackInfo(deviceUdn: DeviceUdn, callback: (Result<PlaybackInfo>) -> Unit)
   fun getCurrentPosition(deviceUdn: DeviceUdn, callback: (Result<TimePosition>) -> Unit)
   fun getTransportState(deviceUdn: DeviceUdn, callback: (Result<TransportState>) -> Unit)
+  fun getSupportedPlaybackSpeeds(deviceUdn: DeviceUdn, callback: (Result<SupportedPlaybackSpeeds>) -> Unit)
   fun setPlaybackSpeed(deviceUdn: DeviceUdn, speed: PlaybackSpeed, callback: (Result<Unit>) -> Unit)
   /**
    * This method is designed mainly for iOS platform and
@@ -1576,6 +1631,26 @@ interface MediaCastDlnaApi {
             val args = message as List<Any?>
             val deviceUdnArg = args[0] as DeviceUdn
             api.getTransportState(deviceUdnArg) { result: Result<TransportState> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_cast_dlna.MediaCastDlnaApi.getSupportedPlaybackSpeeds$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val deviceUdnArg = args[0] as DeviceUdn
+            api.getSupportedPlaybackSpeeds(deviceUdnArg) { result: Result<SupportedPlaybackSpeeds> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))
